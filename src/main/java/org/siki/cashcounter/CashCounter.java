@@ -29,7 +29,7 @@ public class CashCounter extends Application {
   public void start(Stage stage) throws Exception {
     context = new AnnotationConfigApplicationContext(Config.class);
     var mainScene = context.getBean(MainScene.class);
-    log.info(mainScene.getData().get(0).getName());
+    mainScene.test();
 
     String javaVersion = System.getProperty("java.version");
     String javafxVersion = System.getProperty("javafx.version");

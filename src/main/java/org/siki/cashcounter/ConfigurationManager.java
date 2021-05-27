@@ -16,8 +16,8 @@ import java.util.Properties;
 public class ConfigurationManager {
     private final Properties properties = new Properties();
 
-    public ConfigurationManager() throws IOException {
-        try (var inputStream = new FileInputStream("./config.properties");
+    public ConfigurationManager(String configurationPath) throws IOException {
+        try (var inputStream = new FileInputStream(configurationPath);
              var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             properties.load(inputStreamReader);
         } catch (IOException e) {

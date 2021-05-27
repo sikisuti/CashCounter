@@ -3,6 +3,7 @@ package org.siki.cashcounter.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.DailyBalance;
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
 @Slf4j
+@AllArgsConstructor
 public class DataManager {
 
     @Autowired private DataHolder dataHolder;
@@ -26,7 +28,7 @@ public class DataManager {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void loadData() {
-        String dataPath = configurationManager.getStringProperty("DataPath");
+        var dataPath = configurationManager.getStringProperty("DataPath");
         try (var inputStream = new FileInputStream(dataPath)) {
         objectMapper.readValue(inputStream, DataSource.class);
                 } catch (IOException e) {

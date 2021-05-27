@@ -1,183 +1,33 @@
 package org.siki.cashcounter.model;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Data
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AccountTransaction {
 
-  private Long id;
-  private final StringProperty transactionType;
-  private final ObjectProperty<LocalDate> date;
-  private final IntegerProperty amount;
-  private final IntegerProperty balance;
-  private final StringProperty accountNumber;
-  private final StringProperty owner;
-  private final StringProperty comment;
-  private final StringProperty counter;
-  private final StringProperty category;
-  private final BooleanProperty paired;
-  private final List<Correction> pairedCorrections;
-  private final BooleanProperty possibleDuplicate;
+  private long id;
+  private String transactionType;
+  private LocalDate date;
+  private int amount;
+  private int balance;
+  private String accountNumber;
+  private String owner;
+  private String comment;
+  private String counter;
+  private String category;
+  private boolean paired;
+  private List<Correction> pairedCorrections;
+  private boolean possibleDuplicate;
   private DailyBalance dailyBalance;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getTransactionType() {
-    return transactionType.get();
-  }
-
-  public void setTransactionType(String transactionType) {
-    this.transactionType.set(transactionType);
-  }
-
-  public StringProperty transactionTypeProperty() {
-    return transactionType;
-  }
-
-  public LocalDate getDate() {
-    return date.get();
-  }
-
-  public void setDate(LocalDate date) {
-    this.date.set(date);
-  }
-
-  public ObjectProperty<LocalDate> dateProperty() {
-    return date;
-  }
-
-  public Integer getAmount() {
-    return amount.get();
-  }
-
-  public void setAmount(Integer amount) {
-    this.amount.set(amount);
-  }
-
-  public IntegerProperty amountProperty() {
-    return amount;
-  }
-
-  public Integer getBalance() {
-    return balance.get();
-  }
-
-  public void setBalance(Integer balance) {
-    this.balance.set(balance);
-  }
-
-  public IntegerProperty balanceProperty() {
-    return balance;
-  }
-
-  public String getAccountNumber() {
-    return accountNumber.get();
-  }
-
-  public void setAccountNumber(String accountNumber) {
-    this.accountNumber.set(accountNumber);
-  }
-
-  public StringProperty accountNumberProperty() {
-    return accountNumber;
-  }
-
-  public String getOwner() {
-    return owner.get();
-  }
-
-  public void setOwner(String owner) {
-    this.owner.set(owner);
-  }
-
-  public StringProperty ownerProperty() {
-    return owner;
-  }
-
-  public String getComment() {
-    return comment.get();
-  }
-
-  public void setComment(String comment) {
-    this.comment.set(comment);
-  }
-
-  public StringProperty commentProperty() {
-    return comment;
-  }
-
-  public String getCounter() {
-    return counter.get();
-  }
-
-  public void setCounter(String counter) {
-    this.counter.set(counter);
-  }
-
-  public StringProperty counterProperty() {
-    return counter;
-  }
-
-  public String getCategory() {
-    return category.get();
-  }
-
-  public void setCategory(String subCategory) {
-    this.category.set(subCategory);
-  }
-
-  public StringProperty categoryProperty() {
-    return category;
-  }
-
-  public Boolean isPaired() {
-    return paired.get();
-  }
-
-  public void setPaired(Boolean value) {
-    this.paired.set(value);
-  }
-
-  public BooleanProperty pairedProperty() {
-    return paired;
-  }
-
-  public boolean isPossibleDuplicate() {
-    return possibleDuplicate.get();
-  }
-
-  public void setPossibleDuplicate(boolean value) {
-    this.possibleDuplicate.set(value);
-  }
-
-  public BooleanProperty possibleDuplicateProperty() {
-    return possibleDuplicate;
-  }
-
-  public void setDailyBalance(DailyBalance dailyBalance) {
-    this.dailyBalance = dailyBalance;
-  }
-
-  public DailyBalance getDailyBalance() {
-    return this.dailyBalance;
-  }
 
   public void addPairedCorrection(Correction correction) {
     if (!pairedCorrections.contains(correction)) {
@@ -197,105 +47,8 @@ public final class AccountTransaction {
     return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
   }
 
-  public AccountTransaction() {
-    this.transactionType = new SimpleStringProperty();
-    this.date = new SimpleObjectProperty<>();
-    this.amount = new SimpleIntegerProperty();
-    this.balance = new SimpleIntegerProperty();
-    this.accountNumber = new SimpleStringProperty();
-    this.owner = new SimpleStringProperty();
-    this.comment = new SimpleStringProperty();
-    this.counter = new SimpleStringProperty();
-    this.category = new SimpleStringProperty();
-    this.pairedCorrections = new ArrayList<>();
-    this.paired = new SimpleBooleanProperty();
-    this.possibleDuplicate = new SimpleBooleanProperty();
-  }
-
-  private AccountTransaction(Builder builder) {
-    this();
-    this.id = builder.id;
-    setTransactionType(builder.transactionType);
-    setDate(builder.date);
-    setAmount(builder.amount);
-    setAccountNumber(builder.accountNumber);
-    setOwner(builder.owner);
-    setComment(builder.comment);
-    setCounter(builder.counter);
-    setCategory(builder.subCategory);
-  }
-
-  public static class Builder {
-    Long id;
-    String transactionType;
-    LocalDate date;
-    Integer amount;
-    Integer balance;
-    String accountNumber;
-    String owner;
-    String comment;
-    String counter;
-    String category;
-    String subCategory;
-
-    public Builder setId(Long id) {
-      this.id = id;
-      return this;
-    }
-
-    public Builder setAmount(Integer amount) {
-      this.amount = amount;
-      return this;
-    }
-
-    public Builder setTransactionType(String transactionType) {
-      this.transactionType = transactionType;
-      return this;
-    }
-
-    public Builder setDate(LocalDate date) {
-      this.date = date;
-      return this;
-    }
-
-    public Builder setBalance(Integer balance) {
-      this.balance = balance;
-      return this;
-    }
-
-    public Builder setAccountNumber(String accountNumber) {
-      this.accountNumber = accountNumber;
-      return this;
-    }
-
-    public Builder setOwner(String owner) {
-      this.owner = owner;
-      return this;
-    }
-
-    public Builder setComment(String comment) {
-      this.comment = comment;
-      return this;
-    }
-
-    public Builder setCounter(String counter) {
-      this.counter = counter;
-      return this;
-    }
-
-    public Builder setCategory(String category) {
-      this.category = category;
-      return this;
-    }
-
-    public Builder setSubCategory(String subCategory) {
-      this.subCategory = subCategory;
-      return this;
-    }
-
-    public AccountTransaction build() {
-      return new AccountTransaction(this);
-    }
+  public boolean isValid() {
+    return !isPossibleDuplicate() && getCategory() != null && !getCategory().isEmpty();
   }
 
   @Override
@@ -316,10 +69,10 @@ public final class AccountTransaction {
       }
     }
 
-    return this.getId().equals(other.getId())
+    return this.getId() == other.getId()
         && this.getTransactionType().equals(other.getTransactionType())
-        && this.getAmount().equals(other.getAmount())
-        && this.getBalance().equals(other.getBalance())
+        && this.getAmount() == other.getAmount()
+        && this.getBalance() == other.getBalance()
         && this.getAccountNumber().equals(other.getAccountNumber())
         && this.getOwner().equals(other.getOwner())
         && this.getComment().equals(other.getComment())
@@ -334,7 +87,7 @@ public final class AccountTransaction {
     AccountTransaction other = (AccountTransaction) obj;
 
     return this.getTransactionType().equals(other.getTransactionType())
-        && this.getAmount().equals(other.getAmount());
+        && this.getAmount() == other.getAmount();
   }
 
   @Override
@@ -352,9 +105,5 @@ public final class AccountTransaction {
         category,
         paired,
         pairedCorrections);
-  }
-
-  public boolean isValid() {
-    return !isPossibleDuplicate() && getCategory() != null && !getCategory().isEmpty();
   }
 }

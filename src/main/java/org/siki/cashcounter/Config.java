@@ -10,33 +10,34 @@ import java.io.IOException;
 
 @Configuration
 public class Config {
-    /*@Bean
-    public DataRepository getRepository() {
-        return new DataReporitoryImpl();
-    }
+  /*@Bean
+  public DataRepository getRepository() {
+      return new DataReporitoryImpl();
+  }
 
-    @Bean
-    public DataService getService() {
-        return new DataServiceImpl();
-    }*/
+  @Bean
+  public DataService getService() {
+      return new DataServiceImpl();
+  }*/
 
-    @Bean
-    public MainScene getMainScene() {
-        return new MainScene();
-    }
+  @Bean
+  public MainScene getMainScene() {
+    return new MainScene();
+  }
 
-    @Bean
-    public DataHolder getDataHolder() {
-        return new DataHolder();
-    }
+  @Bean
+  public DataHolder getDataHolder() {
+    return new DataHolder();
+  }
 
-    @Bean
-    public DataManager getDataManager() {
-        return new DataManager();
-    }
+  @Bean
+  public DataManager getDataManager(
+      DataHolder dataHolder, ConfigurationManager configurationManager) {
+    return new DataManager(dataHolder, configurationManager);
+  }
 
-    @Bean
-    public ConfigurationManager configurationManager() throws IOException {
-        return new ConfigurationManager();
-    }
+  @Bean
+  public ConfigurationManager configurationManager() throws IOException {
+    return new ConfigurationManager("./config.properties");
+  }
 }

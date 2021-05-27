@@ -1,9 +1,13 @@
 package org.siki.cashcounter.model;
 
-import javafx.collections.ObservableList;
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+import java.time.YearMonth;
+import java.util.List;
+
+@Data
 public class MonthlyBalance {
-    private ObservableList<DailyBalance> dailyBalances;
+    private YearMonth yearMonth;
+    private List<DailyBalance> dailyBalances;
 }

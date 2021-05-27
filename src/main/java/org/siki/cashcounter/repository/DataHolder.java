@@ -1,16 +1,9 @@
 package org.siki.cashcounter.repository;
 
-import lombok.Getter;
-import org.siki.cashcounter.model.MonthlyBalance;
+import lombok.Data;
+import org.siki.cashcounter.model.DataSource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Getter
+@Data
 public class DataHolder {
-    private final List<MonthlyBalance> monthlyBalances = new ArrayList<>();
-
-    public void addMonthlyBalance(MonthlyBalance monthlyBalance) {
-        monthlyBalances.add(monthlyBalance);
-    }
+  private DataSource dataSource;
 }

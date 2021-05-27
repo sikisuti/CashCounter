@@ -1,209 +1,232 @@
 {
-	"monthlyBalances": [{
-			"date": "2017-03-01",
-			"balance": 1448361,
-			"cash": 66500,
-			"predicted": false,
-			"reviewed": true,
-			"transactions": [{
-					"id": 2901,
-					"type": "IDŐSZAKOS KÖLTSÉGEK",
-					"amount": -168,
-					"balance": 1470902,
-					"accountNumber": "",
-					"owner": "",
-					"comment": " ",
-					"counter": "",
-					"subCategory": "Időszakos költségek"
-				}, {
-					"id": 2902,
-					"type": "HAVI ZÁRLATI DÍJ",
-					"amount": -976,
-					"balance": 1469926,
-					"accountNumber": "",
-					"owner": "",
-					"comment": " ",
-					"counter": "",
-					"subCategory": "Havi zárlati díj"
-				}, {
-					"id": 2903,
-					"type": "OTTHONBIZT.EGYÉNI",
-					"amount": -974,
-					"balance": 1468952,
-					"accountNumber": "",
-					"owner": "GROUPAMA BIZTOSITÓ ZRT.098",
-					"comment": "GB521 496222027 5210005409106121414327",
-					"counter": "",
-					"subCategory": "Biztosítás"
-				}, {
-					"id": 2904,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -2917,
-					"balance": 1466035,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "TESCO 44069 EXPRESS        PPASS 2017.02.28 6203725965",
-					"counter": "",
-					"subCategory": "Élelmiszer"
-				}, {
-					"id": 2905,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -17674,
-					"balance": 1448361,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "OMV 1909/ 2017.02.27 6203002787",
-					"counter": "",
-					"subCategory": "Üzemanyag"
-				}
-			],
-			"corrections": [{
-					"id": 3751,
-					"amount": -974,
-					"comment": "Biztosítás",
-					"type": "Weiner rezsi",
-					"pairedTransactionId": 2903
-				}, {
-					"id": 3019,
-					"amount": -17674,
-					"comment": "Üzemanyag",
-					"type": "Üzemanyag",
-					"pairedTransactionId": 2905
-				}
-			]
-		}, {
-			"date": "2017-03-02",
-			"balance": 1502757,
-			"cash": 66500,
-			"predicted": false,
-			"reviewed": true,
-			"transactions": [{
-					"id": 2906,
-					"type": "ÁTUTALÁS (CSOPORTOS)",
-					"amount": 26600,
-					"balance": 1474961,
-					"accountNumber": "1003200001457443",
-					"owner": "Központ (B47)",
-					"comment": "000000000000002171237243 SIKLÓSI ",
-					"counter": "",
-					"subCategory": "Családi pótlék"
-				}, {
-					"id": 2907,
-					"type": "MUNKABÉR ÁTUTALÁS",
-					"amount": 37787,
-					"balance": 1512748,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "MUNKABR UTALS XIX.ÖNK.",
-					"counter": "",
-					"subCategory": "Gabó"
-				}, {
-					"id": 2908,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -4137,
-					"balance": 1508611,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "TESCO 44069 EXPRESS        PPASS 2017.03.01 6203725965",
-					"counter": "",
-					"subCategory": "Élelmiszer"
-				}, {
-					"id": 2909,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -3816,
-					"balance": 1504795,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "DM 031 DUNAúJVÁROS         PPASS 2017.03.01 6203725965",
-					"counter": "",
-					"subCategory": "Háztartás"
-				}, {
-					"id": 2910,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -2038,
-					"balance": 1502757,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "SPAR 0230                  PPASS 2017.03.01 6203725965",
-					"counter": "",
-					"subCategory": "Élelmiszer"
-				}
-			],
-			"corrections": [{
-					"id": 3440,
-					"amount": 26600,
-					"comment": "Családi pótlék",
-					"type": "Gabó bér",
-					"pairedTransactionId": 2906
-				}, {
-					"id": 5855,
-					"amount": 37787,
-					"comment": "CSED (Forrásház)",
-					"type": "Gabó bér",
-					"pairedTransactionId": 2907
-				}
-			]
-		}, {
-			"date": "2017-03-03",
-			"balance": 1499403,
-			"cash": 66500,
-			"predicted": false,
-			"reviewed": true,
-			"transactions": [{
-					"id": 2911,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -1311,
-					"balance": 1501446,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "TESCO 44069 EXPRESS        PPASS 2017.03.02 6203725965",
-					"counter": "",
-					"subCategory": "Élelmiszer"
-				}, {
-					"id": 2912,
-					"type": "VÁSÁRLÁS KÁRTYÁVAL",
-					"amount": -2043,
-					"balance": 1499403,
-					"accountNumber": "",
-					"owner": "",
-					"comment": "TESCO 41700 ÖNKISZOLGÁLÓ   PPASS 2017.03.02 6203725965",
-					"counter": "",
-					"subCategory": "Élelmiszer"
-				}
-			],
-			"corrections": [{
-					"id": 3913,
-					"amount": -5000,
-					"comment": "Ford zár kinyitása",
-					"type": "Autó"
-				}, {
-					"id": 4026,
-					"amount": -4500,
-					"comment": "Labda-banda",
-					"type": "Vince különóra"
-				}, {
-					"id": 5856,
-					"amount": 10000,
-					"comment": "Fecótól a gyerekeknek",
-					"type": "Egyéb"
-				}
-			]
-		}, {
-			"date": "2017-03-04",
-			"balance": 1499403,
-			"cash": 66500,
-			"predicted": false,
-			"reviewed": true,
-			"transactions": [],
-			"corrections": []
-		}, {
-			"date": "2017-03-05",
-			"balance": 1499403,
-			"cash": 66500,
-			"predicted": false,
-			"reviewed": true,
-			"transactions": [],
-			"corrections": []
-		}
-	]
+  "monthlyBalances": [
+    {
+      "dailyBalances": [
+        {
+          "date": "2017-03-01",
+          "balance": 1448361,
+          "predicted": false,
+          "reviewed": true,
+          "transactions": [
+            {
+              "id": 2901,
+              "type": "IDŐSZAKOS KÖLTSÉGEK",
+              "amount": -168,
+              "balance": 1470902,
+              "accountNumber": "",
+              "owner": "",
+              "comment": " ",
+              "counter": "",
+              "subCategory": "Időszakos költségek"
+            },
+            {
+              "id": 2902,
+              "type": "HAVI ZÁRLATI DÍJ",
+              "amount": -976,
+              "balance": 1469926,
+              "accountNumber": "",
+              "owner": "",
+              "comment": " ",
+              "counter": "",
+              "subCategory": "Havi zárlati díj"
+            },
+            {
+              "id": 2903,
+              "type": "OTTHONBIZT.EGYÉNI",
+              "amount": -974,
+              "balance": 1468952,
+              "accountNumber": "",
+              "owner": "GROUPAMA BIZTOSITÓ ZRT.098",
+              "comment": "GB521 496222027 5210005409106121414327",
+              "counter": "",
+              "subCategory": "Biztosítás"
+            },
+            {
+              "id": 2904,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -2917,
+              "balance": 1466035,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "TESCO 44069 EXPRESS        PPASS 2017.02.28 6203725965",
+              "counter": "",
+              "subCategory": "Élelmiszer"
+            },
+            {
+              "id": 2905,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -17674,
+              "balance": 1448361,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "OMV 1909/ 2017.02.27 6203002787",
+              "counter": "",
+              "subCategory": "Üzemanyag"
+            }
+          ],
+          "corrections": [
+            {
+              "id": 3751,
+              "amount": -974,
+              "comment": "Biztosítás",
+              "type": "Weiner rezsi",
+              "pairedTransactionId": 2903
+            },
+            {
+              "id": 3019,
+              "amount": -17674,
+              "comment": "Üzemanyag",
+              "type": "Üzemanyag",
+              "pairedTransactionId": 2905
+            }
+          ]
+        },
+        {
+          "date": "2017-03-02",
+          "balance": 1502757,
+          "predicted": false,
+          "reviewed": true,
+          "transactions": [
+            {
+              "id": 2906,
+              "type": "ÁTUTALÁS (CSOPORTOS)",
+              "amount": 26600,
+              "balance": 1474961,
+              "accountNumber": "1003200001457443",
+              "owner": "Központ (B47)",
+              "comment": "000000000000002171237243 SIKLÓSI ",
+              "counter": "",
+              "subCategory": "Családi pótlék"
+            },
+            {
+              "id": 2907,
+              "type": "MUNKABÉR ÁTUTALÁS",
+              "amount": 37787,
+              "balance": 1512748,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "MUNKABR UTALS XIX.ÖNK.",
+              "counter": "",
+              "subCategory": "Gabó"
+            },
+            {
+              "id": 2908,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -4137,
+              "balance": 1508611,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "TESCO 44069 EXPRESS        PPASS 2017.03.01 6203725965",
+              "counter": "",
+              "subCategory": "Élelmiszer"
+            },
+            {
+              "id": 2909,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -3816,
+              "balance": 1504795,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "DM 031 DUNAúJVÁROS         PPASS 2017.03.01 6203725965",
+              "counter": "",
+              "subCategory": "Háztartás"
+            },
+            {
+              "id": 2910,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -2038,
+              "balance": 1502757,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "SPAR 0230                  PPASS 2017.03.01 6203725965",
+              "counter": "",
+              "subCategory": "Élelmiszer"
+            }
+          ],
+          "corrections": [
+            {
+              "id": 3440,
+              "amount": 26600,
+              "comment": "Családi pótlék",
+              "type": "Gabó bér",
+              "pairedTransactionId": 2906
+            },
+            {
+              "id": 5855,
+              "amount": 37787,
+              "comment": "CSED (Forrásház)",
+              "type": "Gabó bér",
+              "pairedTransactionId": 2907
+            }
+          ]
+        },
+        {
+          "date": "2017-03-03",
+          "balance": 1499403,
+          "predicted": false,
+          "reviewed": true,
+          "transactions": [
+            {
+              "id": 2911,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -1311,
+              "balance": 1501446,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "TESCO 44069 EXPRESS        PPASS 2017.03.02 6203725965",
+              "counter": "",
+              "subCategory": "Élelmiszer"
+            },
+            {
+              "id": 2912,
+              "type": "VÁSÁRLÁS KÁRTYÁVAL",
+              "amount": -2043,
+              "balance": 1499403,
+              "accountNumber": "",
+              "owner": "",
+              "comment": "TESCO 41700 ÖNKISZOLGÁLÓ   PPASS 2017.03.02 6203725965",
+              "counter": "",
+              "subCategory": "Élelmiszer"
+            }
+          ],
+          "corrections": [
+            {
+              "id": 3913,
+              "amount": -5000,
+              "comment": "Ford zár kinyitása",
+              "type": "Autó"
+            },
+            {
+              "id": 4026,
+              "amount": -4500,
+              "comment": "Labda-banda",
+              "type": "Vince különóra"
+            },
+            {
+              "id": 5856,
+              "amount": 10000,
+              "comment": "Fecótól a gyerekeknek",
+              "type": "Egyéb"
+            }
+          ]
+        },
+        {
+          "date": "2017-03-04",
+          "balance": 1499403,
+          "predicted": false,
+          "reviewed": true,
+          "transactions": [],
+          "corrections": []
+        },
+        {
+          "date": "2017-03-05",
+          "balance": 1499403,
+          "predicted": false,
+          "reviewed": true,
+          "transactions": [],
+          "corrections": []
+        }
+      ]
+    }
+  ]
 }

@@ -9,9 +9,12 @@ import java.util.stream.Collectors;
 
 public class DailyBalanceRepository {
 
-    @Autowired private DataHolder dataHolder;
+  @Autowired private DataHolder dataHolder;
 
-    public ObservableList<DailyBalance> getAllDailyBalances() {
-        return FXCollections.observableList(dataHolder.getMonthlyBalances().stream().flatMap(mb -> mb.getDailyBalances().stream()).collect(Collectors.toList()));
-    }
+  public ObservableList<DailyBalance> getAllDailyBalances() {
+    return FXCollections.observableList(
+        dataHolder.getDataSource().getMonthlyBalances().stream()
+            .flatMap(mb -> mb.getDailyBalances().stream())
+            .collect(Collectors.toList()));
+  }
 }

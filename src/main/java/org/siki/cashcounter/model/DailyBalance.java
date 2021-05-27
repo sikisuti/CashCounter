@@ -1,17 +1,15 @@
 package org.siki.cashcounter.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class DailyBalance {
   private DailyBalance prevDailyBalance;
   private LocalDate date;
@@ -20,9 +18,9 @@ public final class DailyBalance {
   private boolean reviewed;
   private int dailySpend;
 
-  private final List<Saving> savings = new ArrayList<>();
-  private final List<Correction> corrections = new ArrayList<>();
-  private final List<AccountTransaction> transactions = new ArrayList<>();
+  private List<Saving> savings;
+  private List<Correction> corrections;
+  private List<AccountTransaction> transactions;
 
   public void setPrevDailyBalance(DailyBalance prevDailyBalance) {
     this.prevDailyBalance = prevDailyBalance;

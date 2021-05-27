@@ -1,17 +1,16 @@
 package org.siki.cashcounter.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
 @Data
-@Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class AccountTransaction {
 
   private long id;

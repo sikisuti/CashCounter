@@ -23,48 +23,20 @@ public class DataManager {
   public DataManager(ConfigurationManager configurationManager) {
     this.configurationManager = configurationManager;
     objectMapper.registerModule(new JavaTimeModule());
-    loadData();
+    loadDataFromFile();
   }
 
   public List<MonthlyBalance> getMonthlyBalances() {
     return dataSource.monthlyBalances;
   }
 
-  public void loadData() {
+  private void loadDataFromFile() {
     var dataPath = configurationManager.getStringProperty("DataPath");
     try (var inputStream = new FileInputStream(dataPath)) {
       dataSource = objectMapper.readValue(inputStream, DataSource.class);
     } catch (IOException e) {
       log.error("Unable to load data file " + dataPath, e);
     }
-
-    /*ObservableList<DailyBalance> rtnList = FXCollections.observableArrayList();
-    int lineCnt = 0;
-    DailyBalance prevDailyBalance = null;
-
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(dataPath), StandardCharsets.UTF_8))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            lineCnt++;
-            DailyBalance db = gsonDeserializer.fromJson(line, DailyBalance.class);
-            if (db.getDate().isBefore(LocalDate.now().minusYears(3).withDayOfMonth(1)))
-                continue;
-            getSavings(db.getDate()).forEach(db::addSaving);
-            db.getCorrections().forEach(c -> c.setDailyBalance(db));
-
-            db.getTransactions().forEach(t -> t.setDailyBalance(db));
-
-            if (prevDailyBalance != null) { db.setPrevDailyBalance(prevDailyBalance); }
-            rtnList.add(db);
-            prevDailyBalance = db;
-        }
-    } catch (IOException e) {
-        throw e;
-    } catch (Exception e) {
-        throw new JsonDeserializeException(lineCnt, e);
-    }
-
-    return rtnList;*/
   }
 
   @Data

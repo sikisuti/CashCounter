@@ -1,5 +1,9 @@
 package org.siki.cashcounter.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -9,25 +13,27 @@ import org.siki.cashcounter.ConfigurationManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class DataManagerTest {
 
-  @Mock ConfigurationManager configurationManager;
+  @Mock private ConfigurationManager configurationManager;
+  private static ObjectMapper objectMapper = new ObjectMapper();
+
+  @BeforeAll
+  static void setUp() {
+    objectMapper.registerModule(new JavaTimeModule());
+  }
 
   @Test
   void testLoadData() throws Exception {
-    DataHolder dataHolder = new DataHolder();
     when(configurationManager.getStringProperty("DataPath")).thenReturn("test-data.json");
-    DataManager dataManager = new DataManager(dataHolder, configurationManager);
-    dataManager.loadData();
+    DataManager dataManager = new DataManager(configurationManager);
+    log.info(
+        objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(dataManager.getMonthlyBalances()));
     assertEquals(
-        1448361,
-        dataHolder
-            .getDataSource()
-            .getMonthlyBalances()
-            .get(0)
-            .getDailyBalances()
-            .get(0)
-            .getBalance());
+        1448361, dataManager.getMonthlyBalances().get(0).getDailyBalances().get(0).getBalance());
   }
 }

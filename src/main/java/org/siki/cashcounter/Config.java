@@ -1,6 +1,5 @@
 package org.siki.cashcounter;
 
-import org.siki.cashcounter.repository.DataHolder;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.MainScene;
 import org.springframework.context.annotation.Bean;
@@ -26,14 +25,8 @@ public class Config {
   }
 
   @Bean
-  public DataHolder getDataHolder() {
-    return new DataHolder();
-  }
-
-  @Bean
-  public DataManager getDataManager(
-      DataHolder dataHolder, ConfigurationManager configurationManager) {
-    return new DataManager(dataHolder, configurationManager);
+  public DataManager getDataManager(ConfigurationManager configurationManager) {
+    return new DataManager(configurationManager);
   }
 
   @Bean

@@ -1,6 +1,8 @@
 package org.siki.cashcounter.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +16,7 @@ import java.util.Objects;
 public final class AccountTransaction {
 
   private long id;
-  private String transactionType;
+  private String type;
   private LocalDate date;
   private int amount;
   private int balance;
@@ -22,7 +24,10 @@ public final class AccountTransaction {
   private String owner;
   private String comment;
   private String counter;
+
+  @JsonProperty("subCategory")
   private String category;
+
   private boolean paired;
   private List<Correction> pairedCorrections;
   private boolean possibleDuplicate;
@@ -42,6 +47,7 @@ public final class AccountTransaction {
     }
   }
 
+  @JsonIgnore
   public Integer getNotPairedAmount() {
     return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
   }
@@ -69,7 +75,7 @@ public final class AccountTransaction {
     }
 
     return this.getId() == other.getId()
-        && this.getTransactionType().equals(other.getTransactionType())
+        && this.getType().equals(other.getType())
         && this.getAmount() == other.getAmount()
         && this.getBalance() == other.getBalance()
         && this.getAccountNumber().equals(other.getAccountNumber())
@@ -85,15 +91,14 @@ public final class AccountTransaction {
 
     AccountTransaction other = (AccountTransaction) obj;
 
-    return this.getTransactionType().equals(other.getTransactionType())
-        && this.getAmount() == other.getAmount();
+    return this.getType().equals(other.getType()) && this.getAmount() == other.getAmount();
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
         id,
-        transactionType,
+        type,
         date,
         amount,
         balance,

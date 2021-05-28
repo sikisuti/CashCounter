@@ -1,5 +1,6 @@
 package org.siki.cashcounter.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public final class DailyBalance {
     savings.add(saving);
   }
 
+  @JsonIgnore
   public Integer getTotalSavings() {
     return savings.stream().mapToInt(Saving::getAmount).sum();
   }

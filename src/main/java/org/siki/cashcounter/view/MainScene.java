@@ -1,21 +1,33 @@
 package org.siki.cashcounter.view;
 
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.VBox;
 import org.siki.cashcounter.repository.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MainScene extends Scene {
 
   @Autowired private DataManager dataManager;
+
+  private final VBox dailyBalancesPH = new VBox();
+  private final VBox vbCashFlow = new VBox();
+  private final VBox vbStatistics = new VBox();
 
   public MainScene() {
     super(new BorderPane(), 640, 480);
@@ -28,14 +40,38 @@ public class MainScene extends Scene {
   }
 
   private Node getTabPane() {
-    return new TabPane(getCorrectionsTab());
+    return new TabPane(getCorrectionsTab(), getCashFlowTab(), getStatisticsTab());
   }
 
   private Tab getCorrectionsTab() {
     var gridPane = new GridPane();
+    var columnConstraints = new ColumnConstraints();
+    columnConstraints.setPercentWidth(100);
+    gridPane.getColumnConstraints().add(columnConstraints);
+    var rowConstraints = new RowConstraints();
+    rowConstraints.setVgrow(Priority.ALWAYS);
+    gridPane.getRowConstraints().add(rowConstraints);
+    gridPane.getChildren().add(new ScrollPane(dailyBalancesPH));
     var correctionsTab = new Tab("Korrekciók", gridPane);
     correctionsTab.setClosable(false);
     return correctionsTab;
+  }
+
+  private Tab getCashFlowTab() {
+    vbCashFlow.setAlignment(Pos.CENTER);
+    vbCashFlow.setOnScroll(this::scrollChart);
+    var cashFlowTab = new Tab("Flow chart", vbCashFlow);
+    cashFlowTab.setClosable(false);
+    cashFlowTab.setOnSelectionChanged(this::refreshChart);
+    return cashFlowTab;
+  }
+
+  private Tab getStatisticsTab() {
+    vbStatistics.setAlignment(Pos.CENTER);
+    var statisticsTab = new Tab("Statisztikák", new ScrollPane(vbStatistics));
+    statisticsTab.setClosable(false);
+    statisticsTab.setOnSelectionChanged(this::refreshStatistics);
+    return statisticsTab;
   }
 
   private MenuBar getMenuBar() {
@@ -69,4 +105,10 @@ public class MainScene extends Scene {
   private void showCategories(ActionEvent actionEvent) {}
 
   private void loadPredictedCorrections(ActionEvent actionEvent) {}
+
+  private void scrollChart(ScrollEvent scrollEvent) {}
+
+  private void refreshChart(Event event) {}
+
+  private void refreshStatistics(Event event) {}
 }

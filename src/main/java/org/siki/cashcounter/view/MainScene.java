@@ -5,6 +5,7 @@ import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -19,7 +20,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDate;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainScene extends Scene {
 
@@ -32,6 +37,17 @@ public class MainScene extends Scene {
   public MainScene() {
     super(new BorderPane(), 640, 480);
     draw((BorderPane) getRoot());
+
+    XYChart.Series<LocalDate, Number> series = new XYChart.Series<>();
+    var random = ThreadLocalRandom.current();
+    var value = random.nextInt(0, 100);
+    for (LocalDate date = LocalDate.now().minusYears(1);
+        date.isBefore(LocalDate.now().plusYears(1));
+        date = date.plusDays(1)) {
+      value += random.nextInt(-10, 10);
+      series.getData().add(new XYChart.Data<>(date, value));
+    }
+    vbCashFlow.getChildren().add(new CashFlowChart(series));
   }
 
   private void draw(BorderPane pane) {

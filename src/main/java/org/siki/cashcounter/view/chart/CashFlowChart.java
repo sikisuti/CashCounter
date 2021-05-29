@@ -1,13 +1,22 @@
 package org.siki.cashcounter.view.chart;
 
-import static javafx.scene.chart.XYChart.*;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 
-public class CashFlowChart {
-    private Series<Integer, Integer> series = new Series<>();
+import java.time.LocalDate;
 
-    public CashFlowChart() {
-        for (int i = 0; i < 100; i++) {
-            series.getData().add(new Data<>(i, i));
-        }
-    }
+public class CashFlowChart extends LineChart<LocalDate, Number> {
+  Series<LocalDate, Number> series = new Series<>();
+
+  public CashFlowChart(Series<LocalDate, Number> series) {
+    super(
+        new DateAxis(
+            series.getData().get(0).getXValue(),
+            series.getData().get(series.getData().size() - 1).getXValue()),
+        new NumberAxis());
+    series.setName("Dátum");
+
+    this.getData().addAll(series);
+    this.setCreateSymbols(false);
+  }
 }

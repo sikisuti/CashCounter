@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 class DataManagerTest {
 
   @Mock private ConfigurationManager configurationManager;
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @BeforeAll
   static void setUp() {

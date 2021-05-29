@@ -13,17 +13,17 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 public class DateAxis extends Axis<LocalDate> {
   private final ObjectProperty<LocalDate> lowerBound =
-          new ObjectPropertyBase<>() {
-            @Override
-            public Object getBean() {
-              return DateAxis.this;
-            }
+      new ObjectPropertyBase<>() {
+        @Override
+        public Object getBean() {
+          return DateAxis.this;
+        }
 
-            @Override
-            public String getName() {
-              return "lowerBound";
-            }
-          };
+        @Override
+        public String getName() {
+          return "lowerBound";
+        }
+      };
 
   public final LocalDate getLowerBound() {
     return lowerBound.get();
@@ -60,6 +60,10 @@ public class DateAxis extends Axis<LocalDate> {
 
   public final ObjectProperty<LocalDate> upperBoundProperty() {
     return upperBound;
+  }
+
+  public DateAxis() {
+    this(LocalDate.now(), LocalDate.now().plusDays(1));
   }
 
   public DateAxis(LocalDate lowerBound, LocalDate upperBound) {

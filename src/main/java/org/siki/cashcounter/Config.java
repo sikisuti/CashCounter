@@ -23,8 +23,9 @@ public class Config {
   }
 
   @Bean
-  public MainScene getMainScene() {
-    return new MainScene();
+  public MainScene getMainScene(
+      CashFlowChart cashFlowChart, ConfigurationManager configurationManager) {
+    return new MainScene(cashFlowChart, configurationManager);
   }
 
   @Bean

@@ -11,12 +11,13 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
 
   @Autowired ChartService chartService;
 
-  Series<LocalDate, Number> series = new Series<>();
-
   public CashFlowChart(ChartService chartService) {
-    super(new DateAxis(), new NumberAxis());
+    super(
+        new DateAxis(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)),
+        new NumberAxis());
     this.setCreateSymbols(false);
 
-    this.getData().add(chartService.getBalances());
+    var series = chartService.getBalances();
+    this.getData().add(series);
   }
 }

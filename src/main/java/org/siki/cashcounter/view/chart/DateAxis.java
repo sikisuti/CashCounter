@@ -62,10 +62,6 @@ public class DateAxis extends Axis<LocalDate> {
     return upperBound;
   }
 
-  public DateAxis() {
-    this(LocalDate.now(), LocalDate.now().plusDays(1));
-  }
-
   public DateAxis(LocalDate lowerBound, LocalDate upperBound) {
     setLowerBound(lowerBound);
     setUpperBound(upperBound);

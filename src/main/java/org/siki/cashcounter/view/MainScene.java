@@ -72,6 +72,9 @@ public class MainScene extends Scene {
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.start("prepareDailyBalances");
     dailyBalancesPH.getChildren().clear();
+
+    for ()
+
     try {
       LocalDate date = null;
       DailyBalancesTitledPane tp = null;

@@ -5,8 +5,6 @@
  */
 package org.siki.cashcounter.view;
 
-import com.siki.cashcount.model.DailyBalance;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Border;
@@ -17,9 +15,11 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
 
@@ -43,33 +43,18 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   //    }
 
   public MonthlyBalanceTitledPane(ObservableMonthlyBalance observableMonthlyBalance) {
-    super(observableMonthlyBalance.getYearMonthString(), new GridPane());
+    super(
+        observableMonthlyBalance
+            .getYearMonthProperty()
+            .get()
+            .format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
+        new GridPane());
+    this.observableMonthlyBalance = observableMonthlyBalance;
+
     GridPane gpRoot = (GridPane) this.getContent();
-
     GridPane.setColumnIndex(vbDailyBalances, 0);
-
     gpRoot.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
-
-    this.period = period;
-    this.setExpanded(isAroundToday(period));
-
-    this.expandedProperty()
-        .addListener(
-            (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-              if (newValue && vbDailyBalances.getChildren().isEmpty()) {
-                for (DailyBalance db : dailyBalances) {
-                  vbDailyBalances.getChildren().add(new DailyBalanceControl(db, this));
-                }
-              }
-            });
-  }
-
-  private boolean isAroundToday(LocalDate date) {
-    return date.isAfter(
-            LocalDate.now()
-                .minusMonths(1)
-                .withDayOfMonth(LocalDate.now().minusMonths(1).lengthOfMonth()))
-        && date.isBefore(LocalDate.now().plusMonths(1).withDayOfMonth(1));
+    this.setExpanded(YearMonth.now().equals(observableMonthlyBalance.getYearMonthProperty()));
   }
 
   public void validate() {
@@ -77,7 +62,9 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void isValid() {
-    boolean isValid = dailyBalances.stream().allMatch(DailyBalance::isValid);
+    boolean isValid =
+        observableMonthlyBalance.getObservableDailyBalances().stream()
+            .allMatch(ObservableDailyBalance::isValid);
 
     if (!isValid) {
       this.setBorder(

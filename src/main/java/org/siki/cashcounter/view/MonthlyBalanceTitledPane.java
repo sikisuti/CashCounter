@@ -15,7 +15,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 
 import java.time.YearMonth;
@@ -62,9 +61,7 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void isValid() {
-    boolean isValid =
-        observableMonthlyBalance.getObservableDailyBalances().stream()
-            .allMatch(ObservableDailyBalance::isValid);
+    boolean isValid = observableMonthlyBalance.isValid();
 
     if (!isValid) {
       this.setBorder(

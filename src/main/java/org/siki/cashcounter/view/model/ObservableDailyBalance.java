@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.siki.cashcounter.model.DailyBalance;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -30,6 +31,14 @@ public class ObservableDailyBalance {
   private ObservableList<ObservableAccountTransaction> transactions;
 
   private DailyBalance dailyBalance;
+
+  public String getDateString() {
+    return date.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+  }
+
+  public BooleanProperty predictedProperty() {
+    return predictedProperty()
+  }
 
   public static ObservableDailyBalance of(DailyBalance dailyBalance) {
     var observableDailyBalance = new ObservableDailyBalance();

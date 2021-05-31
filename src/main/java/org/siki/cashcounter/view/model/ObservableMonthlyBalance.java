@@ -33,5 +33,7 @@ public class ObservableMonthlyBalance {
     return observableMonthlyBalance;
   }
 
-  public boolean isValid() {}
+  public boolean isValid() {
+    return true;
+  }
 }

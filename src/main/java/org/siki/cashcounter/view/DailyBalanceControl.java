@@ -41,6 +41,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
 import java.io.IOException;
@@ -54,7 +55,6 @@ public final class DailyBalanceControl extends VBox {
 
   private Label txtDate;
   private Label txtBalance;
-  private TextField tfCash;
   private Label txtDailySpend;
   private CheckBox chkReviewed;
   private HBox corrections;
@@ -83,7 +83,6 @@ public final class DailyBalanceControl extends VBox {
     btnAdd.onActionProperty().set(this::addCorrection);
     btnAdd.setVisible(false);
     chkReviewed.visibleProperty().bind(observableDailyBalance.predictedProperty().not());
-    tfCash.visibleProperty().bind(observableDailyBalance.predictedProperty().not());
 
     txtBalance.disableProperty().bind(observableDailyBalance.predictedProperty());
     txtDate.disableProperty().bind(observableDailyBalance.predictedProperty());
@@ -92,40 +91,19 @@ public final class DailyBalanceControl extends VBox {
     txtBalance
         .textProperty()
         .bindBidirectional(
-            this.observableDailyBalance.totalMoneyProperty(), NumberFormat.getCurrencyInstance());
-    setCash(NumberFormat.getCurrencyInstance().format(observableDailyBalance.getCash()));
+            this.observableDailyBalance.balanceProperty(), NumberFormat.getCurrencyInstance());
     txtDailySpend
         .textProperty()
         .bindBidirectional(
             this.observableDailyBalance.dailySpendProperty(), NumberFormat.getCurrencyInstance());
-    tfCash
-        .focusedProperty()
-        .addListener(
-            (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-              if (!newValue) {
-                try {
-                  observableDailyBalance.setCash(Integer.parseInt(tfCash.getText()));
-                  setCash(
-                      NumberFormat.getCurrencyInstance().format(observableDailyBalance.getCash()));
-                  try {
-                    DataManager.getInstance().calculatePredictions();
-                  } catch (IOException ex) {
-                    Logger.getLogger(DailyBalanceControl.class.getName())
-                        .log(Level.SEVERE, null, ex);
-                  }
-                } catch (NotEnoughPastDataException ex) {
-                  Logger.getLogger(DailyBalanceControl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-              }
-            });
+
     chkReviewed.selectedProperty().bindBidirectional(observableDailyBalance.reviewedProperty());
     hbLine.disableProperty().bind(chkReviewed.selectedProperty());
     chkReviewed
         .selectedProperty()
         .addListener(
-            (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-              setBackground();
-            });
+            (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) ->
+                setBackground());
     loadCorrections();
 
     setBackground();
@@ -172,8 +150,9 @@ public final class DailyBalanceControl extends VBox {
           Dragboard db = event.getDragboard();
           boolean success = false;
           if (db.hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
-            Correction data = (Correction) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
-            observableDailyBalance.addCorrection(data);
+            ObservableCorrection data =
+                (ObservableCorrection) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
+            observableDailyBalance.addObservableCorrection(data);
             loadCorrections();
             success = true;
           }
@@ -186,8 +165,8 @@ public final class DailyBalanceControl extends VBox {
   }
 
   private void setBackground() {
-    if (observableDailyBalance.getDate().getDayOfWeek() == DayOfWeek.SATURDAY
-        || observableDailyBalance.getDate().getDayOfWeek() == DayOfWeek.SUNDAY)
+    if (observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SATURDAY
+        || observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SUNDAY)
       if (chkReviewed.isSelected()) this.setStyle("-fx-background-color: green;");
       else this.setStyle("-fx-background-color: lightgrey;");
     else if (chkReviewed.isSelected()) this.setStyle("-fx-background-color: lightgreen;");
@@ -340,9 +319,9 @@ public final class DailyBalanceControl extends VBox {
     }
   }
 
-  public void removeCorrection(Correction correction) {
+  public void removeCorrection(ObservableCorrection observableCorrection) {
     try {
-      observableDailyBalance.removeCorrection(correction);
+      observableDailyBalance.removeCorrection(observableCorrection);
       loadCorrections();
       DataManager.getInstance().calculatePredictions();
     } catch (NotEnoughPastDataException | IOException ex) {

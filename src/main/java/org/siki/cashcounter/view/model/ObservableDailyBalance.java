@@ -32,12 +32,28 @@ public class ObservableDailyBalance {
 
   private DailyBalance dailyBalance;
 
+  public ObjectProperty<LocalDate> dateProperty() {
+    return date;
+  }
+
   public String getDateString() {
     return date.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
   }
 
+  public IntegerProperty balanceProperty() {
+    return balance;
+  }
+
   public BooleanProperty predictedProperty() {
-    return predictedProperty()
+    return predicted;
+  }
+
+  public BooleanProperty reviewedProperty() {
+    return reviewed;
+  }
+
+  public IntegerProperty dailySpendProperty() {
+    return dailySpend;
   }
 
   public static ObservableDailyBalance of(DailyBalance dailyBalance) {
@@ -61,5 +77,11 @@ public class ObservableDailyBalance {
             .map(ObservableAccountTransaction::of)
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
     return observableDailyBalance;
+  }
+
+  public void addObservableCorrection(ObservableCorrection observableCorrection) {
+    corrections.add(observableCorrection);
+    dailyBalance.addCorrection(observableCorrection.getCorrection());
+    dailySpend.set(dailyBalance.getDailySpend());
   }
 }

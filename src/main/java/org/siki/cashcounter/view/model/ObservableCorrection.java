@@ -22,6 +22,26 @@ public class ObservableCorrection {
 
   private Correction correction;
 
+  public IntegerProperty amountProperty() {
+    return amount;
+  }
+
+  public StringProperty commentProperty() {
+    return comment;
+  }
+
+  public StringProperty typeProperty() {
+    return type;
+  }
+
+  public BooleanProperty pairedProperty() {
+    return paired;
+  }
+
+  public Correction getCorrection() {
+    return correction;
+  }
+
   public static ObservableCorrection of(Correction correction) {
     var observableCollection = new ObservableCorrection();
     observableCollection.correction = correction;

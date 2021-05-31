@@ -4,6 +4,7 @@ import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.ChartService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.service.converter.MonthlyBalanceMapper;
+import org.siki.cashcounter.view.ControlFactory;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.springframework.context.annotation.Bean;
@@ -44,5 +45,10 @@ public class Config {
   public DataForViewService getDataForViewService(
       DataManager dataManager, MonthlyBalanceMapper monthlyBalanceMapper) {
     return new DataForViewService(dataManager, monthlyBalanceMapper);
+  }
+
+  @Bean
+  public ControlFactory getControlFactory(DataForViewService dataForViewService) {
+    return new ControlFactory(dataForViewService);
   }
 }

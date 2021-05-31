@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 public class MonthlyBalanceTitledPane extends TitledPane {
 
   private ObservableMonthlyBalance observableMonthlyBalance;
+  private ControlFactory controlFactory;
 
   //    private YearMonth period;
   //    private MonthlyBalance // TODO
@@ -41,7 +42,8 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   //        return dailyBalances;
   //    }
 
-  public MonthlyBalanceTitledPane(ObservableMonthlyBalance observableMonthlyBalance) {
+  public MonthlyBalanceTitledPane(
+      ObservableMonthlyBalance observableMonthlyBalance, ControlFactory controlFactory) {
     super(
         observableMonthlyBalance
             .getYearMonthProperty()
@@ -49,6 +51,7 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             .format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
         new GridPane());
     this.observableMonthlyBalance = observableMonthlyBalance;
+    this.controlFactory = controlFactory;
 
     GridPane gpRoot = (GridPane) this.getContent();
     GridPane.setColumnIndex(vbDailyBalances, 0);

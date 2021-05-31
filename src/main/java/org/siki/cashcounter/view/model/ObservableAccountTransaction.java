@@ -20,44 +20,86 @@ import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 public class ObservableAccountTransaction {
-  private LongProperty id;
-  private StringProperty type;
-  private ObjectProperty<LocalDate> date;
-  private IntegerProperty amount;
-  private IntegerProperty balance;
-  private StringProperty accountNumber;
-  private StringProperty owner;
-  private StringProperty comment;
-  private StringProperty counter;
-  private StringProperty category;
-  private BooleanProperty paired;
-  private ObservableList<ObservableCorrection> pairedCorrections;
-  private BooleanProperty possibleDuplicate;
-  private ObservableDailyBalance dailyBalance;
+  private LongProperty idProperty;
+  private StringProperty typeProperty;
+  private ObjectProperty<LocalDate> dateProperty;
+  private IntegerProperty amountProperty;
+  private IntegerProperty balanceProperty;
+  private StringProperty accountNumberProperty;
+  private StringProperty ownerProperty;
+  private StringProperty commentProperty;
+  private StringProperty counterProperty;
+  private StringProperty categoryProperty;
+  private BooleanProperty pairedProperty;
+  private ObservableList<ObservableCorrection> observablePairedCorrections;
+  private BooleanProperty possibleDuplicateProperty;
+  private ObservableDailyBalance observableDailyBalance;
 
   private AccountTransaction accountTransaction;
+
+  public StringProperty typeProperty() {
+    return typeProperty;
+  }
+
+  public IntegerProperty amountProperty() {
+    return amountProperty;
+  }
+
+  public StringProperty ownerProperty() {
+    return ownerProperty;
+  }
+
+  public StringProperty commentProperty() {
+    return commentProperty;
+  }
+
+  public BooleanProperty pairedProperty() {
+    return pairedProperty;
+  }
+
+  public StringProperty categoryProperty() {
+    return categoryProperty;
+  }
+
+  public BooleanProperty possibleDuplicateProperty() {
+    return possibleDuplicateProperty;
+  }
 
   public static ObservableAccountTransaction of(AccountTransaction accountTransaction) {
     var observableAccountTransaction = new ObservableAccountTransaction();
     observableAccountTransaction.accountTransaction = accountTransaction;
-    observableAccountTransaction.id = new SimpleLongProperty(accountTransaction.getId());
-    observableAccountTransaction.type = new SimpleStringProperty(accountTransaction.getType());
-    observableAccountTransaction.date = new SimpleObjectProperty<>(accountTransaction.getDate());
-    observableAccountTransaction.amount = new SimpleIntegerProperty(accountTransaction.getAmount());
-    observableAccountTransaction.balance =
+    observableAccountTransaction.idProperty = new SimpleLongProperty(accountTransaction.getId());
+    observableAccountTransaction.typeProperty =
+        new SimpleStringProperty(accountTransaction.getType());
+    observableAccountTransaction.dateProperty =
+        new SimpleObjectProperty<>(accountTransaction.getDate());
+    observableAccountTransaction.amountProperty =
+        new SimpleIntegerProperty(accountTransaction.getAmount());
+    observableAccountTransaction.balanceProperty =
         new SimpleIntegerProperty(accountTransaction.getBalance());
-    observableAccountTransaction.accountNumber =
+    observableAccountTransaction.accountNumberProperty =
         new SimpleStringProperty(accountTransaction.getAccountNumber());
-    observableAccountTransaction.owner = new SimpleStringProperty(accountTransaction.getOwner());
-    observableAccountTransaction.comment =
+    observableAccountTransaction.ownerProperty =
+        new SimpleStringProperty(accountTransaction.getOwner());
+    observableAccountTransaction.commentProperty =
         new SimpleStringProperty(accountTransaction.getComment());
-    observableAccountTransaction.counter =
+    observableAccountTransaction.counterProperty =
         new SimpleStringProperty(accountTransaction.getCounter());
-    observableAccountTransaction.category =
+    observableAccountTransaction.categoryProperty =
         new SimpleStringProperty(accountTransaction.getCategory());
-    observableAccountTransaction.paired = new SimpleBooleanProperty(accountTransaction.isPaired());
-    observableAccountTransaction.possibleDuplicate =
+    observableAccountTransaction.pairedProperty =
+        new SimpleBooleanProperty(accountTransaction.isPaired());
+    observableAccountTransaction.possibleDuplicateProperty =
         new SimpleBooleanProperty(accountTransaction.isPossibleDuplicate());
     return observableAccountTransaction;
+  }
+
+  public Integer getNotPairedAmount() {
+    return amountProperty.get()
+        - observablePairedCorrections.stream().mapToInt(c -> c.amountProperty().get()).sum();
+  }
+
+  public boolean isValid() {
+    return accountTransaction.isValid();
   }
 }

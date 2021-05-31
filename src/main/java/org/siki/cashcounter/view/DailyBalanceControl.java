@@ -7,10 +7,8 @@ package org.siki.cashcounter.view;
 
 import com.siki.cashcount.NewCorrectionWindowController;
 import com.siki.cashcount.data.DataManager;
-import com.siki.cashcount.exception.JsonDeserializeException;
 import com.siki.cashcount.exception.NotEnoughPastDataException;
 import com.siki.cashcount.model.AccountTransaction;
-import com.siki.cashcount.model.Correction;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -23,7 +21,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -41,6 +38,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
@@ -52,12 +50,13 @@ import java.util.logging.Logger;
 
 public final class DailyBalanceControl extends VBox {
   private MonthlyBalanceTitledPane parent;
+  private ControlFactory controlFactory;
 
   private Label txtDate;
   private Label txtBalance;
   private Label txtDailySpend;
   private CheckBox chkReviewed;
-  private HBox corrections;
+  private HBox hbCorrections;
   private HBox hbLine;
 
   private Button btnAdd;
@@ -72,9 +71,12 @@ public final class DailyBalanceControl extends VBox {
   }
 
   DailyBalanceControl(
-      ObservableDailyBalance observableDailyBalance, MonthlyBalanceTitledPane parent) {
+      ObservableDailyBalance observableDailyBalance,
+      MonthlyBalanceTitledPane parent,
+      ControlFactory controlFactory) {
     this.observableDailyBalance = observableDailyBalance;
     this.parent = parent;
+    this.controlFactory = controlFactory;
 
     setDragAndDrop();
 
@@ -115,7 +117,7 @@ public final class DailyBalanceControl extends VBox {
           /* data is dragged over the target */
           /* accept it only if it is not dragged from the same node
            * and if it has a string data */
-          if (((CorrectionControl) event.getGestureSource()).getParent() != corrections
+          if (((CorrectionControl) event.getGestureSource()).getParent() != hbCorrections
               && !chkReviewed.isSelected()
               && event.getDragboard().hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
             /* allow for moving */
@@ -128,7 +130,7 @@ public final class DailyBalanceControl extends VBox {
         (DragEvent event) -> {
           /* the drag-and-drop gesture entered the target */
           /* show to the user that it is an actual gesture target */
-          if (((CorrectionControl) event.getGestureSource()).getParent() != corrections
+          if (((CorrectionControl) event.getGestureSource()).getParent() != hbCorrections
               && !chkReviewed.isSelected()
               && event.getDragboard().hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
             this.setStyle("-fx-background-color: yellow;");
@@ -174,58 +176,52 @@ public final class DailyBalanceControl extends VBox {
   }
 
   public void loadCorrections() {
-    corrections.getChildren().clear();
-    observableDailyBalance.getCorrections().stream()
+    hbCorrections.getChildren().clear();
+    observableDailyBalance
+        .getObservableCorrections()
         .forEach(
-            (correction) -> {
-              corrections.getChildren().add(new CorrectionControl(correction, this));
+            (observableCorrection) -> {
+              hbCorrections.getChildren().add(new CorrectionControl(observableCorrection, this));
             });
   }
 
   private void loadUI() {
     this.setMinHeight(40);
-    this.setOnMouseEntered(event -> mouseEntered(event));
-    this.setOnMouseExited(event -> mouseExited(event));
+    this.setOnMouseEntered(this::mouseEntered);
+    this.setOnMouseExited(this::mouseExited);
     this.setSpacing(0);
 
-    BorderPane bp = new BorderPane();
+    var bp = new BorderPane();
 
     txtDate = new Label();
     txtDate.setPrefWidth(100);
     txtBalance = new Label();
     txtBalance.setPrefWidth(100);
-    tfCash = new TextField();
-    tfCash.setPrefWidth(100);
     txtDailySpend = new Label();
     txtDailySpend.setPrefWidth(100);
-    //        txtAverageDailySpend = new Label();
-    //        txtAverageDailySpend.setPrefWidth(100);
     btnAdd = new Button("+");
 
-    corrections = new HBox();
-    corrections.setSpacing(10);
-    HBox.setMargin(corrections, new Insets(0, 0, 0, 20));
+    hbCorrections = new HBox();
+    hbCorrections.setSpacing(10);
+    HBox.setMargin(hbCorrections, new Insets(0, 0, 0, 20));
 
     hbLine = new HBox();
-    hbLine.getChildren().addAll(txtDate, txtBalance, tfCash, txtDailySpend, btnAdd, corrections);
+    hbLine.getChildren().addAll(txtDate, txtBalance, txtDailySpend, btnAdd, hbCorrections);
     bp.setCenter(hbLine);
 
-    HBox rightContext = new HBox();
+    var rightContext = new HBox();
 
     btnExpand = new ToggleButton("...");
     btnExpand.setOnAction(
         event -> {
           if (btnExpand.isSelected()) {
             if (vbTransactions.getChildren().isEmpty()
-                && !observableDailyBalance.getTransactions().isEmpty()) {
+                && !observableDailyBalance.getObservableTransactions().isEmpty()) {
               vbTransactions
                   .getChildren()
-                  .add(new TransactionControl(observableDailyBalance.getTransactions(), this));
-              try {
-                DataManager.getInstance().categorize();
-              } catch (IOException | JsonDeserializeException ex) {
-                Logger.getLogger(DailyBalanceControl.class.getName()).log(Level.SEVERE, null, ex);
-              }
+                  .add(
+                      controlFactory.createTransactionControl(
+                          observableDailyBalance.getObservableTransactions(), this));
             }
             this.getChildren().add(vbTransactions);
           } else {
@@ -265,38 +261,15 @@ public final class DailyBalanceControl extends VBox {
     return txtBalance.textProperty();
   }
 
-  public String getCash() {
-    return cashProperty().get();
-  }
-
-  public final void setCash(String value) {
-    cashProperty().set(value);
-  }
-
-  public StringProperty cashProperty() {
-    return tfCash.textProperty();
-  }
-
-  //    public String getDailySpend() { return dailySpendProperty().get(); }
-  //    public final void setDailySpend(String value) { dailySpendProperty().set(value); }
-  //    public StringProperty dailySpendProperty() { return txtDailySpend.textProperty(); }
-
-  //    public String getAverageDailySpend() { return averageDailySpendProperty().get(); }
-  //    public final void setAverageDailySpend(String value) {
-  // averageDailySpendProperty().set(value); }
-  //    public StringProperty averageDailySpendProperty() { return
-  // txtAverageDailySpend.textProperty(); }
-
-  @FXML
   protected void addCorrection(ActionEvent event) {
-    Correction newCorrection = new Correction.Builder().build();
+    var newCorrection = new Correction();
 
     try {
       FXMLLoader fxmlLoader =
           new FXMLLoader(getClass().getResource("/fxml/NewCorrectionWindow.fxml"));
       Parent root1 = (Parent) fxmlLoader.load();
       NewCorrectionWindowController controller = fxmlLoader.getController();
-      Stage stage = new Stage();
+      var stage = new Stage();
       stage.initModality(Modality.APPLICATION_MODAL);
       stage.initStyle(StageStyle.UTILITY);
       stage.setTitle(observableDailyBalance.getDate().toString());

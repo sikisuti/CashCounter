@@ -19,60 +19,70 @@ import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 public class ObservableDailyBalance {
-  private ObservableDailyBalance prevDailyBalance;
-  private ObjectProperty<LocalDate> date;
-  private IntegerProperty balance;
-  private BooleanProperty predicted;
-  private BooleanProperty reviewed;
-  private IntegerProperty dailySpend;
+  private ObservableDailyBalance prevObservableDailyBalance;
+  private ObjectProperty<LocalDate> dateProperty;
+  private IntegerProperty balanceProperty;
+  private BooleanProperty predictedProperty;
+  private BooleanProperty reviewedProperty;
+  private IntegerProperty dailySpendProperty;
 
-  private ObservableList<ObservableSaving> savings;
-  private ObservableList<ObservableCorrection> corrections;
-  private ObservableList<ObservableAccountTransaction> transactions;
+  private ObservableList<ObservableSaving> observableSavings;
+  private ObservableList<ObservableCorrection> observableCorrections;
+  private ObservableList<ObservableAccountTransaction> observableTransactions;
 
   private DailyBalance dailyBalance;
 
   public ObjectProperty<LocalDate> dateProperty() {
-    return date;
+    return dateProperty;
   }
 
   public String getDateString() {
-    return date.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    return dateProperty.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
   }
 
   public IntegerProperty balanceProperty() {
-    return balance;
+    return balanceProperty;
   }
 
   public BooleanProperty predictedProperty() {
-    return predicted;
+    return predictedProperty;
   }
 
   public BooleanProperty reviewedProperty() {
-    return reviewed;
+    return reviewedProperty;
   }
 
   public IntegerProperty dailySpendProperty() {
-    return dailySpend;
+    return dailySpendProperty;
+  }
+
+  public ObservableList<ObservableCorrection> getObservableCorrections() {
+    return observableCorrections;
+  }
+
+  public ObservableList<ObservableAccountTransaction> getObservableTransactions() {
+    return observableTransactions;
   }
 
   public static ObservableDailyBalance of(DailyBalance dailyBalance) {
     var observableDailyBalance = new ObservableDailyBalance();
     observableDailyBalance.dailyBalance = dailyBalance;
-    observableDailyBalance.date = new SimpleObjectProperty<>(dailyBalance.getDate());
-    observableDailyBalance.balance = new SimpleIntegerProperty(dailyBalance.getBalance());
-    observableDailyBalance.predicted = new SimpleBooleanProperty(dailyBalance.isPredicted());
-    observableDailyBalance.reviewed = new SimpleBooleanProperty(dailyBalance.isReviewed());
-    observableDailyBalance.dailySpend = new SimpleIntegerProperty(dailyBalance.getDailySpend());
-    observableDailyBalance.savings =
+    observableDailyBalance.dateProperty = new SimpleObjectProperty<>(dailyBalance.getDate());
+    observableDailyBalance.balanceProperty = new SimpleIntegerProperty(dailyBalance.getBalance());
+    observableDailyBalance.predictedProperty =
+        new SimpleBooleanProperty(dailyBalance.isPredicted());
+    observableDailyBalance.reviewedProperty = new SimpleBooleanProperty(dailyBalance.isReviewed());
+    observableDailyBalance.dailySpendProperty =
+        new SimpleIntegerProperty(dailyBalance.getDailySpend());
+    observableDailyBalance.observableSavings =
         dailyBalance.getSavings().stream()
             .map(ObservableSaving::of)
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
-    observableDailyBalance.corrections =
+    observableDailyBalance.observableCorrections =
         dailyBalance.getCorrections().stream()
             .map(ObservableCorrection::of)
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
-    observableDailyBalance.transactions =
+    observableDailyBalance.observableTransactions =
         dailyBalance.getTransactions().stream()
             .map(ObservableAccountTransaction::of)
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
@@ -80,8 +90,8 @@ public class ObservableDailyBalance {
   }
 
   public void addObservableCorrection(ObservableCorrection observableCorrection) {
-    corrections.add(observableCorrection);
+    observableCorrections.add(observableCorrection);
     dailyBalance.addCorrection(observableCorrection.getCorrection());
-    dailySpend.set(dailyBalance.getDailySpend());
+    dailySpendProperty.set(dailyBalance.getDailySpend());
   }
 }

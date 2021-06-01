@@ -5,7 +5,6 @@
  */
 package org.siki.cashcounter.view;
 
-import com.siki.cashcount.NewCorrectionWindowController;
 import com.siki.cashcount.data.DataManager;
 import com.siki.cashcount.exception.NotEnoughPastDataException;
 import com.siki.cashcount.model.AccountTransaction;
@@ -13,12 +12,10 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
@@ -35,23 +32,20 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import lombok.Getter;
-import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class DailyBalanceControl extends VBox {
   private MonthlyBalanceTitledPane parent;
-  private ControlFactory controlFactory;
+  private ViewFactory viewFactory;
 
   private Label txtDate;
   private Label txtBalance;
@@ -70,10 +64,10 @@ public final class DailyBalanceControl extends VBox {
   DailyBalanceControl(
       ObservableDailyBalance observableDailyBalance,
       MonthlyBalanceTitledPane parent,
-      ControlFactory controlFactory) {
+      ViewFactory viewFactory) {
     this.observableDailyBalance = observableDailyBalance;
     this.parent = parent;
-    this.controlFactory = controlFactory;
+    this.viewFactory = viewFactory;
 
     setDragAndDrop();
 
@@ -217,7 +211,7 @@ public final class DailyBalanceControl extends VBox {
               vbTransactions
                   .getChildren()
                   .add(
-                      controlFactory.createTransactionControl(
+                      viewFactory.createTransactionControl(
                           observableDailyBalance.getObservableTransactions(), this));
             }
             this.getChildren().add(vbTransactions);
@@ -259,29 +253,15 @@ public final class DailyBalanceControl extends VBox {
   }
 
   protected void addCorrection(ActionEvent event) {
-    var newCorrection = new Correction();
-
     try {
-      FXMLLoader fxmlLoader =
-          new FXMLLoader(getClass().getResource("/fxml/NewCorrectionWindow.fxml"));
-      Parent root1 = (Parent) fxmlLoader.load();
-      NewCorrectionWindowController controller = fxmlLoader.getController();
-      var stage = new Stage();
-      stage.initModality(Modality.APPLICATION_MODAL);
-      stage.initStyle(StageStyle.UTILITY);
-      stage.setTitle(observableDailyBalance.getDate().toString());
-      stage.setScene(new Scene(root1));
-      controller.setContext(newCorrection, this);
-      controller.setDialogStage(stage);
-      stage.showAndWait();
+      var correctionDialog = viewFactory.createNewCorrectionDialog();
+      Optional<ButtonType> result = correctionDialog.showAndWait();
 
-      if (controller.isOkClicked()) {
-        observableDailyBalance.addCorrection(newCorrection);
+      if (result.isPresent() && result.get() == ButtonType.OK) {
+        observableDailyBalance
+            .getObservableCorrections()
+            .add(correctionDialog.getObservableCorrection());
         loadCorrections();
-        //                setDailySpend(NumberFormat.getCurrencyInstance().format(
-        //                        dailyBalance.getTotalMoney() -
-        // dailyBalance.getPrevDailyBalance().getTotalMoney() - dailyBalance.getTotalCorrections()
-        //                ));
         DataManager.getInstance().calculatePredictions();
       }
     } catch (IOException | NotEnoughPastDataException ex) {

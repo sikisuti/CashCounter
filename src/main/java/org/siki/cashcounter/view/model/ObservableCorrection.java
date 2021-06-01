@@ -42,6 +42,10 @@ public class ObservableCorrection {
     return pairedTransaction;
   }
 
+  public LongProperty pairedTransactionIdProperty() {
+    return pairedTransactionIdProperty;
+  }
+
   public Correction getCorrection() {
     return correction;
   }

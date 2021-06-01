@@ -1,9 +1,8 @@
 package org.siki.cashcounter.view.dialog;
 
-import com.siki.cashcount.model.AccountTransaction;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -20,15 +19,21 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
+import lombok.Getter;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.DailyBalanceControl;
 import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 
-public class CorrectionDialog extends Dialog<ObservableCorrection> {
-  private ObservableCorrection observableCorrection;
+import static javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE;
+import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
+
+public class CorrectionDialog extends Dialog<ButtonType> {
+  @Getter private ObservableCorrection observableCorrection;
   private DailyBalanceControl dailyBalanceControl;
 
   ComboBox<String> cbType;
@@ -87,6 +92,14 @@ public class CorrectionDialog extends Dialog<ObservableCorrection> {
     tblTransactions.setPrefHeight(300);
     var root = new VBox(grid, tblTransactions);
     this.getDialogPane().setContent(root);
+
+    this.initModality(Modality.APPLICATION_MODAL);
+    this.initStyle(StageStyle.UTILITY);
+    this.setTitle(dailyBalanceControl.getDate());
+
+    ButtonType okButton = new ButtonType("Mentés", OK_DONE);
+    ButtonType cancelButton = new ButtonType("Mégse", CANCEL_CLOSE);
+    this.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
   }
 
   private void prepareTable() {
@@ -116,37 +129,24 @@ public class CorrectionDialog extends Dialog<ObservableCorrection> {
           return row;
         });
 
-    TableColumn<AccountTransaction, String> transactionTypeCol =
+    TableColumn<ObservableAccountTransaction, String> transactionTypeCol =
         new TableColumn<>("Forgalom típusa");
     transactionTypeCol.setCellValueFactory(new PropertyValueFactory<>("transactionType"));
-    //        TableColumn<AccountTransaction, LocalDate> dateCol = new TableColumn<>("Könyvelési
-    // dátum");
-    //        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-    TableColumn<AccountTransaction, Integer> amountCol = new TableColumn<>("Összeg");
+    TableColumn<ObservableAccountTransaction, Integer> amountCol = new TableColumn<>("Összeg");
     amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
-    //        TableColumn<AccountTransaction, Integer> balanceCol = new TableColumn<>("Új könyvelt
-    // egyenleg");
-    //        balanceCol.setCellValueFactory(new PropertyValueFactory<>("balance"));
-    //        TableColumn<AccountTransaction, String> accountNumberCol = new
-    // TableColumn<>("Ellenoldali számlaszám");
-    //        accountNumberCol.setCellValueFactory(new PropertyValueFactory<>("accountNumber"));
-    TableColumn<AccountTransaction, String> ownerCol = new TableColumn<>("Ellenoldali név");
+    TableColumn<ObservableAccountTransaction, String> ownerCol =
+        new TableColumn<>("Ellenoldali név");
     ownerCol.setCellValueFactory(new PropertyValueFactory<>("owner"));
-    TableColumn<AccountTransaction, String> commentCol = new TableColumn<>("Közlemény");
+    TableColumn<ObservableAccountTransaction, String> commentCol = new TableColumn<>("Közlemény");
     commentCol.setCellValueFactory(new PropertyValueFactory<>("comment"));
-    //        TableColumn<AccountTransaction, String> counterCol = new TableColumn<>("?");
-    //        counterCol.setCellValueFactory(new PropertyValueFactory<>("counter"));
-    TableColumn<AccountTransaction, Boolean> isPairedCol = new TableColumn<>("Párosítva");
+    TableColumn<ObservableAccountTransaction, Boolean> isPairedCol = new TableColumn<>("Párosítva");
     isPairedCol.setCellValueFactory(new PropertyValueFactory<>("paired"));
     isPairedCol.setCellFactory(
-        new Callback<
-            TableColumn<AccountTransaction, Boolean>, TableCell<AccountTransaction, Boolean>>() {
+        new Callback<>() {
           @Override
-          public TableCell<AccountTransaction, Boolean> call(
-              TableColumn<AccountTransaction, Boolean> param) {
-            return new TableCell<AccountTransaction, Boolean>() {
-              {
-              }
+          public TableCell<ObservableAccountTransaction, Boolean> call(
+              TableColumn<ObservableAccountTransaction, Boolean> param) {
+            return new TableCell<>() {
 
               @Override
               protected void updateItem(Boolean item, boolean empty) {
@@ -167,39 +167,34 @@ public class CorrectionDialog extends Dialog<ObservableCorrection> {
         .setAll(transactionTypeCol, amountCol, isPairedCol, ownerCol, commentCol);
   }
 
-  @FXML
   protected void doSave(ActionEvent event) {
-    observableCorrection.setAmount(
-        Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", "")));
-    observableCorrection.setType(cbType.getValue());
-    observableCorrection.setComment(tfComment.getText());
+    observableCorrection
+        .amountProperty()
+        .set(Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", "")));
+    observableCorrection.typeProperty().set(cbType.getValue());
+    observableCorrection.commentProperty().set(tfComment.getText());
 
-    okClicked = true;
-
-    dialogStage.close();
+    this.close();
   }
 
-  @FXML
   protected void doCancel(ActionEvent event) {
-    dialogStage.close();
+    this.close();
   }
 
-  @FXML
   protected void doRemove(ActionEvent event) {
     if (observableCorrection.getPairedTransaction() != null) {
       observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
     }
     dailyBalanceControl.removeCorrection(observableCorrection);
-    dialogStage.close();
+    this.close();
   }
 
-  @FXML
   protected void doRemovePair(ActionEvent event) {
     if (observableCorrection.getPairedTransaction() != null) {
       observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
     }
     observableCorrection.setPairedTransaction(null);
-    observableCorrection.setPairedTransactionId(null);
+    observableCorrection.pairedTransactionIdProperty().set(0);
     //        pairedTransaction = null;
   }
 }

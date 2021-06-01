@@ -33,13 +33,13 @@ import java.util.Optional;
 public class MainScene extends Scene {
 
   @Autowired private ConfigurationManager configurationManager;
-  @Autowired private ControlFactory controlFactory;
+  @Autowired private ViewFactory viewFactory;
 
   private final VBox dailyBalancesPH = new VBox();
   private final VBox vbCashFlow = new VBox();
   private final VBox vbStatistics = new VBox();
 
-  public MainScene(CashFlowChart cashFlowChart, ConfigurationManager configurationManager, ControlFactory controlFactory) {
+  public MainScene(CashFlowChart cashFlowChart, ConfigurationManager configurationManager, ViewFactory viewFactory) {
     super(new BorderPane(), 640, 480);
     this.configurationManager = configurationManager;
     draw((BorderPane) getRoot());

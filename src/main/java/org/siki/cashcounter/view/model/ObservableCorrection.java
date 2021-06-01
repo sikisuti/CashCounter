@@ -11,31 +11,35 @@ import javafx.beans.property.StringProperty;
 import org.siki.cashcounter.model.Correction;
 
 public class ObservableCorrection {
-  private LongProperty id;
-  private IntegerProperty amount;
-  private StringProperty comment;
-  private StringProperty type;
-  private ObservableDailyBalance dailyBalance;
-  private BooleanProperty paired;
+  private LongProperty idProperty;
+  private IntegerProperty amountProperty;
+  private StringProperty commentProperty;
+  private StringProperty typeProperty;
+  private ObservableDailyBalance observableDailyBalance;
+  private BooleanProperty pairedProperty;
   private ObservableAccountTransaction pairedTransaction;
-  private LongProperty pairedTransactionId;
+  private LongProperty pairedTransactionIdProperty;
 
   private Correction correction;
 
   public IntegerProperty amountProperty() {
-    return amount;
+    return amountProperty;
   }
 
   public StringProperty commentProperty() {
-    return comment;
+    return commentProperty;
   }
 
   public StringProperty typeProperty() {
-    return type;
+    return typeProperty;
   }
 
   public BooleanProperty pairedProperty() {
-    return paired;
+    return pairedProperty;
+  }
+
+  public ObservableAccountTransaction getPairedTransaction() {
+    return pairedTransaction;
   }
 
   public Correction getCorrection() {
@@ -45,13 +49,19 @@ public class ObservableCorrection {
   public static ObservableCorrection of(Correction correction) {
     var observableCollection = new ObservableCorrection();
     observableCollection.correction = correction;
-    observableCollection.id = new SimpleLongProperty(correction.getId());
-    observableCollection.amount = new SimpleIntegerProperty(correction.getAmount());
-    observableCollection.comment = new SimpleStringProperty(correction.getComment());
-    observableCollection.type = new SimpleStringProperty(correction.getType());
-    observableCollection.paired = new SimpleBooleanProperty(correction.isPaired());
-    observableCollection.pairedTransactionId =
+    observableCollection.idProperty = new SimpleLongProperty(correction.getId());
+    observableCollection.amountProperty = new SimpleIntegerProperty(correction.getAmount());
+    observableCollection.commentProperty = new SimpleStringProperty(correction.getComment());
+    observableCollection.typeProperty = new SimpleStringProperty(correction.getType());
+    observableCollection.pairedProperty = new SimpleBooleanProperty(correction.isPaired());
+    observableCollection.pairedTransactionIdProperty =
         new SimpleLongProperty(correction.getPairedTransactionId());
     return observableCollection;
+  }
+
+  public void setPairedTransaction(ObservableAccountTransaction transaction) {
+    pairedTransaction = transaction;
+    pairedProperty.set(transaction != null);
+    pairedTransactionIdProperty.set(transaction != null ? transaction.idProperty().get() : 0);
   }
 }

@@ -38,6 +38,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import lombok.Getter;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
@@ -64,11 +65,7 @@ public final class DailyBalanceControl extends VBox {
 
   VBox vbTransactions = new VBox();
 
-  private final ObservableDailyBalance observableDailyBalance;
-
-  public ObservableDailyBalance getObservableDailyBalance() {
-    return observableDailyBalance;
-  }
+  @Getter private final ObservableDailyBalance observableDailyBalance;
 
   DailyBalanceControl(
       ObservableDailyBalance observableDailyBalance,

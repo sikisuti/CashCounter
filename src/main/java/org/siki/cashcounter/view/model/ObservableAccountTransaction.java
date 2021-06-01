@@ -37,6 +37,10 @@ public class ObservableAccountTransaction {
 
   private AccountTransaction accountTransaction;
 
+  public LongProperty idProperty() {
+    return idProperty;
+  }
+
   public StringProperty typeProperty() {
     return typeProperty;
   }
@@ -97,6 +101,23 @@ public class ObservableAccountTransaction {
   public Integer getNotPairedAmount() {
     return amountProperty.get()
         - observablePairedCorrections.stream().mapToInt(c -> c.amountProperty().get()).sum();
+  }
+
+  public void addPairedCorrection(ObservableCorrection observableCorrection) {
+    accountTransaction.addPairedCorrection(observableCorrection.getCorrection());
+    if (!observablePairedCorrections.contains(observableCorrection)) {
+      observablePairedCorrections.add(observableCorrection);
+    }
+
+    pairedProperty.set(true);
+  }
+
+  public void removePairedCorrection(ObservableCorrection observableCorrection) {
+    accountTransaction.removePairedCorrection(observableCorrection.getCorrection());
+    observablePairedCorrections.remove(observableCorrection);
+    if (observablePairedCorrections.isEmpty()) {
+      pairedProperty.set(false);
+    }
   }
 
   public boolean isValid() {

@@ -13,6 +13,7 @@ import org.siki.cashcounter.model.DailyBalance;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -75,9 +76,13 @@ public class ObservableDailyBalance {
     observableDailyBalance.dailySpendProperty =
         new SimpleIntegerProperty(dailyBalance.getDailySpend());
     observableDailyBalance.observableSavings =
-        dailyBalance.getSavings().stream()
-            .map(ObservableSaving::of)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        Optional.ofNullable(dailyBalance.getSavings())
+            .map(
+                s ->
+                    s.stream()
+                        .map(ObservableSaving::of)
+                        .collect(Collectors.toCollection(FXCollections::observableArrayList)))
+            .orElse(FXCollections.observableArrayList());
     observableDailyBalance.observableCorrections =
         dailyBalance.getCorrections().stream()
             .map(ObservableCorrection::of)

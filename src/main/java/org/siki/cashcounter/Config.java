@@ -3,7 +3,6 @@ package org.siki.cashcounter;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.ChartService;
 import org.siki.cashcounter.service.DataForViewService;
-import org.siki.cashcounter.service.converter.MonthlyBalanceMapper;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.ViewFactory;
 import org.siki.cashcounter.view.chart.CashFlowChart;
@@ -45,9 +44,8 @@ public class Config {
   }
 
   @Bean
-  public DataForViewService getDataForViewService(
-      DataManager dataManager, MonthlyBalanceMapper monthlyBalanceMapper) {
-    return new DataForViewService(dataManager, monthlyBalanceMapper);
+  public DataForViewService getDataForViewService(DataManager dataManager) {
+    return new DataForViewService(dataManager);
   }
 
   @Bean

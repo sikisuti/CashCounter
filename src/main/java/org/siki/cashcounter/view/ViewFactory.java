@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
 import org.siki.cashcounter.view.model.ObservableAccountTransaction;
+import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,5 +28,10 @@ public class ViewFactory {
 
   public CorrectionDialog createNewCorrectionDialog() {
     return new CorrectionDialog(dataForViewService);
+  }
+
+  public DailyBalanceControl createDailyBalanceControl(
+      ObservableDailyBalance observableDailyBalance, MonthlyBalanceTitledPane parent) {
+    return new DailyBalanceControl(observableDailyBalance, parent, this);
   }
 }

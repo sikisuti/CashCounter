@@ -44,6 +44,7 @@ public class MainScene extends Scene {
     this.viewFactory = viewFactory;
     this.dataForViewService = dataForViewService;
     draw((BorderPane) getRoot());
+    loadCorrections();
     vbCashFlow.getChildren().add(cashFlowChart);
   }
 
@@ -70,7 +71,7 @@ public class MainScene extends Scene {
     return correctionsTab;
   }
 
-  private void prepareDailyBalances() {
+  private void loadCorrections() {
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.start("prepareDailyBalances");
     dailyBalancesPH.getChildren().clear();

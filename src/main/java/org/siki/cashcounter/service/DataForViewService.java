@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.repository.DataManager;
-import org.siki.cashcounter.service.converter.MonthlyBalanceMapper;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,14 +15,13 @@ import java.util.stream.Collectors;
 public class DataForViewService {
 
   @Autowired private final DataManager dataManager;
-  @Autowired private final MonthlyBalanceMapper monthlyBalanceMapper;
 
   private ObservableList<String> categories;
   private ObservableList<String> correctionTypes;
 
   public ObservableList<ObservableMonthlyBalance> getObservableMonthlyBalances() {
     return dataManager.getMonthlyBalances().stream()
-        .map(monthlyBalanceMapper::toView)
+        .map(ObservableMonthlyBalance::of)
         .collect(Collectors.toCollection(FXCollections::observableArrayList));
   }
 

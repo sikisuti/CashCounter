@@ -17,25 +17,9 @@ import java.time.format.DateTimeFormatter;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
 
-  private ObservableMonthlyBalance observableMonthlyBalance;
-  private ViewFactory viewFactory;
+  private final ObservableMonthlyBalance observableMonthlyBalance;
 
-  //    private YearMonth period;
-  //    private MonthlyBalance // TODO
-  //    private ObservableList<DailyBalance> dailyBalances = FXCollections.observableArrayList();
-  private VBox vbDailyBalances = new VBox();
-
-  //    public LocalDate getPeriod() { return period; }
-
-  /*public void addDailyBalance(DailyBalance db) {
-      dailyBalances.add(db);
-      if (isAroundToday(period))
-          vbDailyBalances.getChildren().add(new DailyBalanceControl(db, this));
-  }*/
-
-  //    public List<DailyBalance> getDailyBalances() {
-  //        return dailyBalances;
-  //    }
+  private final VBox vbDailyBalances = new VBox();
 
   public MonthlyBalanceTitledPane(
       ObservableMonthlyBalance observableMonthlyBalance, ViewFactory viewFactory) {
@@ -46,12 +30,24 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             .format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
         new GridPane());
     this.observableMonthlyBalance = observableMonthlyBalance;
-    this.viewFactory = viewFactory;
 
     GridPane gpRoot = (GridPane) this.getContent();
     GridPane.setColumnIndex(vbDailyBalances, 0);
     gpRoot.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
-    this.setExpanded(YearMonth.now().equals(observableMonthlyBalance.getYearMonthProperty()));
+    this.expandedProperty()
+        .addListener(
+            (observable, oldValue, newValue) -> {
+              if (Boolean.TRUE.equals(newValue) && vbDailyBalances.getChildren().isEmpty()) {
+                observableMonthlyBalance
+                    .getObservableDailyBalances()
+                    .forEach(
+                        odb ->
+                            vbDailyBalances
+                                .getChildren()
+                                .add(viewFactory.createDailyBalanceControl(odb, this)));
+              }
+            });
+    this.setExpanded(YearMonth.now().equals(observableMonthlyBalance.getYearMonthProperty().get()));
   }
 
   public void validate() {

@@ -5,13 +5,9 @@
  */
 package org.siki.cashcounter.view;
 
-import com.siki.cashcount.data.DataManager;
-import com.siki.cashcount.exception.NotEnoughPastDataException;
-import com.siki.cashcount.model.AccountTransaction;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -33,15 +29,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import lombok.Getter;
+import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class DailyBalanceControl extends VBox {
   private MonthlyBalanceTitledPane parent;
@@ -253,38 +247,26 @@ public final class DailyBalanceControl extends VBox {
   }
 
   protected void addCorrection(ActionEvent event) {
-    try {
-      var correctionDialog = viewFactory.createNewCorrectionDialog();
-      Optional<ButtonType> result = correctionDialog.showAndWait();
+    var correctionDialog = viewFactory.createNewCorrectionDialog();
+    Optional<ButtonType> result = correctionDialog.showAndWait();
 
-      if (result.isPresent() && result.get() == ButtonType.OK) {
-        observableDailyBalance
-            .getObservableCorrections()
-            .add(correctionDialog.getObservableCorrection());
-        loadCorrections();
-        DataManager.getInstance().calculatePredictions();
-      }
-    } catch (IOException | NotEnoughPastDataException ex) {
-      Logger.getLogger(DailyBalanceControl.class.getName()).log(Level.SEVERE, null, ex);
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      observableDailyBalance.addObservableCorrection(correctionDialog.getObservableCorrection());
+      loadCorrections();
+      //        DataManager.getInstance().calculatePredictions();
     }
   }
 
   public void removeCorrection(ObservableCorrection observableCorrection) {
-    try {
-      observableDailyBalance.removeCorrection(observableCorrection);
-      loadCorrections();
-      DataManager.getInstance().calculatePredictions();
-    } catch (NotEnoughPastDataException | IOException ex) {
-      Logger.getLogger(DailyBalanceControl.class.getName()).log(Level.SEVERE, null, ex);
-    }
+    observableDailyBalance.removeObservableCorrection(observableCorrection);
+    loadCorrections();
+    //      DataManager.getInstance().calculatePredictions();
   }
 
-  @FXML
   private void mouseEntered(MouseEvent event) {
     btnAdd.setVisible(!chkReviewed.isSelected());
   }
 
-  @FXML
   private void mouseExited(MouseEvent event) {
     btnAdd.setVisible(false);
   }
@@ -296,7 +278,8 @@ public final class DailyBalanceControl extends VBox {
 
   void isValid() {
     boolean isValid =
-        observableDailyBalance.getTransactions().stream().allMatch(AccountTransaction::isValid);
+        observableDailyBalance.getObservableTransactions().stream()
+            .allMatch(ObservableAccountTransaction::isValid);
 
     if (!isValid) {
       this.setBorder(

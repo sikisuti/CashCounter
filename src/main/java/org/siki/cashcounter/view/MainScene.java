@@ -5,9 +5,6 @@ import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -22,26 +19,30 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import org.siki.cashcounter.ConfigurationManager;
+import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.util.StopWatch;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Optional;
 
 public class MainScene extends Scene {
 
   @Autowired private ConfigurationManager configurationManager;
   @Autowired private ViewFactory viewFactory;
+  @Autowired private DataForViewService dataForViewService;
 
   private final VBox dailyBalancesPH = new VBox();
   private final VBox vbCashFlow = new VBox();
   private final VBox vbStatistics = new VBox();
 
-  public MainScene(CashFlowChart cashFlowChart, ConfigurationManager configurationManager, ViewFactory viewFactory) {
+  public MainScene(
+      CashFlowChart cashFlowChart,
+      ConfigurationManager configurationManager,
+      ViewFactory viewFactory,
+      DataForViewService dataForViewService) {
     super(new BorderPane(), 640, 480);
     this.configurationManager = configurationManager;
+    this.viewFactory = viewFactory;
+    this.dataForViewService = dataForViewService;
     draw((BorderPane) getRoot());
     vbCashFlow.getChildren().add(cashFlowChart);
   }
@@ -73,59 +74,25 @@ public class MainScene extends Scene {
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.start("prepareDailyBalances");
     dailyBalancesPH.getChildren().clear();
+    dataForViewService
+        .getObservableMonthlyBalances()
+        .forEach(
+            omb ->
+                dailyBalancesPH.getChildren().add(viewFactory.createMonthlyBalanceTitledPane(omb)));
+    validate();
+    if (configurationManager.getBooleanProperty("LogPerformance"))
+      StopWatch.stop("prepareDailyBalances");
+  }
 
-    for ()
-
-    try {
-      LocalDate date = null;
-      DailyBalancesTitledPane tp = null;
-      // 1. create DailyBalancesTitledPane
-      // 2. add DailyBalancesTitledPne to the list
-      // 3. add all DailyBalances to the DailyBalancesTitledPane
-      // 4. validate DailyBalancesTitledPane
-      for (int i = 0; i < DataManager.getInstance().getAllDailyBalances().size(); i++) {
-        DailyBalance db = DataManager.getInstance().getAllDailyBalances().get(i);
-        if (db.getDate().plusYears(1).isBefore(LocalDate.now().withDayOfMonth(1))) {
-          continue;
-        }
-
-        if (date == null || !db.getDate().getMonth().equals(date.getMonth())) {
-          date = db.getDate();
-          tp = new DailyBalancesTitledPane(date);
-          dailyBalancesPH.getChildren().add(tp);
-        }
-
-        tp.addDailyBalance(db);
-      }
-
-      validate();
-
-      Button btnNewMonth = new Button("+");
-      btnNewMonth.setStyle("-fx-alignment: center;");
-      btnNewMonth.setOnAction(
-          (ActionEvent event) -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("Kibővíted a kalkulációt egy hónappal?");
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-              try {
-                DataManager.getInstance().addOneMonth();
-                prepareDailyBalances();
-              } catch (IOException | JsonDeserializeException | NotEnoughPastDataException ex) {
-                LOGGER.error("", ex);
+  private void validate() {
+    dailyBalancesPH
+        .getChildren()
+        .forEach(
+            child -> {
+              if (child instanceof MonthlyBalanceTitledPane) {
+                ((MonthlyBalanceTitledPane) child).validate();
               }
-            }
-          });
-      dailyBalancesPH.getChildren().add(btnNewMonth);
-    } catch (JsonDeserializeException ex) {
-      LOGGER.error("Error in line: " + ex.getErrorLineNum(), ex);
-      ExceptionDialog.get(ex).showAndWait();
-    } catch (Exception ex) {
-      LOGGER.error("", ex);
-      ExceptionDialog.get(ex).showAndWait();
-    }
-    if (ConfigManager.getBooleanProperty("LogPerformance")) StopWatch.stop("prepareDailyBalances");
+            });
   }
 
   private Tab getCashFlowTab() {

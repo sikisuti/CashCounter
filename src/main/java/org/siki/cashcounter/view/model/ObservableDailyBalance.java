@@ -94,4 +94,10 @@ public class ObservableDailyBalance {
     dailyBalance.addCorrection(observableCorrection.getCorrection());
     dailySpendProperty.set(dailyBalance.getDailySpend());
   }
+
+  public void removeObservableCorrection(ObservableCorrection observableCorrection) {
+    observableCorrections.remove(observableCorrection);
+    dailyBalance.removeCorrection(observableCorrection.getCorrection());
+    dailySpendProperty.set(dailyBalance.getDailySpend());
+  }
 }

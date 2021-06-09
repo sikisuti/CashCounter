@@ -79,8 +79,6 @@ public class ObservableAccountTransaction {
         new SimpleObjectProperty<>(accountTransaction.getDate());
     observableAccountTransaction.amountProperty =
         new SimpleIntegerProperty(accountTransaction.getAmount());
-    observableAccountTransaction.balanceProperty =
-        new SimpleIntegerProperty(accountTransaction.getBalance());
     observableAccountTransaction.accountNumberProperty =
         new SimpleStringProperty(accountTransaction.getAccountNumber());
     observableAccountTransaction.ownerProperty =

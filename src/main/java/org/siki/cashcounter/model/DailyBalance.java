@@ -15,6 +15,7 @@ public final class DailyBalance {
   private DailyBalance prevDailyBalance;
   private LocalDate date;
   private int balance;
+  private boolean balanceSetManually;
   private boolean predicted;
   private boolean reviewed;
   private int dailySpend;
@@ -112,7 +113,8 @@ public final class DailyBalance {
         this.getDate().equals(other.getDate())
             && this.getBalance() == other.getBalance()
             && this.predicted == other.predicted
-            && this.reviewed == other.reviewed;
+            && this.reviewed == other.reviewed
+            && this.balanceSetManually == other.balanceSetManually;
 
     if (!rtn) {
       return false;

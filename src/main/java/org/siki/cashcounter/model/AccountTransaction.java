@@ -19,7 +19,6 @@ public final class AccountTransaction {
   private String type;
   private LocalDate date;
   private int amount;
-  private int balance;
   private String accountNumber;
   private String owner;
   private String comment;
@@ -77,7 +76,6 @@ public final class AccountTransaction {
     return this.getId() == other.getId()
         && this.getType().equals(other.getType())
         && this.getAmount() == other.getAmount()
-        && this.getBalance() == other.getBalance()
         && this.getAccountNumber().equals(other.getAccountNumber())
         && this.getOwner().equals(other.getOwner())
         && this.getComment().equals(other.getComment())
@@ -101,7 +99,6 @@ public final class AccountTransaction {
         type,
         date,
         amount,
-        balance,
         accountNumber,
         owner,
         comment,

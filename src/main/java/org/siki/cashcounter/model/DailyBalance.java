@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class DailyBalance {
-  private DailyBalance prevDailyBalance;
   private LocalDate date;
   private int balance;
   private boolean balanceSetManually;
@@ -23,15 +22,6 @@ public final class DailyBalance {
   private List<Saving> savings;
   private List<Correction> corrections;
   private List<AccountTransaction> transactions;
-
-  public void setPrevDailyBalance(DailyBalance prevDailyBalance) {
-    this.prevDailyBalance = prevDailyBalance;
-    if (prevDailyBalance != null) {
-      setDailySpend(getBalance() - prevDailyBalance.getBalance() - getTotalCorrections());
-    } else {
-      setDailySpend(0);
-    }
-  }
 
   public void addSaving(Saving saving) {
     savings.add(saving);
@@ -44,20 +34,12 @@ public final class DailyBalance {
 
   public void addCorrection(Correction correction) {
     corrections.add(correction);
-    if (prevDailyBalance != null) {
-      setDailySpend(getBalance() - prevDailyBalance.getBalance() - getTotalCorrections());
-    } else {
-      setDailySpend(0);
-    }
+    setDailySpend(dailySpend - correction.getAmount());
   }
 
   public void removeCorrection(Correction correction) {
     corrections.remove(correction);
-    if (prevDailyBalance != null) {
-      setDailySpend(getBalance() - prevDailyBalance.getBalance() - getTotalCorrections());
-    } else {
-      setDailySpend(0);
-    }
+    setDailySpend(dailySpend + correction.getAmount());
   }
 
   public void addTransaction(AccountTransaction transaction) {
@@ -75,9 +57,9 @@ public final class DailyBalance {
     }
   }
 
-  public void calculateBalance() {
+  public void calculateBalance(int previousBalance) {
     int diff = transactions.stream().mapToInt(AccountTransaction::getAmount).sum();
-    setBalance(prevDailyBalance.getBalance() + diff);
+    setBalance(previousBalance + diff);
   }
 
   public Integer getTotalCorrections() {

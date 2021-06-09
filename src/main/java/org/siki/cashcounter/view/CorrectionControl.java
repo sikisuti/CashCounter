@@ -17,8 +17,10 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
-import javafx.util.converter.CurrencyStringConverter;
 import org.siki.cashcounter.view.model.ObservableCorrection;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import static javafx.scene.layout.Priority.NEVER;
 
@@ -39,6 +41,7 @@ public class CorrectionControl extends GridPane {
   public CorrectionControl(ObservableCorrection observableCorrection, DailyBalanceControl parent) {
     this.observableCorrection = observableCorrection;
     this.parent = parent;
+    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
 
     setDragAndDrop();
     loadUI();
@@ -49,7 +52,7 @@ public class CorrectionControl extends GridPane {
     txtType.setTooltip(tt);
     txtAmount
         .textProperty()
-        .bindBidirectional(observableCorrection.amountProperty(), new CurrencyStringConverter());
+        .bindBidirectional(observableCorrection.amountProperty(), currencyFormat);
     cirPaired.visibleProperty().bind(observableCorrection.pairedProperty());
 
     selectedCategoryProperty.addListener(

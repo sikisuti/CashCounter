@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.siki.cashcounter.view;
 
 import javafx.beans.property.StringProperty;
@@ -16,7 +11,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Border;
@@ -33,13 +27,14 @@ import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.util.Optional;
 
 public final class DailyBalanceControl extends VBox {
-  private MonthlyBalanceTitledPane parent;
-  private ViewFactory viewFactory;
+  private final MonthlyBalanceTitledPane parent;
+  private final ViewFactory viewFactory;
 
   private Label txtDate;
   private Label txtBalance;
@@ -75,14 +70,13 @@ public final class DailyBalanceControl extends VBox {
     txtDate.disableProperty().bind(observableDailyBalance.predictedProperty());
 
     setDate(observableDailyBalance.getDateString());
+    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
     txtBalance
         .textProperty()
-        .bindBidirectional(
-            this.observableDailyBalance.balanceProperty(), NumberFormat.getCurrencyInstance());
+        .bindBidirectional(this.observableDailyBalance.balanceProperty(), currencyFormat);
     txtDailySpend
         .textProperty()
-        .bindBidirectional(
-            this.observableDailyBalance.dailySpendProperty(), NumberFormat.getCurrencyInstance());
+        .bindBidirectional(this.observableDailyBalance.dailySpendProperty(), currencyFormat);
 
     chkReviewed.selectedProperty().bindBidirectional(observableDailyBalance.reviewedProperty());
     hbLine.disableProperty().bind(chkReviewed.selectedProperty());
@@ -134,8 +128,8 @@ public final class DailyBalanceControl extends VBox {
         (DragEvent event) -> {
           /* data dropped */
           /* if there is a string data on dragboard, read it and use it */
-          Dragboard db = event.getDragboard();
-          boolean success = false;
+          var db = event.getDragboard();
+          var success = false;
           if (db.hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
             ObservableCorrection data =
                 (ObservableCorrection) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
@@ -153,11 +147,17 @@ public final class DailyBalanceControl extends VBox {
 
   private void setBackground() {
     if (observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SATURDAY
-        || observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SUNDAY)
-      if (chkReviewed.isSelected()) this.setStyle("-fx-background-color: green;");
-      else this.setStyle("-fx-background-color: lightgrey;");
-    else if (chkReviewed.isSelected()) this.setStyle("-fx-background-color: lightgreen;");
-    else this.setStyle("-fx-background-color: none;");
+        || observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SUNDAY) {
+      if (chkReviewed.isSelected()) {
+        this.setStyle("-fx-background-color: green;");
+      } else {
+        this.setStyle("-fx-background-color: lightgrey;");
+      }
+    } else if (chkReviewed.isSelected()) {
+      this.setStyle("-fx-background-color: lightgreen;");
+    } else {
+      this.setStyle("-fx-background-color: none;");
+    }
   }
 
   public void loadCorrections() {
@@ -165,9 +165,8 @@ public final class DailyBalanceControl extends VBox {
     observableDailyBalance
         .getObservableCorrections()
         .forEach(
-            (observableCorrection) -> {
-              hbCorrections.getChildren().add(new CorrectionControl(observableCorrection, this));
-            });
+            observableCorrection ->
+                hbCorrections.getChildren().add(new CorrectionControl(observableCorrection, this)));
   }
 
   private void loadUI() {

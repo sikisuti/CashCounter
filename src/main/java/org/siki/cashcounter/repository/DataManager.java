@@ -40,7 +40,7 @@ public class DataManager {
   }
 
   @Data
-  private static class DataSource {
+  static class DataSource {
     private List<MonthlyBalance> monthlyBalances;
   }
 }

@@ -9,6 +9,7 @@ import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.YearMonth;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -18,11 +19,18 @@ public class DataForViewService {
 
   private ObservableList<String> categories;
   private ObservableList<String> correctionTypes;
+  private ObservableList<ObservableMonthlyBalance> observableMonthlyBalances;
 
   public ObservableList<ObservableMonthlyBalance> getObservableMonthlyBalances() {
-    return dataManager.getMonthlyBalances().stream()
-        .map(ObservableMonthlyBalance::of)
-        .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    if (observableMonthlyBalances == null) {
+      observableMonthlyBalances =
+          dataManager.getMonthlyBalances().stream()
+              .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().minusYears(1)))
+              .map(ObservableMonthlyBalance::of)
+              .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    }
+
+    return observableMonthlyBalances;
   }
 
   public ObservableList<String> getAllCorrectionTypes() {

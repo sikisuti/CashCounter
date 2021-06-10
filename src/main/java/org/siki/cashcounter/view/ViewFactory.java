@@ -8,6 +8,8 @@ import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.YearMonth;
+
 public class ViewFactory {
   @Autowired private final DataForViewService dataForViewService;
 
@@ -17,7 +19,15 @@ public class ViewFactory {
 
   public MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(
       ObservableMonthlyBalance observableMonthlyBalance) {
-    return new MonthlyBalanceTitledPane(observableMonthlyBalance, this);
+    var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(observableMonthlyBalance, this);
+    boolean isThisMonth =
+        YearMonth.now().equals(observableMonthlyBalance.getYearMonthProperty().get());
+    monthlyBalanceTitledPane.expandedProperty().set(isThisMonth);
+    if (isThisMonth) {
+      monthlyBalanceTitledPane.fill();
+    }
+
+    return monthlyBalanceTitledPane;
   }
 
   public TransactionControl createTransactionControl(

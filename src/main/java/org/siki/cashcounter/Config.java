@@ -1,7 +1,9 @@
 package org.siki.cashcounter;
 
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.ChartService;
+import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.ViewFactory;
@@ -29,8 +31,16 @@ public class Config {
       CashFlowChart cashFlowChart,
       ConfigurationManager configurationManager,
       ViewFactory viewFactory,
-      DataForViewService dataForViewService) {
-    return new MainScene(cashFlowChart, configurationManager, viewFactory, dataForViewService);
+      DataForViewService dataForViewService,
+      AccountTransactionService accountTransactionService,
+      DailyBalanceService dailyBalanceService) {
+    return new MainScene(
+        cashFlowChart,
+        configurationManager,
+        viewFactory,
+        dataForViewService,
+        accountTransactionService,
+        dailyBalanceService);
   }
 
   @Bean
@@ -51,5 +61,15 @@ public class Config {
   @Bean
   public ViewFactory getControlFactory(DataForViewService dataForViewService) {
     return new ViewFactory(dataForViewService);
+  }
+
+  @Bean
+  public AccountTransactionService getTransactionService(DataForViewService dataForViewService) {
+    return new AccountTransactionService(dataForViewService);
+  }
+
+  @Bean
+  public DailyBalanceService getDailyBalanceService(DataForViewService dataForViewService) {
+    return new DailyBalanceService(dataForViewService);
   }
 }

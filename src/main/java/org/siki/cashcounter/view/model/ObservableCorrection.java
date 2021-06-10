@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import lombok.Getter;
 import org.siki.cashcounter.model.Correction;
 
 public class ObservableCorrection {
@@ -20,7 +21,7 @@ public class ObservableCorrection {
   private ObservableAccountTransaction pairedTransaction;
   private LongProperty pairedTransactionIdProperty;
 
-  private Correction correction;
+  @Getter private Correction correction;
 
   public IntegerProperty amountProperty() {
     return amountProperty;
@@ -44,10 +45,6 @@ public class ObservableCorrection {
 
   public LongProperty pairedTransactionIdProperty() {
     return pairedTransactionIdProperty;
-  }
-
-  public Correction getCorrection() {
-    return correction;
   }
 
   public static ObservableCorrection of(Correction correction) {

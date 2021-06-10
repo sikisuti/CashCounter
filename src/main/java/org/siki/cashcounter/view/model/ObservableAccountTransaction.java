@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 
@@ -35,7 +36,7 @@ public class ObservableAccountTransaction {
   private BooleanProperty possibleDuplicateProperty;
   private ObservableDailyBalance observableDailyBalance;
 
-  private AccountTransaction accountTransaction;
+  @Getter private AccountTransaction accountTransaction;
 
   public LongProperty idProperty() {
     return idProperty;
@@ -43,6 +44,10 @@ public class ObservableAccountTransaction {
 
   public StringProperty typeProperty() {
     return typeProperty;
+  }
+
+  public ObjectProperty<LocalDate> dateProperty() {
+    return dateProperty;
   }
 
   public IntegerProperty amountProperty() {

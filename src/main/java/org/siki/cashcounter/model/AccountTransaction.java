@@ -3,6 +3,7 @@ package org.siki.cashcounter.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Data
+@Builder
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class AccountTransaction {

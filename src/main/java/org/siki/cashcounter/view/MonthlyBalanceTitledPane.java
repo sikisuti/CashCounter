@@ -12,12 +12,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
 
   private final ObservableMonthlyBalance observableMonthlyBalance;
+  private final ViewFactory viewFactory;
 
   private final VBox vbDailyBalances = new VBox();
 
@@ -30,6 +30,7 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             .format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
         new GridPane());
     this.observableMonthlyBalance = observableMonthlyBalance;
+    this.viewFactory = viewFactory;
 
     GridPane gpRoot = (GridPane) this.getContent();
     GridPane.setColumnIndex(vbDailyBalances, 0);
@@ -38,16 +39,19 @@ public class MonthlyBalanceTitledPane extends TitledPane {
         .addListener(
             (observable, oldValue, newValue) -> {
               if (Boolean.TRUE.equals(newValue) && vbDailyBalances.getChildren().isEmpty()) {
-                observableMonthlyBalance
-                    .getObservableDailyBalances()
-                    .forEach(
-                        odb ->
-                            vbDailyBalances
-                                .getChildren()
-                                .add(viewFactory.createDailyBalanceControl(odb, this)));
+                fill();
               }
             });
-    this.setExpanded(YearMonth.now().equals(observableMonthlyBalance.getYearMonthProperty().get()));
+  }
+
+  public void fill() {
+    observableMonthlyBalance
+        .getObservableDailyBalances()
+        .forEach(
+            odb ->
+                vbDailyBalances
+                    .getChildren()
+                    .add(viewFactory.createDailyBalanceControl(odb, this)));
   }
 
   public void validate() {

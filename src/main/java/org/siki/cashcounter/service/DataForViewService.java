@@ -28,9 +28,27 @@ public class DataForViewService {
               .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().minusYears(1)))
               .map(ObservableMonthlyBalance::of)
               .collect(Collectors.toCollection(FXCollections::observableArrayList));
+      wireDependencies();
     }
 
     return observableMonthlyBalances;
+  }
+
+  private void wireDependencies() {
+    var allDailyBalances =
+        observableMonthlyBalances.stream()
+            .flatMap(mb -> mb.getObservableDailyBalances().stream())
+            .collect(Collectors.toList());
+    for (int i = 1; i < allDailyBalances.size(); i++) {
+      var actDailyBalance = allDailyBalances.get(i);
+      var prevDailyBalance = allDailyBalances.get(i - 1);
+      prevDailyBalance
+          .balanceProperty()
+          .addListener(
+              (observable, oldValue, newValue) -> {
+                actDailyBalance.setBalance(newValue.intValue());
+              });
+    }
   }
 
   public ObservableList<String> getAllCorrectionTypes() {

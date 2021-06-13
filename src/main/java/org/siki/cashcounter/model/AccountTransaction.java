@@ -3,6 +3,7 @@ package org.siki.cashcounter.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class AccountTransaction {
 
@@ -84,12 +86,10 @@ public final class AccountTransaction {
         && this.getCounter().equals(other.getCounter());
   }
 
-  public boolean similar(Object obj) {
-    if (obj == null || this.getClass() != obj.getClass()) {
+  public boolean similar(AccountTransaction other) {
+    if (other == null) {
       return false;
     }
-
-    AccountTransaction other = (AccountTransaction) obj;
 
     return this.getType().equals(other.getType()) && this.getAmount() == other.getAmount();
   }

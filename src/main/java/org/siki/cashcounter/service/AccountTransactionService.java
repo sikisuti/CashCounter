@@ -10,28 +10,41 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.ACCOUNT_NUMBER;
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.AMOUNT;
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.COMMENT_1;
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.COMMENT_2;
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.DATE;
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.OWNER;
+import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.TYPE;
+
 @RequiredArgsConstructor
 public class AccountTransactionService {
   @Autowired private final DataForViewService dataForViewService;
   private Long lastTransactionId;
 
-  public ObservableAccountTransaction createObservableTransactionsFromCSV(String csvLine) {
+  public void createObservableTransactionsFromCSV(
+      String csvLine, List<ObservableAccountTransaction> newTransactions) {
     csvLine = csvLine.replace("\"", "");
     String[] elements = csvLine.split(";");
 
-    AccountTransaction newTransaction =
-        AccountTransaction.builder()
-            .id(getNextTransactionId())
-            .amount(Integer.parseInt(elements[2]))
-            .date(LocalDate.parse(elements[4], DateTimeFormatter.ofPattern("yyyyMMdd")))
-            .accountNumber(elements[7])
-            .owner(elements[8])
-            .comment(elements[9] + " " + elements[11])
-            .counter("")
-            .type(elements[12])
-            .build();
+    if (!elements[DATE.getNumber()].isEmpty()) {
+      AccountTransaction newTransaction =
+          AccountTransaction.builder()
+              .id(getNextTransactionId())
+              .amount(Integer.parseInt(elements[AMOUNT.getNumber()]))
+              .date(
+                  LocalDate.parse(
+                      elements[DATE.getNumber()], DateTimeFormatter.ofPattern("yyyyMMdd")))
+              .accountNumber(elements[ACCOUNT_NUMBER.getNumber()])
+              .owner(elements[OWNER.getNumber()])
+              .comment(elements[COMMENT_1.getNumber()] + elements[COMMENT_2.getNumber()])
+              .counter("")
+              .type(elements[TYPE.getNumber()])
+              .build();
 
-    return ObservableAccountTransaction.of(newTransaction);
+      newTransactions.add(ObservableAccountTransaction.of(newTransaction));
+    }
   }
 
   public void storeObservableTransactions(
@@ -50,11 +63,31 @@ public class AccountTransactionService {
                   mb ->
                       mb.getObservableDailyBalances().stream()
                           .flatMap(db -> db.getObservableTransactions().stream()))
-              .mapToLong(t -> t.idProperty().get())
+              .mapToLong(ObservableAccountTransaction::getId)
               .max()
               .orElse(0);
     }
 
     return ++lastTransactionId;
+  }
+
+  enum CSVColumn {
+    AMOUNT(2),
+    DATE(4),
+    ACCOUNT_NUMBER(7),
+    OWNER(8),
+    COMMENT_1(9),
+    COMMENT_2(10),
+    TYPE(12);
+
+    private int number;
+
+    private CSVColumn(int number) {
+      this.number = number;
+    }
+
+    private int getNumber() {
+      return number;
+    }
   }
 }

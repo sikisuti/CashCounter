@@ -41,6 +41,14 @@ public class ObservableDailyBalance {
     return dateProperty.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
   }
 
+  public void setBalance(int value) {
+    balanceProperty.set(value);
+  }
+
+  public void addToBalance(int value) {
+    balanceProperty.set(balanceProperty.get() + value);
+  }
+
   public IntegerProperty balanceProperty() {
     return balanceProperty;
   }
@@ -107,7 +115,12 @@ public class ObservableDailyBalance {
   }
 
   public void addObservableTransaction(ObservableAccountTransaction observableTransaction) {
+    if (this.getObservableTransactions().stream().anyMatch(t -> t.similar(observableTransaction))) {
+      observableTransaction.setPossibleDuplicate(true);
+    }
+
     observableTransactions.add(observableTransaction);
     dailyBalance.addTransaction(observableTransaction.getAccountTransaction());
+    addToBalance(observableTransaction.getAmount());
   }
 }

@@ -63,6 +63,6 @@ public class ObservableCorrection {
   public void setPairedTransaction(ObservableAccountTransaction transaction) {
     pairedTransaction = transaction;
     pairedProperty.set(transaction != null);
-    pairedTransactionIdProperty.set(transaction != null ? transaction.idProperty().get() : 0);
+    pairedTransactionIdProperty.set(transaction != null ? transaction.getId() : 0);
   }
 }

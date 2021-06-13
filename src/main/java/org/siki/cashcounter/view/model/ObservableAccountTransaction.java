@@ -38,24 +38,48 @@ public class ObservableAccountTransaction {
 
   @Getter private AccountTransaction accountTransaction;
 
+  public long getId() {
+    return idProperty.get();
+  }
+
   public LongProperty idProperty() {
     return idProperty;
+  }
+
+  public String getType() {
+    return typeProperty.get();
   }
 
   public StringProperty typeProperty() {
     return typeProperty;
   }
 
+  public LocalDate getDate() {
+    return dateProperty.get();
+  }
+
   public ObjectProperty<LocalDate> dateProperty() {
     return dateProperty;
+  }
+
+  public int getAmount() {
+    return amountProperty.get();
   }
 
   public IntegerProperty amountProperty() {
     return amountProperty;
   }
 
+  public String getOwner() {
+    return ownerProperty.get();
+  }
+
   public StringProperty ownerProperty() {
     return ownerProperty;
+  }
+
+  public String getComment() {
+    return commentProperty.get();
   }
 
   public StringProperty commentProperty() {
@@ -68,6 +92,15 @@ public class ObservableAccountTransaction {
 
   public StringProperty categoryProperty() {
     return categoryProperty;
+  }
+
+  public boolean isPossibleDuplicate() {
+    return possibleDuplicateProperty.get();
+  }
+
+  public void setPossibleDuplicate(boolean value) {
+    possibleDuplicateProperty.set(value);
+    accountTransaction.setPossibleDuplicate(value);
   }
 
   public BooleanProperty possibleDuplicateProperty() {
@@ -125,5 +158,9 @@ public class ObservableAccountTransaction {
 
   public boolean isValid() {
     return accountTransaction.isValid();
+  }
+
+  public boolean similar(ObservableAccountTransaction other) {
+    return accountTransaction.similar(other.accountTransaction);
   }
 }

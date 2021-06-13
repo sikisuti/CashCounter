@@ -6,7 +6,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -23,7 +22,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
-import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
@@ -42,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -180,53 +177,25 @@ public class MainScene extends Scene {
         List<ObservableAccountTransaction> newTransactions = new ArrayList<>();
 
         while ((line = br.readLine()) != null) {
-          newTransactions.add(transactionService.createObservableTransactionsFromCSV(line));
+          transactionService.createObservableTransactionsFromCSV(line, newTransactions);
         }
 
-        newTransactions.sort(Comparator.comparing(t -> t.dateProperty().get()));
+        newTransactions.sort(Comparator.comparing(ObservableAccountTransaction::getDate));
         TreeMap<LocalDate, List<ObservableAccountTransaction>> groupped =
             newTransactions.stream()
                 .collect(
                     Collectors.groupingBy(
-                        t -> t.dateProperty().get(), TreeMap::new, Collectors.toList()));
+                        ObservableAccountTransaction::getDate, TreeMap::new, Collectors.toList()));
 
         for (Map.Entry<LocalDate, List<ObservableAccountTransaction>> entry : groupped.entrySet()) {
           var db = dailyBalanceService.findDailyBalanceByDate(entry.getKey());
-          // TODO: DataManager line 233
           transactionService.storeObservableTransactions(entry.getValue(), db);
         }
 
-        Integer importedRows;
-        var force = false;
-        do {
-          try {
-            importedRows = DataManager.getInstance().saveTransactions(newTransactions, force);
-            force = false;
-          } catch (TransactionGapException ex) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Adathiány");
-            alert.setHeaderText("Adat hiányzik");
-            StringBuilder content = new StringBuilder();
-            ex.missingDates.stream()
-                .forEach(
-                    (d) -> {
-                      content
-                          .append(d.toString())
-                          .append(" (")
-                          .append(d.getDayOfWeek().name())
-                          .append(")\n");
-                    });
-            content.append("\nMégis betöltsem a fájlt?");
-            alert.setContentText(content.toString());
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == ButtonType.OK) force = true;
-          }
-        } while (force);
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        var alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Üzenet");
         alert.setHeaderText("Importálás kész");
-        alert.setContentText(importedRows + " új tranzakció importálva");
+        alert.setContentText(newTransactions.size() + " új tranzakció importálva");
         alert.showAndWait();
         validate();
       } catch (Exception e) {

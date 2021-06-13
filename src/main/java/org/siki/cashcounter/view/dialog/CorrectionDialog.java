@@ -110,8 +110,8 @@ public class CorrectionDialog extends Dialog<ButtonType> {
               event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                   ObservableAccountTransaction rowData = row.getItem();
-                  observableCorrection.amountProperty().set(rowData.amountProperty().get());
-                  tfAmount.setText(String.valueOf(rowData.amountProperty().get()));
+                  observableCorrection.amountProperty().set(rowData.getAmount());
+                  tfAmount.setText(String.valueOf(rowData.getAmount()));
                   if (observableCorrection.getPairedTransaction() != null
                       && observableCorrection.getPairedTransaction() != rowData) {
                     observableCorrection

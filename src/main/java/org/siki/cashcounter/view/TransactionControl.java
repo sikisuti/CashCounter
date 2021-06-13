@@ -40,13 +40,12 @@ public class TransactionControl extends GridPane {
     int rowCnt = -1;
     for (ObservableAccountTransaction t : observableTransactions) {
       rowCnt++;
-      var lblType = new Label(t.typeProperty().get());
-      var lblAmount =
-          new Label(NumberFormat.getCurrencyInstance().format(t.amountProperty().get()));
-      var lblOwner = new Label(t.ownerProperty().get());
+      var lblType = new Label(t.getType());
+      var lblAmount = new Label(NumberFormat.getCurrencyInstance().format(t.getAmount()));
+      var lblOwner = new Label(t.getOwner());
       var isPaired = new Circle(10, new Color(0, 0, 1, 1));
       isPaired.visibleProperty().bind(t.pairedProperty());
-      var lblComment = new Label(t.commentProperty().get());
+      var lblComment = new Label(t.getComment());
 
       GridPane.setConstraints(lblType, 0, rowCnt);
       GridPane.setConstraints(lblAmount, 1, rowCnt);
@@ -54,7 +53,7 @@ public class TransactionControl extends GridPane {
       GridPane.setConstraints(isPaired, 3, rowCnt);
       GridPane.setConstraints(lblComment, 4, rowCnt);
 
-      if (t.possibleDuplicateProperty().get()) {
+      if (t.isPossibleDuplicate()) {
         var duplicateHandler = new HBox();
         var removeDuplicateButton = new Button("töröl");
         removeDuplicateButton.setOnAction(
@@ -65,7 +64,7 @@ public class TransactionControl extends GridPane {
         var notDuplicateButton = new Button("hozzáad");
         notDuplicateButton.setOnAction(
             event -> {
-              t.possibleDuplicateProperty().set(false);
+              t.setPossibleDuplicate(false);
               buildLayout();
             });
         duplicateHandler.getChildren().addAll(removeDuplicateButton, notDuplicateButton);

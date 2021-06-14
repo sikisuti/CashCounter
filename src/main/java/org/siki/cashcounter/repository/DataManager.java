@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
+import org.siki.cashcounter.model.CategoryMatchingRule;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,8 +40,13 @@ public class DataManager {
     }
   }
 
+  public List<CategoryMatchingRule> getCategoryMatchingRules() {
+    return dataSource.categoryMatchingRules;
+  }
+
   @Data
   static class DataSource {
     private List<MonthlyBalance> monthlyBalances;
+    private List<CategoryMatchingRule> categoryMatchingRules;
   }
 }

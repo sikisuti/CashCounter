@@ -3,8 +3,10 @@ package org.siki.cashcounter.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.siki.cashcounter.model.CategoryMatchingRule;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 
@@ -20,18 +22,32 @@ import static org.siki.cashcounter.repository.DataManager.DataSource;
 
 @Slf4j
 class Migrate {
+
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  @BeforeAll
+  static void init() {
+    objectMapper.registerModule(new JavaTimeModule());
+  }
+
   @Test
   @Disabled
   void migrate() throws Exception {
-    String sourcePath = "C:\\GoogleDrive\\CashCount\\data.jsn";
     String destinationPath = "c:\\Project Sources\\CashCounter\\data.json";
 
-    List<String> dailyBalanceSources = Files.readAllLines(Paths.get(sourcePath));
+    DataSource dataSource = new DataSource();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
+    readDailyBalances(dataSource);
+    readCategoryMatchingRules(dataSource);
+
+    objectMapper.writeValue(Paths.get(destinationPath).toFile(), dataSource);
+  }
+
+  private void readDailyBalances(DataSource dataSource) throws Exception {
+    String dailyBalancesSourcePath = "C:\\GoogleDrive\\CashCount\\data.jsn";
+
     List<DailyBalance> dailyBalances = new ArrayList<>();
-
+    List<String> dailyBalanceSources = Files.readAllLines(Paths.get(dailyBalancesSourcePath));
     for (String dailyBalanceSource : dailyBalanceSources) {
       dailyBalances.add(objectMapper.readValue(dailyBalanceSource, DailyBalance.class));
     }
@@ -40,7 +56,6 @@ class Migrate {
 
     Map<YearMonth, List<DailyBalance>> months =
         dailyBalances.stream().collect(Collectors.groupingBy(db -> YearMonth.from(db.getDate())));
-    DataSource dataSource = new DataSource();
     dataSource.setMonthlyBalances(new ArrayList<>());
     months.entrySet().stream()
         .sorted(Map.Entry.comparingByKey())
@@ -53,7 +68,25 @@ class Migrate {
             });
 
     log.info(dataSource.getMonthlyBalances().size() + " MonthlyBalances created");
+  }
 
-    objectMapper.writeValue(Paths.get(destinationPath).toFile(), dataSource);
+  private void readCategoryMatchingRules(DataSource dataSource) throws Exception {
+    String categoryMatchingRulesSourcePath = "c:\\Apps\\CashCount\\matchingRules.jsn";
+
+    List<CategoryMatchingRule> categoryMatchingRules = new ArrayList<>();
+    List<String> CategoryMatchingRuleSources =
+        Files.readAllLines(Paths.get(categoryMatchingRulesSourcePath));
+    for (String categoryMatchingRuleSource : CategoryMatchingRuleSources) {
+      categoryMatchingRules.add(
+          objectMapper.readValue(categoryMatchingRuleSource, CategoryMatchingRule.class));
+    }
+
+    log.info(categoryMatchingRules.size() + " CategoryMatchingRule read");
+    dataSource.setCategoryMatchingRules(new ArrayList<>());
+    for (CategoryMatchingRule categoryMatchingRule : categoryMatchingRules) {
+      dataSource.getCategoryMatchingRules().add(categoryMatchingRule);
+    }
+
+    log.info(dataSource.getCategoryMatchingRules().size() + " CategoryMatchingRule created");
   }
 }

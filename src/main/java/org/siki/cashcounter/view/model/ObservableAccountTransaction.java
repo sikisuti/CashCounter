@@ -135,8 +135,7 @@ public class ObservableAccountTransaction {
   }
 
   public Integer getNotPairedAmount() {
-    return amountProperty.get()
-        - observablePairedCorrections.stream().mapToInt(c -> c.amountProperty().get()).sum();
+    return accountTransaction.getNotPairedAmount();
   }
 
   public void addPairedCorrection(ObservableCorrection observableCorrection) {

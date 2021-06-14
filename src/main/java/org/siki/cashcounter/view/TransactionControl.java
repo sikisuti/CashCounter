@@ -17,6 +17,7 @@ import javafx.scene.shape.Circle;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class TransactionControl extends GridPane {
@@ -36,12 +37,14 @@ public class TransactionControl extends GridPane {
   }
 
   private void buildLayout() {
+    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+
     this.getChildren().clear();
     int rowCnt = -1;
     for (ObservableAccountTransaction t : observableTransactions) {
       rowCnt++;
       var lblType = new Label(t.getType());
-      var lblAmount = new Label(NumberFormat.getCurrencyInstance().format(t.getAmount()));
+      var lblAmount = new Label(currencyFormat.format(t.getAmount()));
       var lblOwner = new Label(t.getOwner());
       var isPaired = new Circle(10, new Color(0, 0, 1, 1));
       isPaired.visibleProperty().bind(t.pairedProperty());

@@ -7,8 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,9 +34,15 @@ public final class AccountTransaction {
   private String category;
 
   private boolean paired;
-  private List<Correction> pairedCorrections;
+  @Singular private List<Correction> pairedCorrections = new ArrayList<>();
   private boolean possibleDuplicate;
   private DailyBalance dailyBalance;
+
+  public void setPairedCorrections(List<Correction> pairedCorrections) {
+    if (pairedCorrections != null) {
+      this.pairedCorrections = pairedCorrections;
+    }
+  }
 
   public void addPairedCorrection(Correction correction) {
     if (!pairedCorrections.contains(correction)) {

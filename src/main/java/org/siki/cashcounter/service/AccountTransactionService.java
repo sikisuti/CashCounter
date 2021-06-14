@@ -22,6 +22,7 @@ import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.T
 @RequiredArgsConstructor
 public class AccountTransactionService {
   @Autowired private final DataForViewService dataForViewService;
+  @Autowired private final CategoryService categoryService;
   private Long lastTransactionId;
 
   public void createObservableTransactionsFromCSV(
@@ -45,6 +46,7 @@ public class AccountTransactionService {
               .pairedCorrections(new ArrayList<>())
               .build();
 
+      categoryService.setCategory(newTransaction);
       newTransactions.add(ObservableAccountTransaction.of(newTransaction));
     }
   }
@@ -82,9 +84,9 @@ public class AccountTransactionService {
     COMMENT_2(10),
     TYPE(12);
 
-    private int number;
+    private final int number;
 
-    private CSVColumn(int number) {
+    CSVColumn(int number) {
       this.number = number;
     }
 

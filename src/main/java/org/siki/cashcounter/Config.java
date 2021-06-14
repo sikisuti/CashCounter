@@ -2,6 +2,7 @@ package org.siki.cashcounter;
 
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
+import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.ChartService;
 import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
@@ -64,12 +65,18 @@ public class Config {
   }
 
   @Bean
-  public AccountTransactionService getTransactionService(DataForViewService dataForViewService) {
-    return new AccountTransactionService(dataForViewService);
+  public AccountTransactionService getTransactionService(
+      DataForViewService dataForViewService, CategoryService categoryService) {
+    return new AccountTransactionService(dataForViewService, categoryService);
   }
 
   @Bean
   public DailyBalanceService getDailyBalanceService(DataForViewService dataForViewService) {
     return new DailyBalanceService(dataForViewService);
+  }
+
+  @Bean
+  public CategoryService getCategoryService(DataManager dataManager) {
+    return new CategoryService(dataManager);
   }
 }

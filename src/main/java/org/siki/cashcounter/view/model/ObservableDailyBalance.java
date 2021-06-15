@@ -123,4 +123,8 @@ public class ObservableDailyBalance {
     dailyBalance.addTransaction(observableTransaction.getAccountTransaction());
     addToBalance(observableTransaction.getAmount());
   }
+
+  public int getSumTransactions() {
+    return observableTransactions.stream().mapToInt(ObservableAccountTransaction::getAmount).sum();
+  }
 }

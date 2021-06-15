@@ -30,7 +30,7 @@ public class AccountTransactionService {
     csvLine = csvLine.replace("\"", "");
     String[] elements = csvLine.split(";");
 
-    if (!elements[DATE.getNumber()].isEmpty()) {
+    if (elements.length > 12 && !elements[DATE.getNumber()].isEmpty()) {
       AccountTransaction newTransaction =
           AccountTransaction.builder()
               .id(getNextTransactionId())

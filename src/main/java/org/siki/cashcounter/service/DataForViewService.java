@@ -39,15 +39,15 @@ public class DataForViewService {
         observableMonthlyBalances.stream()
             .flatMap(mb -> mb.getObservableDailyBalances().stream())
             .collect(Collectors.toList());
-    for (int i = 1; i < allDailyBalances.size(); i++) {
+    for (var i = 1; i < allDailyBalances.size(); i++) {
       var actDailyBalance = allDailyBalances.get(i);
       var prevDailyBalance = allDailyBalances.get(i - 1);
       prevDailyBalance
           .balanceProperty()
           .addListener(
-              (observable, oldValue, newValue) -> {
-                actDailyBalance.setBalance(newValue.intValue());
-              });
+              (observable, oldValue, newValue) ->
+                  actDailyBalance.setBalance(
+                      newValue.intValue() + actDailyBalance.getSumTransactions()));
     }
   }
 

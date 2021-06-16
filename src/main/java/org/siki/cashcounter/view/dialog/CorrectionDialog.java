@@ -194,7 +194,7 @@ public class CorrectionDialog extends Dialog<ButtonType> {
       observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
     }
     observableCorrection.setPairedTransaction(null);
-    observableCorrection.pairedTransactionIdProperty().set(0);
+    //    observableCorrection.pairedTransactionIdProperty().set(0);
     //        pairedTransaction = null;
   }
 }

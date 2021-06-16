@@ -47,7 +47,7 @@ public class DataForViewService {
           .addListener(
               (observable, oldValue, newValue) ->
                   actDailyBalance.setBalance(
-                      newValue.intValue() + actDailyBalance.getSumTransactions()));
+                      newValue.intValue() + actDailyBalance.getDailySpent()));
     }
   }
 

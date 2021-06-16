@@ -1,5 +1,6 @@
 package org.siki.cashcounter.view;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -53,7 +54,14 @@ public class CorrectionControl extends GridPane {
     txtAmount
         .textProperty()
         .bindBidirectional(observableCorrection.amountProperty(), currencyFormat);
-    cirPaired.visibleProperty().bind(observableCorrection.pairedProperty());
+    BooleanBinding isPaired =
+        new BooleanBinding() {
+          @Override
+          protected boolean computeValue() {
+            return observableCorrection.getPairedTransaction() != null;
+          }
+        };
+    cirPaired.visibleProperty().bind(isPaired);
 
     selectedCategoryProperty.addListener(
         (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {

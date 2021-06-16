@@ -91,13 +91,13 @@ public class ObservableDailyBalance {
                         .map(ObservableSaving::of)
                         .collect(Collectors.toCollection(FXCollections::observableArrayList)))
             .orElse(FXCollections.observableArrayList());
-    observableDailyBalance.observableCorrections =
-        dailyBalance.getCorrections().stream()
-            .map(ObservableCorrection::of)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
     observableDailyBalance.observableTransactions =
         dailyBalance.getTransactions().stream()
             .map(ObservableAccountTransaction::of)
+            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    observableDailyBalance.observableCorrections =
+        dailyBalance.getCorrections().stream()
+            .map(c -> ObservableCorrection.of(c, observableDailyBalance.observableTransactions))
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
     return observableDailyBalance;
   }
@@ -124,7 +124,15 @@ public class ObservableDailyBalance {
     addToBalance(observableTransaction.getAmount());
   }
 
-  public int getSumTransactions() {
-    return observableTransactions.stream().mapToInt(ObservableAccountTransaction::getAmount).sum();
+  public int getDailySpent() {
+    var transactionSum =
+        observableTransactions.stream().mapToInt(ObservableAccountTransaction::getAmount).sum();
+    var notPairedCorrectionSum =
+        observableCorrections.stream()
+            .filter(ObservableCorrection::isNotPaired)
+            .mapToInt(ObservableCorrection::getAmount)
+            .sum();
+
+    return transactionSum + notPairedCorrectionSum;
   }
 }

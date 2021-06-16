@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+
 @Slf4j
 public class DataManager {
 
@@ -24,6 +26,7 @@ public class DataManager {
   public DataManager(ConfigurationManager configurationManager) {
     this.configurationManager = configurationManager;
     objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
     loadDataFromFile();
   }
 

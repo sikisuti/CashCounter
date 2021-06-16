@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.ACCOUNT_NUMBER;
@@ -43,7 +42,7 @@ public class AccountTransactionService {
               .comment(elements[COMMENT_1.getNumber()] + elements[COMMENT_2.getNumber()])
               .counter("")
               .type(elements[TYPE.getNumber()])
-              .pairedCorrections(new ArrayList<>())
+              //              .pairedCorrections(new ArrayList<>())
               .build();
 
       categoryService.setCategory(newTransaction);

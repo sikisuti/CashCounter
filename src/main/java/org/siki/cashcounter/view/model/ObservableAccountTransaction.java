@@ -2,11 +2,9 @@ package org.siki.cashcounter.view.model;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -21,7 +19,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 public class ObservableAccountTransaction {
-  private LongProperty idProperty;
+  //  private LongProperty idProperty;
   private StringProperty typeProperty;
   private ObjectProperty<LocalDate> dateProperty;
   private IntegerProperty amountProperty;
@@ -34,16 +32,12 @@ public class ObservableAccountTransaction {
   private BooleanProperty pairedProperty;
   private ObservableList<ObservableCorrection> observablePairedCorrections;
   private BooleanProperty possibleDuplicateProperty;
-  private ObservableDailyBalance observableDailyBalance;
+  private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
 
   @Getter private AccountTransaction accountTransaction;
 
   public long getId() {
-    return idProperty.get();
-  }
-
-  public LongProperty idProperty() {
-    return idProperty;
+    return accountTransaction.getId();
   }
 
   public String getType() {
@@ -110,7 +104,6 @@ public class ObservableAccountTransaction {
   public static ObservableAccountTransaction of(AccountTransaction accountTransaction) {
     var observableAccountTransaction = new ObservableAccountTransaction();
     observableAccountTransaction.accountTransaction = accountTransaction;
-    observableAccountTransaction.idProperty = new SimpleLongProperty(accountTransaction.getId());
     observableAccountTransaction.typeProperty =
         new SimpleStringProperty(accountTransaction.getType());
     observableAccountTransaction.dateProperty =
@@ -127,19 +120,20 @@ public class ObservableAccountTransaction {
         new SimpleStringProperty(accountTransaction.getCounter());
     observableAccountTransaction.categoryProperty =
         new SimpleStringProperty(accountTransaction.getCategory());
-    observableAccountTransaction.pairedProperty =
-        new SimpleBooleanProperty(accountTransaction.isPaired());
+    //    observableAccountTransaction.pairedProperty =
+    //        new SimpleBooleanProperty(accountTransaction.isPaired());
     observableAccountTransaction.possibleDuplicateProperty =
         new SimpleBooleanProperty(accountTransaction.isPossibleDuplicate());
     return observableAccountTransaction;
   }
 
   public Integer getNotPairedAmount() {
-    return accountTransaction.getNotPairedAmount();
+    return getAmount()
+        - observablePairedCorrections.stream().mapToInt(ObservableCorrection::getAmount).sum();
   }
 
   public void addPairedCorrection(ObservableCorrection observableCorrection) {
-    accountTransaction.addPairedCorrection(observableCorrection.getCorrection());
+    //    accountTransaction.addPairedCorrection(observableCorrection.getCorrection());
     if (!observablePairedCorrections.contains(observableCorrection)) {
       observablePairedCorrections.add(observableCorrection);
     }
@@ -148,7 +142,7 @@ public class ObservableAccountTransaction {
   }
 
   public void removePairedCorrection(ObservableCorrection observableCorrection) {
-    accountTransaction.removePairedCorrection(observableCorrection.getCorrection());
+    //    accountTransaction.removePairedCorrection(observableCorrection.getCorrection());
     observablePairedCorrections.remove(observableCorrection);
     if (observablePairedCorrections.isEmpty()) {
       pairedProperty.set(false);

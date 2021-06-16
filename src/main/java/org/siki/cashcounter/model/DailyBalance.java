@@ -43,7 +43,7 @@ public final class DailyBalance {
   }
 
   public void addTransaction(AccountTransaction transaction) {
-    transaction.setDailyBalance(this);
+    //    transaction.setDailyBalance(this);
     transactions.add(transaction);
   }
 

@@ -1,17 +1,13 @@
 package org.siki.cashcounter.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -33,35 +29,35 @@ public final class AccountTransaction {
   @JsonProperty("subCategory")
   private String category;
 
-  private boolean paired;
-  @Singular private List<Correction> pairedCorrections = new ArrayList<>();
+  //  private boolean paired;
+  //  @Singular private List<Correction> pairedCorrections = new ArrayList<>();
   private boolean possibleDuplicate;
-  private DailyBalance dailyBalance;
+  //  private DailyBalance dailyBalance;
 
-  public void setPairedCorrections(List<Correction> pairedCorrections) {
-    if (pairedCorrections != null) {
-      this.pairedCorrections = pairedCorrections;
-    }
-  }
+  //  public void setPairedCorrections(List<Correction> pairedCorrections) {
+  //    if (pairedCorrections != null) {
+  //      this.pairedCorrections = pairedCorrections;
+  //    }
+  //  }
 
-  public void addPairedCorrection(Correction correction) {
-    if (!pairedCorrections.contains(correction)) {
-      pairedCorrections.add(correction);
-    }
-    setPaired(true);
-  }
+  //  public void addPairedCorrection(Correction correction) {
+  //    if (!pairedCorrections.contains(correction)) {
+  //      pairedCorrections.add(correction);
+  //    }
+  //    setPaired(true);
+  //  }
 
-  public void removePairedCorrection(Correction correction) {
-    pairedCorrections.remove(correction);
-    if (pairedCorrections.isEmpty()) {
-      setPaired(false);
-    }
-  }
+  //  public void removePairedCorrection(Correction correction) {
+  //    pairedCorrections.remove(correction);
+  //    if (pairedCorrections.isEmpty()) {
+  //      setPaired(false);
+  //    }
+  //  }
 
-  @JsonIgnore
-  public Integer getNotPairedAmount() {
-    return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
-  }
+  //  @JsonIgnore
+  //  public Integer getNotPairedAmount() {
+  //    return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
+  //  }
 
   public boolean isValid() {
     return !isPossibleDuplicate() && getCategory() != null && !getCategory().isEmpty();
@@ -104,17 +100,6 @@ public final class AccountTransaction {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        id,
-        type,
-        date,
-        amount,
-        accountNumber,
-        owner,
-        comment,
-        counter,
-        category,
-        paired,
-        pairedCorrections);
+    return Objects.hash(id, type, date, amount, accountNumber, owner, comment, counter, category);
   }
 }

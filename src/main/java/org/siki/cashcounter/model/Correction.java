@@ -1,5 +1,6 @@
 package org.siki.cashcounter.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,17 @@ public class Correction {
   private int amount;
   private String comment;
   private String type;
-  //  private DailyBalance dailyBalance;
-  //  private boolean paired;
-  //  private AccountTransaction pairedTransaction;
   private long pairedTransactionId;
+
+  @JsonIgnore
+  public boolean isPaired() {
+    return pairedTransactionId != 0;
+  }
+
+  @JsonIgnore
+  public boolean isNotPaired() {
+    return !isPaired();
+  }
 
   public void setPairedTransaction(AccountTransaction transaction) {
     //    pairedTransaction = transaction;

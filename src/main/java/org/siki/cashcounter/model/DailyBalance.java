@@ -35,16 +35,22 @@ public final class DailyBalance {
   public void addCorrection(Correction correction) {
     corrections.add(correction);
     setDailySpend(dailySpend - correction.getAmount());
+    if (correction.isNotPaired()) {
+      balance += correction.getAmount();
+    }
   }
 
   public void removeCorrection(Correction correction) {
     corrections.remove(correction);
     setDailySpend(dailySpend + correction.getAmount());
+    if (correction.isNotPaired()) {
+      balance -= correction.getAmount();
+    }
   }
 
   public void addTransaction(AccountTransaction transaction) {
-    //    transaction.setDailyBalance(this);
     transactions.add(transaction);
+    balance += transaction.getAmount();
   }
 
   public void addNonExistingTransactions(List<AccountTransaction> newTransactions) {

@@ -1,5 +1,6 @@
 package org.siki.cashcounter.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public final class AccountTransaction {
 
   private long id;
   private String type;
-  private LocalDate date;
+  @JsonIgnore private LocalDate date;
   private int amount;
   private String accountNumber;
   private String owner;

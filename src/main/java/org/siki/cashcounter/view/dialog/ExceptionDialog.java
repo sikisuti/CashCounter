@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.siki.cashcounter.view.dialog;
 
 import javafx.scene.control.Alert;
@@ -10,11 +5,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import lombok.NoArgsConstructor;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-/** @author tamas.siklosi */
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public class ExceptionDialog {
   public static Alert get(Exception ex) {
     var alert = new Alert(Alert.AlertType.ERROR);

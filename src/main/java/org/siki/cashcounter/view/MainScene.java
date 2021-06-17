@@ -158,7 +158,14 @@ public class MainScene extends Scene {
         new Menu("Korrekciók", null, predictedCorrectionsMenuItem));
   }
 
-  private void doSave(ActionEvent actionEvent) {}
+  private void doSave(ActionEvent actionEvent) {
+    try {
+      dataForViewService.save();
+    } catch (Exception e) {
+      log.error("", e);
+      ExceptionDialog.get(e).showAndWait();
+    }
+  }
 
   private void doImport(ActionEvent actionEvent) {
     var fileChooser = new FileChooser();

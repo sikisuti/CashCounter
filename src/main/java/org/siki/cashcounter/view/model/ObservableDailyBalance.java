@@ -77,6 +77,14 @@ public class ObservableDailyBalance {
     return reviewedProperty;
   }
 
+  public void setDailySpent(int value) {
+    dailySpendProperty.set(value);
+  }
+
+  public int getDailySpent() {
+    return dailySpendProperty.get();
+  }
+
   public IntegerProperty dailySpendProperty() {
     return dailySpendProperty;
   }
@@ -115,19 +123,27 @@ public class ObservableDailyBalance {
         dailyBalance.getCorrections().stream()
             .map(c -> ObservableCorrection.of(c, observableDailyBalance.observableTransactions))
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    observableDailyBalance.observableTransactions.forEach(
+        t ->
+            observableDailyBalance.getObservableCorrections().stream()
+                .filter(c -> c.getCorrection().getPairedTransactionId() == t.getId())
+                .forEach(t::addPairedCorrection));
+
     return observableDailyBalance;
   }
 
   public void addObservableCorrection(ObservableCorrection observableCorrection) {
     observableCorrections.add(observableCorrection);
     dailyBalance.addCorrection(observableCorrection.getCorrection());
-    dailySpendProperty.set(dailyBalance.getDailySpend());
+    setDailySpent(dailyBalance.getDailySpend());
+    setBalance(dailyBalance.getBalance());
   }
 
   public void removeObservableCorrection(ObservableCorrection observableCorrection) {
     observableCorrections.remove(observableCorrection);
     dailyBalance.removeCorrection(observableCorrection.getCorrection());
-    dailySpendProperty.set(dailyBalance.getDailySpend());
+    setDailySpent(dailyBalance.getDailySpend());
+    setBalance(dailyBalance.getBalance());
   }
 
   public void addObservableTransaction(ObservableAccountTransaction observableTransaction) {
@@ -140,7 +156,7 @@ public class ObservableDailyBalance {
     addToBalance(observableTransaction.getAmount());
   }
 
-  public int getDailySpent() {
+  public int calculateDailySpent() {
     var transactionSum =
         observableTransactions.stream().mapToInt(ObservableAccountTransaction::getAmount).sum();
     var notPairedCorrectionSum =
@@ -149,7 +165,8 @@ public class ObservableDailyBalance {
             .mapToInt(ObservableCorrection::getAmount)
             .sum();
 
-    return transactionSum + notPairedCorrectionSum;
+    setDailySpent(transactionSum + notPairedCorrectionSum);
+    return getDailySpent();
   }
 
   public int getTotalCorrections() {

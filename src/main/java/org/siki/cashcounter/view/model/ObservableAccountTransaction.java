@@ -1,5 +1,6 @@
 package org.siki.cashcounter.view.model;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -8,6 +9,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -120,8 +122,12 @@ public class ObservableAccountTransaction {
         new SimpleStringProperty(accountTransaction.getCounter());
     observableAccountTransaction.categoryProperty =
         new SimpleStringProperty(accountTransaction.getCategory());
-    //    observableAccountTransaction.pairedProperty =
-    //        new SimpleBooleanProperty(accountTransaction.isPaired());
+    observableAccountTransaction.observablePairedCorrections = FXCollections.observableArrayList();
+    observableAccountTransaction.pairedProperty = new SimpleBooleanProperty();
+    observableAccountTransaction.pairedProperty.bind(
+        Bindings.createBooleanBinding(
+            () -> !observableAccountTransaction.observablePairedCorrections.isEmpty(),
+            observableAccountTransaction.observablePairedCorrections));
     observableAccountTransaction.possibleDuplicateProperty =
         new SimpleBooleanProperty(accountTransaction.isPossibleDuplicate());
     return observableAccountTransaction;
@@ -137,16 +143,11 @@ public class ObservableAccountTransaction {
     if (!observablePairedCorrections.contains(observableCorrection)) {
       observablePairedCorrections.add(observableCorrection);
     }
-
-    pairedProperty.set(true);
   }
 
   public void removePairedCorrection(ObservableCorrection observableCorrection) {
     //    accountTransaction.removePairedCorrection(observableCorrection.getCorrection());
     observablePairedCorrections.remove(observableCorrection);
-    if (observablePairedCorrections.isEmpty()) {
-      pairedProperty.set(false);
-    }
   }
 
   public boolean isValid() {

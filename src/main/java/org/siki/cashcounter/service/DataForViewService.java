@@ -10,6 +10,7 @@ import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -49,7 +50,7 @@ public class DataForViewService {
           .balanceProperty()
           .addListener(
               (observable, oldValue, newValue) -> {
-                int newBalance = newValue.intValue() + actDailyBalance.getDailySpent();
+                int newBalance = newValue.intValue() + actDailyBalance.calculateDailySpent();
                 if (actDailyBalance.isNotReviewed()) {
                   newBalance += getDayAverage(actDailyBalance.getDate());
                 }
@@ -95,6 +96,10 @@ public class DataForViewService {
     }
 
     return Math.round(averageSum / 6f);
+  }
+
+  public void save() throws IOException {
+    dataManager.save();
   }
 
   public ObservableList<String> getAllCorrectionTypes() {

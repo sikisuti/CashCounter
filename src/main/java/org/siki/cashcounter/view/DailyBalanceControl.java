@@ -166,7 +166,9 @@ public final class DailyBalanceControl extends VBox {
         .getObservableCorrections()
         .forEach(
             observableCorrection ->
-                hbCorrections.getChildren().add(new CorrectionControl(observableCorrection, this)));
+                hbCorrections
+                    .getChildren()
+                    .add(viewFactory.createCorrectionControl(observableCorrection, this)));
   }
 
   private void loadUI() {

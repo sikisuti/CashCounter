@@ -1,7 +1,6 @@
 package org.siki.cashcounter.view;
 
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
@@ -18,7 +17,9 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.view.model.ObservableCorrection;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -27,7 +28,7 @@ import static javafx.scene.layout.Priority.NEVER;
 
 public class CorrectionControl extends GridPane {
 
-  private static final StringProperty selectedCategoryProperty = new SimpleStringProperty();
+  @Autowired private final CategoryService categoryService;
 
   private Label txtType;
   private Text txtAmount;
@@ -39,9 +40,13 @@ public class CorrectionControl extends GridPane {
   public static final DataFormat CORRECTION_DATA_FORMAT =
       new DataFormat("com.siki.cashcount.model.Correction");
 
-  public CorrectionControl(ObservableCorrection observableCorrection, DailyBalanceControl parent) {
+  public CorrectionControl(
+      ObservableCorrection observableCorrection,
+      DailyBalanceControl parent,
+      CategoryService categoryService) {
     this.observableCorrection = observableCorrection;
     this.parent = parent;
+    this.categoryService = categoryService;
     NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
 
     setDragAndDrop();
@@ -63,14 +68,16 @@ public class CorrectionControl extends GridPane {
         };
     cirPaired.visibleProperty().bind(isPaired);
 
-    selectedCategoryProperty.addListener(
-        (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-          if (newValue.equals(observableCorrection.typeProperty().get())) {
-            this.setStyle("-fx-background-color: yellow;");
-          } else {
-            this.setStyle("-fx-background-color: none;");
-          }
-        });
+    categoryService
+        .selectedCategoryProperty()
+        .addListener(
+            (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+              if (newValue.equals(observableCorrection.typeProperty().get())) {
+                this.setStyle("-fx-background-color: yellow;");
+              } else {
+                this.setStyle("-fx-background-color: none;");
+              }
+            });
   }
 
   private void loadUI() {
@@ -95,6 +102,8 @@ public class CorrectionControl extends GridPane {
     cirPaired.setFill(Color.BLUE);
 
     this.getChildren().addAll(txtType, txtAmount, cirPaired);
+
+    this.setOnMouseClicked(this::doModify);
   }
 
   private void setDragAndDrop() {
@@ -144,5 +153,41 @@ public class CorrectionControl extends GridPane {
 
   public StringProperty amountProperty() {
     return txtAmount.textProperty();
+  }
+
+  public void doModify(MouseEvent event) {
+    if (event.getClickCount() == 1) {
+      if (this.observableCorrection.getType().equals(categoryService.getSelectedCategory())) {
+        categoryService.setSelectedCategory("");
+      } else {
+        categoryService.setSelectedCategory(this.observableCorrection.getType());
+      }
+    } else if (event.getClickCount() == 2) {
+      //      try {
+      //        FXMLLoader fxmlLoader = new
+      // FXMLLoader(getClass().getResource("/fxml/NewCorrectionWindow.fxml"));
+      //        Parent root1 = (Parent) fxmlLoader.load();
+      //        NewCorrectionWindowController controller = fxmlLoader.getController();
+      //        Stage stage = new Stage();
+      //        stage.initModality(Modality.APPLICATION_MODAL);
+      //        stage.initStyle(StageStyle.UTILITY);
+      //        stage.setTitle(parent.getDate());
+      //        stage.setScene(new Scene(root1));
+      //        controller.setContext(correction, parent);
+      //        controller.setDialogStage(stage);
+      //        stage.showAndWait();
+      //
+      //        if (controller.isOkClicked()) {
+      //          DataManager.getInstance().calculatePredictions();
+      ////                    parent.setDailySpend(NumberFormat.getCurrencyInstance().format(
+      ////                            parent.getDailyBalance().getTotalMoney() -
+      // parent.getDailyBalance().getPrevDailyBalance().getTotalMoney() -
+      // parent.getDailyBalance().getTotalCorrections()
+      ////                    ));
+      //        }
+      //      } catch (IOException | NotEnoughPastDataException ex) {
+      //        Logger.getLogger(DailyBalanceControl.class.getName()).log(Level.SEVERE, null, ex);
+      //      }
+    }
   }
 }

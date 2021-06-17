@@ -35,6 +35,10 @@ public class ObservableCorrection {
     return commentProperty;
   }
 
+  public String getType() {
+    return typeProperty.get();
+  }
+
   public StringProperty typeProperty() {
     return typeProperty;
   }

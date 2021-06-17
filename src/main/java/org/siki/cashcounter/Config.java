@@ -60,8 +60,9 @@ public class Config {
   }
 
   @Bean
-  public ViewFactory getControlFactory(DataForViewService dataForViewService) {
-    return new ViewFactory(dataForViewService);
+  public ViewFactory getControlFactory(
+      DataForViewService dataForViewService, CategoryService categoryService) {
+    return new ViewFactory(dataForViewService, categoryService);
   }
 
   @Bean

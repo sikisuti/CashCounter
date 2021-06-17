@@ -6,10 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -45,10 +48,53 @@ public class DataForViewService {
       prevDailyBalance
           .balanceProperty()
           .addListener(
-              (observable, oldValue, newValue) ->
-                  actDailyBalance.setBalance(
-                      newValue.intValue() + actDailyBalance.getDailySpent()));
+              (observable, oldValue, newValue) -> {
+                int newBalance = newValue.intValue() + actDailyBalance.getDailySpent();
+                if (actDailyBalance.isNotReviewed()) {
+                  newBalance += getDayAverage(actDailyBalance.getDate());
+                }
+
+                actDailyBalance.setBalance(newBalance);
+              });
     }
+  }
+
+  public int getDayAverage(LocalDate date) {
+    var averageSum = 0;
+    // Consider the last 6 months
+    for (int i = -6; i < 0; i++) {
+      var weeklyAverage = 0;
+
+      List<ObservableDailyBalance> allDailyBalances =
+          getObservableMonthlyBalances().stream()
+              .flatMap(mb -> mb.getObservableDailyBalances().stream())
+              .collect(Collectors.toList());
+      // Check if data exists in the past
+      if (allDailyBalances.get(0).getDate().compareTo(date.plusMonths(i).minusDays(4)) <= 0) {
+        int index = -1;
+        // Search the day in the past
+        while (!allDailyBalances.get(++index).getDate().equals(date.plusMonths(i)))
+          ;
+        var correctionSum = 0;
+
+        // Summarize the corredtions of the week
+        for (int j = -3; j <= 3; j++) {
+          correctionSum += allDailyBalances.get(index + j).getTotalCorrections();
+        }
+
+        weeklyAverage =
+            Math.round(
+                (allDailyBalances.get(index + 3).getBalance()
+                        - correctionSum
+                        - allDailyBalances.get(index - 4).getBalance())
+                    / 7f);
+      } else {
+        throw new RuntimeException("Not enough past data");
+      }
+      averageSum += weeklyAverage;
+    }
+
+    return Math.round(averageSum / 6f);
   }
 
   public ObservableList<String> getAllCorrectionTypes() {

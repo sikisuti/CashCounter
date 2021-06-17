@@ -41,6 +41,10 @@ public class ObservableDailyBalance {
     return dateProperty.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
   }
 
+  public LocalDate getDate() {
+    return dateProperty.get();
+  }
+
   public void setBalance(int value) {
     balanceProperty.set(value);
   }
@@ -49,12 +53,24 @@ public class ObservableDailyBalance {
     balanceProperty.set(balanceProperty.get() + value);
   }
 
+  public int getBalance() {
+    return balanceProperty.get();
+  }
+
   public IntegerProperty balanceProperty() {
     return balanceProperty;
   }
 
   public BooleanProperty predictedProperty() {
     return predictedProperty;
+  }
+
+  public boolean isReviewed() {
+    return reviewedProperty.get();
+  }
+
+  public boolean isNotReviewed() {
+    return !isReviewed();
   }
 
   public BooleanProperty reviewedProperty() {
@@ -134,5 +150,9 @@ public class ObservableDailyBalance {
             .sum();
 
     return transactionSum + notPairedCorrectionSum;
+  }
+
+  public int getTotalCorrections() {
+    return observableCorrections.stream().mapToInt(ObservableCorrection::getAmount).sum();
   }
 }

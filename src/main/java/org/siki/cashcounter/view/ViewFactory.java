@@ -40,8 +40,13 @@ public class ViewFactory {
     return new TransactionControl(observableTransactions, parent, dataForViewService);
   }
 
-  public CorrectionDialog createNewCorrectionDialog() {
-    return new CorrectionDialog(dataForViewService);
+  public CorrectionDialog createNewCorrectionDialog(ObservableDailyBalance parentDailyBalance) {
+    return new CorrectionDialog(dataForViewService, parentDailyBalance);
+  }
+
+  public CorrectionDialog editCorrectionDialog(
+      ObservableCorrection observableCorrection, ObservableDailyBalance parentDailyBalance) {
+    return new CorrectionDialog(dataForViewService, observableCorrection, parentDailyBalance);
   }
 
   public DailyBalanceControl createDailyBalanceControl(
@@ -51,6 +56,6 @@ public class ViewFactory {
 
   public CorrectionControl createCorrectionControl(
       ObservableCorrection observableCorrection, DailyBalanceControl parent) {
-    return new CorrectionControl(observableCorrection, parent, categoryService);
+    return new CorrectionControl(observableCorrection, parent, categoryService, this);
   }
 }

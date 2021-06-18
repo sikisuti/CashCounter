@@ -29,6 +29,7 @@ import static javafx.scene.layout.Priority.NEVER;
 public class CorrectionControl extends GridPane {
 
   @Autowired private final CategoryService categoryService;
+  @Autowired private final ViewFactory viewFactory;
 
   private Label txtType;
   private Text txtAmount;
@@ -43,10 +44,12 @@ public class CorrectionControl extends GridPane {
   public CorrectionControl(
       ObservableCorrection observableCorrection,
       DailyBalanceControl parent,
-      CategoryService categoryService) {
+      CategoryService categoryService,
+      ViewFactory viewFactory) {
     this.observableCorrection = observableCorrection;
     this.parent = parent;
     this.categoryService = categoryService;
+    this.viewFactory = viewFactory;
     NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
 
     setDragAndDrop();
@@ -163,31 +166,10 @@ public class CorrectionControl extends GridPane {
         categoryService.setSelectedCategory(this.observableCorrection.getType());
       }
     } else if (event.getClickCount() == 2) {
-      //      try {
-      //        FXMLLoader fxmlLoader = new
-      // FXMLLoader(getClass().getResource("/fxml/NewCorrectionWindow.fxml"));
-      //        Parent root1 = (Parent) fxmlLoader.load();
-      //        NewCorrectionWindowController controller = fxmlLoader.getController();
-      //        Stage stage = new Stage();
-      //        stage.initModality(Modality.APPLICATION_MODAL);
-      //        stage.initStyle(StageStyle.UTILITY);
-      //        stage.setTitle(parent.getDate());
-      //        stage.setScene(new Scene(root1));
-      //        controller.setContext(correction, parent);
-      //        controller.setDialogStage(stage);
-      //        stage.showAndWait();
-      //
-      //        if (controller.isOkClicked()) {
-      //          DataManager.getInstance().calculatePredictions();
-      ////                    parent.setDailySpend(NumberFormat.getCurrencyInstance().format(
-      ////                            parent.getDailyBalance().getTotalMoney() -
-      // parent.getDailyBalance().getPrevDailyBalance().getTotalMoney() -
-      // parent.getDailyBalance().getTotalCorrections()
-      ////                    ));
-      //        }
-      //      } catch (IOException | NotEnoughPastDataException ex) {
-      //        Logger.getLogger(DailyBalanceControl.class.getName()).log(Level.SEVERE, null, ex);
-      //      }
+      var correctionDialog =
+          viewFactory.editCorrectionDialog(
+              observableCorrection, parent.getObservableDailyBalance());
+      correctionDialog.showAndWait();
     }
   }
 }

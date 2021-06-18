@@ -2,11 +2,11 @@ package org.siki.cashcounter.view;
 
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
@@ -30,7 +30,6 @@ import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
-import java.util.Optional;
 
 public final class DailyBalanceControl extends VBox {
   private final MonthlyBalanceTitledPane parent;
@@ -86,6 +85,9 @@ public final class DailyBalanceControl extends VBox {
             (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) ->
                 setBackground());
     loadCorrections();
+    observableDailyBalance
+        .getObservableCorrections()
+        .removeListener((ListChangeListener<ObservableCorrection>) c -> loadCorrections());
 
     setBackground();
   }
@@ -248,14 +250,8 @@ public final class DailyBalanceControl extends VBox {
   }
 
   protected void addCorrection(ActionEvent event) {
-    var correctionDialog = viewFactory.createNewCorrectionDialog();
-    Optional<ButtonType> result = correctionDialog.showAndWait();
-
-    if (result.isPresent() && result.get() == ButtonType.OK) {
-      observableDailyBalance.addObservableCorrection(correctionDialog.getObservableCorrection());
-      loadCorrections();
-      //        DataManager.getInstance().calculatePredictions();
-    }
+    var correctionDialog = viewFactory.createNewCorrectionDialog(observableDailyBalance);
+    correctionDialog.showAndWait();
   }
 
   public void removeCorrection(ObservableCorrection observableCorrection) {

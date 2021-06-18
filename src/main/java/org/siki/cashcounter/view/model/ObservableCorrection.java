@@ -27,6 +27,10 @@ public class ObservableCorrection {
     return amountProperty.get();
   }
 
+  public void setAmount(int value) {
+    amountProperty.set(value);
+  }
+
   public IntegerProperty amountProperty() {
     return amountProperty;
   }

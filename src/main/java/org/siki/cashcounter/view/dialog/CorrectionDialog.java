@@ -1,10 +1,12 @@
 package org.siki.cashcounter.view.dialog;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -20,21 +22,22 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 import lombok.Getter;
 import org.siki.cashcounter.service.DataForViewService;
-import org.siki.cashcounter.view.DailyBalanceControl;
 import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
+import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
-import static javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE;
-import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
+import java.time.format.DateTimeFormatter;
 
-public class CorrectionDialog extends Dialog<ButtonType> {
+public class CorrectionDialog extends Stage {
   @Getter private ObservableCorrection observableCorrection;
-  private DailyBalanceControl dailyBalanceControl;
+  private ObservableDailyBalance parentDailyBalance;
+  private final BooleanProperty pairedProperty = new SimpleBooleanProperty(false);
 
   ComboBox<String> cbType;
   TextField tfAmount;
@@ -44,22 +47,24 @@ public class CorrectionDialog extends Dialog<ButtonType> {
   public CorrectionDialog(
       DataForViewService dataForViewService,
       ObservableCorrection observableCorrection,
-      DailyBalanceControl dailyBalanceControl) {
-    this(dataForViewService);
+      ObservableDailyBalance parentDailyBalance) {
+    this(dataForViewService, parentDailyBalance);
 
     cbType.setValue(observableCorrection.typeProperty().get());
     tfAmount.setText(String.valueOf(observableCorrection.amountProperty().get()));
     tfComment.setText(observableCorrection.commentProperty().get());
 
     this.observableCorrection = observableCorrection;
-    this.dailyBalanceControl = dailyBalanceControl;
+    this.parentDailyBalance = parentDailyBalance;
+
+    pairedProperty.bind(observableCorrection.pairedProperty());
 
     prepareTable();
-    tblTransactions.setItems(
-        dailyBalanceControl.getObservableDailyBalance().getObservableTransactions());
+    tblTransactions.setItems(parentDailyBalance.getObservableTransactions());
   }
 
-  public CorrectionDialog(DataForViewService dataForViewService) {
+  public CorrectionDialog(
+      DataForViewService dataForViewService, ObservableDailyBalance parentDailyBalance) {
     var lblType = new Label("Típus");
     cbType = new ComboBox<>();
     cbType.setEditable(true);
@@ -71,6 +76,7 @@ public class CorrectionDialog extends Dialog<ButtonType> {
     tfComment = new TextField();
     var btnRemovePair = new Button("Párosítás törlése");
     btnRemovePair.setOnAction(this::doRemovePair);
+    btnRemovePair.visibleProperty().bind(pairedProperty);
     var grid = new GridPane();
     grid.getColumnConstraints()
         .addAll(new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints());
@@ -90,16 +96,19 @@ public class CorrectionDialog extends Dialog<ButtonType> {
     tblTransactions = new TableView<>();
     tblTransactions.setPrefWidth(1000);
     tblTransactions.setPrefHeight(300);
-    var root = new VBox(grid, tblTransactions);
-    this.getDialogPane().setContent(root);
+    var buttonBar = new ButtonBar();
+    var btnSave = new Button("Mentés");
+    btnSave.setOnAction(this::doSave);
+    buttonBar.getButtons().add(btnSave);
+    var btnCancel = new Button("Mégse");
+    btnCancel.setOnAction(this::doCancel);
+    buttonBar.getButtons().add(btnCancel);
+    var root = new VBox(grid, tblTransactions, buttonBar);
+    this.setScene(new Scene(root));
 
     this.initModality(Modality.APPLICATION_MODAL);
     this.initStyle(StageStyle.UTILITY);
-    this.setTitle(dailyBalanceControl.getDate());
-
-    ButtonType okButton = new ButtonType("Mentés", OK_DONE);
-    ButtonType cancelButton = new ButtonType("Mégse", CANCEL_CLOSE);
-    this.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+    this.setTitle(parentDailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
   }
 
   private void prepareTable() {
@@ -131,7 +140,7 @@ public class CorrectionDialog extends Dialog<ButtonType> {
 
     TableColumn<ObservableAccountTransaction, String> transactionTypeCol =
         new TableColumn<>("Forgalom típusa");
-    transactionTypeCol.setCellValueFactory(new PropertyValueFactory<>("transactionType"));
+    transactionTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
     TableColumn<ObservableAccountTransaction, Integer> amountCol = new TableColumn<>("Összeg");
     amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
     TableColumn<ObservableAccountTransaction, String> ownerCol =
@@ -168,9 +177,10 @@ public class CorrectionDialog extends Dialog<ButtonType> {
   }
 
   protected void doSave(ActionEvent event) {
-    observableCorrection
-        .amountProperty()
-        .set(Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", "")));
+    var newAmount = Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", ""));
+    parentDailyBalance.setBalance(
+        parentDailyBalance.getBalance() - observableCorrection.getAmount() + newAmount);
+    observableCorrection.setAmount(newAmount);
     observableCorrection.typeProperty().set(cbType.getValue());
     observableCorrection.commentProperty().set(tfComment.getText());
 
@@ -185,7 +195,7 @@ public class CorrectionDialog extends Dialog<ButtonType> {
     if (observableCorrection.getPairedTransaction() != null) {
       observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
     }
-    dailyBalanceControl.removeCorrection(observableCorrection);
+    parentDailyBalance.removeObservableCorrection(observableCorrection);
     this.close();
   }
 

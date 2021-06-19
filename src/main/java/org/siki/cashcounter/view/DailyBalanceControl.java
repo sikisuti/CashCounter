@@ -162,6 +162,7 @@ public final class DailyBalanceControl extends VBox {
     }
   }
 
+  // TODO: bind correction list to bhCorrections instead
   public void loadCorrections() {
     hbCorrections.getChildren().clear();
     observableDailyBalance

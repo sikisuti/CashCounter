@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
 import lombok.Getter;
 import org.siki.cashcounter.model.Correction;
 
@@ -68,7 +67,7 @@ public class ObservableCorrection {
   //  }
 
   public static ObservableCorrection of(
-      Correction correction, ObservableList<ObservableAccountTransaction> transactions) {
+      Correction correction, ObservableDailyBalance parentDailyBalance) {
     var observableCollection = new ObservableCorrection();
     observableCollection.correction = correction;
     observableCollection.amountProperty = new SimpleIntegerProperty(correction.getAmount());
@@ -78,7 +77,7 @@ public class ObservableCorrection {
 
     observableCollection.pairedTransaction =
         new SimpleObjectProperty<>(
-            transactions.stream()
+            parentDailyBalance.getObservableTransactions().stream()
                 .filter(t -> t.getId() == correction.getPairedTransactionId())
                 .findFirst()
                 .orElse(null));
@@ -91,7 +90,7 @@ public class ObservableCorrection {
 
   public void setPairedTransaction(ObservableAccountTransaction transaction) {
     pairedTransaction.set(transaction);
-    pairedProperty.set(transaction != null);
+    //    pairedProperty.set(transaction != null);
     //    pairedTransactionIdProperty.set(transaction != null ? transaction.getId() : 0);
   }
 }

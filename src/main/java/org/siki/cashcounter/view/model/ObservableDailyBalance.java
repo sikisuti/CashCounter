@@ -121,7 +121,7 @@ public class ObservableDailyBalance {
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
     observableDailyBalance.observableCorrections =
         dailyBalance.getCorrections().stream()
-            .map(c -> ObservableCorrection.of(c, observableDailyBalance.observableTransactions))
+            .map(c -> ObservableCorrection.of(c, observableDailyBalance))
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
     observableDailyBalance.observableTransactions.forEach(
         t ->

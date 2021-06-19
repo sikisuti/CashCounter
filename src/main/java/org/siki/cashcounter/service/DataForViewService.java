@@ -133,6 +133,7 @@ public class DataForViewService {
                 mb ->
                     mb.getDailyBalances().stream()
                         .flatMap(db -> db.getCorrections().stream().map(Correction::getType)))
+            .distinct()
             .collect(Collectors.toList()));
   }
 

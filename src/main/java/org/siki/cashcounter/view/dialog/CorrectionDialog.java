@@ -27,6 +27,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 import lombok.Getter;
+import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
@@ -35,8 +36,8 @@ import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import java.time.format.DateTimeFormatter;
 
 public class CorrectionDialog extends Stage {
-  @Getter private ObservableCorrection observableCorrection;
-  private ObservableDailyBalance parentDailyBalance;
+  @Getter private final ObservableCorrection observableCorrection;
+  private final ObservableDailyBalance parentDailyBalance;
   private final BooleanProperty pairedProperty = new SimpleBooleanProperty(false);
 
   ComboBox<String> cbType;
@@ -48,23 +49,21 @@ public class CorrectionDialog extends Stage {
       DataForViewService dataForViewService,
       ObservableCorrection observableCorrection,
       ObservableDailyBalance parentDailyBalance) {
-    this(dataForViewService, parentDailyBalance);
-
-    cbType.setValue(observableCorrection.typeProperty().get());
-    tfAmount.setText(String.valueOf(observableCorrection.amountProperty().get()));
-    tfComment.setText(observableCorrection.commentProperty().get());
-
-    this.observableCorrection = observableCorrection;
     this.parentDailyBalance = parentDailyBalance;
+    this.observableCorrection = observableCorrection;
 
-    pairedProperty.bind(observableCorrection.pairedProperty());
-
-    prepareTable();
-    tblTransactions.setItems(parentDailyBalance.getObservableTransactions());
+    loadUI(dataForViewService);
   }
 
   public CorrectionDialog(
       DataForViewService dataForViewService, ObservableDailyBalance parentDailyBalance) {
+    this(
+        dataForViewService,
+        ObservableCorrection.of(new Correction(), parentDailyBalance),
+        parentDailyBalance);
+  }
+
+  private void loadUI(DataForViewService dataForViewService) {
     var lblType = new Label("Típus");
     cbType = new ComboBox<>();
     cbType.setEditable(true);
@@ -109,6 +108,15 @@ public class CorrectionDialog extends Stage {
     this.initModality(Modality.APPLICATION_MODAL);
     this.initStyle(StageStyle.UTILITY);
     this.setTitle(parentDailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
+
+    prepareTable();
+    tblTransactions.setItems(parentDailyBalance.getObservableTransactions());
+
+    cbType.setValue(observableCorrection.typeProperty().get());
+    tfAmount.setText(String.valueOf(observableCorrection.amountProperty().get()));
+    tfComment.setText(observableCorrection.commentProperty().get());
+
+    pairedProperty.bind(observableCorrection.pairedProperty());
   }
 
   private void prepareTable() {
@@ -119,7 +127,6 @@ public class CorrectionDialog extends Stage {
               event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                   ObservableAccountTransaction rowData = row.getItem();
-                  observableCorrection.amountProperty().set(rowData.getAmount());
                   tfAmount.setText(String.valueOf(rowData.getAmount()));
                   if (observableCorrection.getPairedTransaction() != null
                       && observableCorrection.getPairedTransaction() != rowData) {
@@ -177,12 +184,17 @@ public class CorrectionDialog extends Stage {
   }
 
   protected void doSave(ActionEvent event) {
+    //    if (observableCorrection == null) {
+    //      var newCorrection = new Correction();
+    //      newCorrection.
+    //      observableCorrection = ObservableCorrection.of(Correction.)
+    //    }
+
     var newAmount = Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", ""));
-    parentDailyBalance.setBalance(
-        parentDailyBalance.getBalance() - observableCorrection.getAmount() + newAmount);
     observableCorrection.setAmount(newAmount);
     observableCorrection.typeProperty().set(cbType.getValue());
     observableCorrection.commentProperty().set(tfComment.getText());
+    parentDailyBalance.addObservableCorrection(observableCorrection);
 
     this.close();
   }

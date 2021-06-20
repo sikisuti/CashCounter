@@ -17,6 +17,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import lombok.Getter;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.view.model.ObservableCorrection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class CorrectionControl extends GridPane {
   private Text txtAmount;
   private Circle cirPaired;
 
-  private final ObservableCorrection observableCorrection;
+  @Getter private final ObservableCorrection observableCorrection;
   private final DailyBalanceControl parent;
 
   public static final DataFormat CORRECTION_DATA_FORMAT =
@@ -166,9 +167,7 @@ public class CorrectionControl extends GridPane {
         categoryService.setSelectedCategory(this.observableCorrection.getType());
       }
     } else if (event.getClickCount() == 2) {
-      var correctionDialog =
-          viewFactory.editCorrectionDialog(
-              observableCorrection, parent.getObservableDailyBalance());
+      var correctionDialog = viewFactory.editCorrectionDialog(observableCorrection, parent);
       correctionDialog.showAndWait();
     }
   }

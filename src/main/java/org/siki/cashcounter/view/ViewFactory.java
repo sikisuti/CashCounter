@@ -40,13 +40,14 @@ public class ViewFactory {
     return new TransactionControl(observableTransactions, parent, dataForViewService);
   }
 
-  public CorrectionDialog createNewCorrectionDialog(ObservableDailyBalance parentDailyBalance) {
-    return new CorrectionDialog(dataForViewService, parentDailyBalance);
+  public CorrectionDialog createNewCorrectionDialog(DailyBalanceControl parentDailyBalanceControl) {
+    return new CorrectionDialog(dataForViewService, parentDailyBalanceControl);
   }
 
   public CorrectionDialog editCorrectionDialog(
-      ObservableCorrection observableCorrection, ObservableDailyBalance parentDailyBalance) {
-    return new CorrectionDialog(dataForViewService, observableCorrection, parentDailyBalance);
+      ObservableCorrection observableCorrection, DailyBalanceControl parentDailyBalanceControl) {
+    return new CorrectionDialog(
+        dataForViewService, observableCorrection, parentDailyBalanceControl);
   }
 
   public DailyBalanceControl createDailyBalanceControl(

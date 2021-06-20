@@ -27,11 +27,17 @@ public class ObservableCorrection {
   }
 
   public void setAmount(int value) {
+    correction.setAmount(value);
     amountProperty.set(value);
   }
 
   public IntegerProperty amountProperty() {
     return amountProperty;
+  }
+
+  public void setComment(String value) {
+    correction.setComment(value);
+    commentProperty.set(value);
   }
 
   public StringProperty commentProperty() {
@@ -40,6 +46,11 @@ public class ObservableCorrection {
 
   public String getType() {
     return typeProperty.get();
+  }
+
+  public void setType(String value) {
+    correction.setType(value);
+    typeProperty.set(value);
   }
 
   public StringProperty typeProperty() {

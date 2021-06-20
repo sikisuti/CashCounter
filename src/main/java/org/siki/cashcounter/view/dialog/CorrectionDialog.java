@@ -29,15 +29,13 @@ import javafx.util.converter.NumberStringConverter;
 import lombok.Getter;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.DataForViewService;
+import org.siki.cashcounter.view.DailyBalanceControl;
 import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableCorrection;
-import org.siki.cashcounter.view.model.ObservableDailyBalance;
-
-import java.time.format.DateTimeFormatter;
 
 public class CorrectionDialog extends Stage {
   @Getter private final ObservableCorrection observableCorrection;
-  private final ObservableDailyBalance parentDailyBalance;
+  private final DailyBalanceControl parentDailyBalanceControl;
   private final BooleanProperty pairedProperty = new SimpleBooleanProperty(false);
 
   ComboBox<String> cbType;
@@ -48,19 +46,20 @@ public class CorrectionDialog extends Stage {
   public CorrectionDialog(
       DataForViewService dataForViewService,
       ObservableCorrection observableCorrection,
-      ObservableDailyBalance parentDailyBalance) {
-    this.parentDailyBalance = parentDailyBalance;
+      DailyBalanceControl parentDailyBalanceControl) {
     this.observableCorrection = observableCorrection;
+    this.parentDailyBalanceControl = parentDailyBalanceControl;
 
     loadUI(dataForViewService);
   }
 
   public CorrectionDialog(
-      DataForViewService dataForViewService, ObservableDailyBalance parentDailyBalance) {
+      DataForViewService dataForViewService, DailyBalanceControl parentDailyBalanceControl) {
     this(
         dataForViewService,
-        ObservableCorrection.of(new Correction(), parentDailyBalance),
-        parentDailyBalance);
+        ObservableCorrection.of(
+            new Correction(), parentDailyBalanceControl.getObservableDailyBalance()),
+        parentDailyBalanceControl);
   }
 
   private void loadUI(DataForViewService dataForViewService) {
@@ -107,10 +106,10 @@ public class CorrectionDialog extends Stage {
 
     this.initModality(Modality.APPLICATION_MODAL);
     this.initStyle(StageStyle.UTILITY);
-    this.setTitle(parentDailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
+    this.setTitle(parentDailyBalanceControl.getDate());
 
     prepareTable();
-    tblTransactions.setItems(parentDailyBalance.getObservableTransactions());
+    tblTransactions.setItems(parentDailyBalanceControl.getObservableTransactions());
 
     cbType.setValue(observableCorrection.typeProperty().get());
     tfAmount.setText(String.valueOf(observableCorrection.amountProperty().get()));
@@ -184,17 +183,11 @@ public class CorrectionDialog extends Stage {
   }
 
   protected void doSave(ActionEvent event) {
-    //    if (observableCorrection == null) {
-    //      var newCorrection = new Correction();
-    //      newCorrection.
-    //      observableCorrection = ObservableCorrection.of(Correction.)
-    //    }
-
     var newAmount = Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", ""));
     observableCorrection.setAmount(newAmount);
-    observableCorrection.typeProperty().set(cbType.getValue());
-    observableCorrection.commentProperty().set(tfComment.getText());
-    parentDailyBalance.addObservableCorrection(observableCorrection);
+    observableCorrection.setType(cbType.getValue());
+    observableCorrection.setComment(tfComment.getText());
+    parentDailyBalanceControl.addCorrection(observableCorrection);
 
     this.close();
   }
@@ -203,11 +196,13 @@ public class CorrectionDialog extends Stage {
     this.close();
   }
 
+  // TODO:
   protected void doRemove(ActionEvent event) {
     if (observableCorrection.getPairedTransaction() != null) {
       observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
     }
-    parentDailyBalance.removeObservableCorrection(observableCorrection);
+
+    parentDailyBalanceControl.removeCorrection(observableCorrection);
     this.close();
   }
 

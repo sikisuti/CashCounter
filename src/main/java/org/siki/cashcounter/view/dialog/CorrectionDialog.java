@@ -30,24 +30,25 @@ import lombok.Getter;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.DailyBalanceControl;
-import org.siki.cashcounter.view.model.ObservableAccountTransaction;
-import org.siki.cashcounter.view.model.ObservableCorrection;
+import org.siki.cashcounter.view.model.ObservableTransaction;
+
+import java.time.format.DateTimeFormatter;
 
 public class CorrectionDialog extends Stage {
-  @Getter private final ObservableCorrection observableCorrection;
+  @Getter private final Correction correction;
   private final DailyBalanceControl parentDailyBalanceControl;
   private final BooleanProperty pairedProperty = new SimpleBooleanProperty(false);
 
   ComboBox<String> cbType;
   TextField tfAmount;
   TextField tfComment;
-  TableView<ObservableAccountTransaction> tblTransactions;
+  TableView<ObservableTransaction> tblTransactions;
 
   public CorrectionDialog(
       DataForViewService dataForViewService,
-      ObservableCorrection observableCorrection,
+      Correction correction,
       DailyBalanceControl parentDailyBalanceControl) {
-    this.observableCorrection = observableCorrection;
+    this.correction = correction;
     this.parentDailyBalanceControl = parentDailyBalanceControl;
 
     loadUI(dataForViewService);
@@ -55,11 +56,7 @@ public class CorrectionDialog extends Stage {
 
   public CorrectionDialog(
       DataForViewService dataForViewService, DailyBalanceControl parentDailyBalanceControl) {
-    this(
-        dataForViewService,
-        ObservableCorrection.of(
-            new Correction(), parentDailyBalanceControl.getObservableDailyBalance()),
-        parentDailyBalanceControl);
+    this(dataForViewService, new Correction(), parentDailyBalanceControl);
   }
 
   private void loadUI(DataForViewService dataForViewService) {
@@ -106,34 +103,32 @@ public class CorrectionDialog extends Stage {
 
     this.initModality(Modality.APPLICATION_MODAL);
     this.initStyle(StageStyle.UTILITY);
-    this.setTitle(parentDailyBalanceControl.getDate());
+    this.setTitle(parentDailyBalanceControl.getDate().format(DateTimeFormatter.ISO_DATE));
 
     prepareTable();
-    tblTransactions.setItems(parentDailyBalanceControl.getObservableTransactions());
+    tblTransactions.setItems(parentDailyBalanceControl.getTransactions());
 
-    cbType.setValue(observableCorrection.typeProperty().get());
-    tfAmount.setText(String.valueOf(observableCorrection.amountProperty().get()));
-    tfComment.setText(observableCorrection.commentProperty().get());
+    cbType.setValue(correction.getType());
+    tfAmount.setText(String.valueOf(correction.getAmount()));
+    tfComment.setText(correction.getComment());
 
-    pairedProperty.bind(observableCorrection.pairedProperty());
+    pairedProperty.set(correction.isPaired());
   }
 
   private void prepareTable() {
     tblTransactions.setRowFactory(
         tv -> {
-          TableRow<ObservableAccountTransaction> row = new TableRow<>();
+          TableRow<ObservableTransaction> row = new TableRow<>();
           row.setOnMouseClicked(
               event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                  ObservableAccountTransaction rowData = row.getItem();
+                  ObservableTransaction rowData = row.getItem();
                   tfAmount.setText(String.valueOf(rowData.getAmount()));
-                  if (observableCorrection.getPairedTransaction() != null
-                      && observableCorrection.getPairedTransaction() != rowData) {
-                    observableCorrection
-                        .getPairedTransaction()
-                        .removePairedCorrection(observableCorrection);
+                  if (correction.getPairedTransactionId() != 0
+                      && correction.getPairedTransactionId() != rowData.getId()) {
+                    correction.setPairedTransaction(null);
                   }
-                  if (observableCorrection.getPairedTransaction() != rowData) {
+                  if (correction.getPairedTransactionId() != rowData.getId()) {
                     rowData.addPairedCorrection(observableCorrection);
                     observableCorrection.setPairedTransaction(rowData);
                   } else {
@@ -144,23 +139,22 @@ public class CorrectionDialog extends Stage {
           return row;
         });
 
-    TableColumn<ObservableAccountTransaction, String> transactionTypeCol =
+    TableColumn<ObservableTransaction, String> transactionTypeCol =
         new TableColumn<>("Forgalom típusa");
     transactionTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-    TableColumn<ObservableAccountTransaction, Integer> amountCol = new TableColumn<>("Összeg");
+    TableColumn<ObservableTransaction, Integer> amountCol = new TableColumn<>("Összeg");
     amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
-    TableColumn<ObservableAccountTransaction, String> ownerCol =
-        new TableColumn<>("Ellenoldali név");
+    TableColumn<ObservableTransaction, String> ownerCol = new TableColumn<>("Ellenoldali név");
     ownerCol.setCellValueFactory(new PropertyValueFactory<>("owner"));
-    TableColumn<ObservableAccountTransaction, String> commentCol = new TableColumn<>("Közlemény");
+    TableColumn<ObservableTransaction, String> commentCol = new TableColumn<>("Közlemény");
     commentCol.setCellValueFactory(new PropertyValueFactory<>("comment"));
-    TableColumn<ObservableAccountTransaction, Boolean> isPairedCol = new TableColumn<>("Párosítva");
+    TableColumn<ObservableTransaction, Boolean> isPairedCol = new TableColumn<>("Párosítva");
     isPairedCol.setCellValueFactory(new PropertyValueFactory<>("paired"));
     isPairedCol.setCellFactory(
         new Callback<>() {
           @Override
-          public TableCell<ObservableAccountTransaction, Boolean> call(
-              TableColumn<ObservableAccountTransaction, Boolean> param) {
+          public TableCell<ObservableTransaction, Boolean> call(
+              TableColumn<ObservableTransaction, Boolean> param) {
             return new TableCell<>() {
 
               @Override

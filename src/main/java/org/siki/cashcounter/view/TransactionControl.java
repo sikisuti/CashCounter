@@ -15,18 +15,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.siki.cashcounter.service.DataForViewService;
-import org.siki.cashcounter.view.model.ObservableAccountTransaction;
+import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class TransactionControl extends GridPane {
-  private final ObservableList<ObservableAccountTransaction> observableTransactions;
+  private final ObservableList<ObservableTransaction> observableTransactions;
   private final DailyBalanceControl parent;
   private final DataForViewService dataForViewService;
 
   public TransactionControl(
-      ObservableList<ObservableAccountTransaction> observableTransactions,
+      ObservableList<ObservableTransaction> observableTransactions,
       DailyBalanceControl parent,
       DataForViewService dataForViewService) {
     this.observableTransactions = observableTransactions;
@@ -41,7 +41,7 @@ public class TransactionControl extends GridPane {
 
     this.getChildren().clear();
     int rowCnt = -1;
-    for (ObservableAccountTransaction t : observableTransactions) {
+    for (ObservableTransaction t : observableTransactions) {
       rowCnt++;
       var lblType = new Label(t.getType());
       var lblAmount = new Label(currencyFormat.format(t.getAmount()));
@@ -84,14 +84,13 @@ public class TransactionControl extends GridPane {
     validate();
   }
 
-  private void addCategoryPicker(
-      ObservableAccountTransaction observableAccountTransaction, int rowCnt) {
+  private void addCategoryPicker(ObservableTransaction observableTransaction, int rowCnt) {
     ComboBox cbCategory = null;
-    if (observableAccountTransaction.getNotPairedAmount() != 0) {
+    if (observableTransaction.getNotPairedAmount() != 0) {
       cbCategory = new ComboBox();
       cbCategory.setEditable(true);
       cbCategory.setItems(dataForViewService.getAllCategories());
-      cbCategory.valueProperty().bindBidirectional(observableAccountTransaction.categoryProperty());
+      cbCategory.valueProperty().bindBidirectional(observableTransaction.categoryProperty());
       cbCategory.setPrefWidth(200);
       cbCategory
           .valueProperty()
@@ -108,8 +107,7 @@ public class TransactionControl extends GridPane {
   }
 
   public void isValid() {
-    boolean isValid =
-        observableTransactions.stream().allMatch(ObservableAccountTransaction::isValid);
+    boolean isValid = observableTransactions.stream().allMatch(ObservableTransaction::isValid);
 
     if (!isValid) {
       this.setBorder(

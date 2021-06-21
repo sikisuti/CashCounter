@@ -1,6 +1,12 @@
 package org.siki.cashcounter.view;
 
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
@@ -18,73 +24,133 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.CategoryService;
-import org.siki.cashcounter.view.model.ObservableCorrection;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.siki.cashcounter.view.model.ObservableDailyBalance;
+import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import static javafx.scene.layout.Priority.NEVER;
+import static lombok.AccessLevel.PRIVATE;
 
+@NoArgsConstructor(access = PRIVATE)
 public class CorrectionControl extends GridPane {
-
-  @Autowired private final CategoryService categoryService;
-  @Autowired private final ViewFactory viewFactory;
-
-  private Label txtType;
-  private Text txtAmount;
-  private Circle cirPaired;
-
-  @Getter private final ObservableCorrection observableCorrection;
-  private final DailyBalanceControl parent;
-
   public static final DataFormat CORRECTION_DATA_FORMAT =
       new DataFormat("com.siki.cashcount.model.Correction");
 
-  public CorrectionControl(
-      ObservableCorrection observableCorrection,
-      DailyBalanceControl parent,
+  private CategoryService categoryService;
+  private ViewFactory viewFactory;
+  private DailyBalanceControl parent;
+
+  @Getter private Correction correction;
+
+  private IntegerProperty amountProperty;
+  private StringProperty commentProperty;
+  private StringProperty typeProperty;
+  private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
+  private BooleanProperty pairedProperty;
+  private ObjectProperty<ObservableTransaction> pairedTransaction;
+
+  public int getAmount() {
+    return amountProperty.get();
+  }
+
+  public void setAmount(int value) {
+    correction.setAmount(value);
+    amountProperty.set(value);
+  }
+
+  public IntegerProperty amountProperty() {
+    return amountProperty;
+  }
+
+  public void setComment(String value) {
+    correction.setComment(value);
+    commentProperty.set(value);
+  }
+
+  public StringProperty commentProperty() {
+    return commentProperty;
+  }
+
+  public String getType() {
+    return typeProperty.get();
+  }
+
+  public final void setType(String value) {
+    typeProperty.set(value);
+  }
+
+  public StringProperty typeProperty() {
+    return typeProperty;
+  }
+
+  public boolean isPaired() {
+    return pairedProperty.get();
+  }
+
+  public boolean isNotPaired() {
+    return !isPaired();
+  }
+
+  public BooleanProperty pairedProperty() {
+    return pairedProperty;
+  }
+
+  public long getPairedTransactionId() {
+    return correction.getPairedTransactionId();
+  }
+
+  public ObservableTransaction getPairedTransaction() {
+    return pairedTransaction.get();
+  }
+
+  public static CorrectionControl of(
+      Correction correction,
+      DailyBalanceControl parentDailyBalanceControl,
       CategoryService categoryService,
       ViewFactory viewFactory) {
-    this.observableCorrection = observableCorrection;
-    this.parent = parent;
-    this.categoryService = categoryService;
-    this.viewFactory = viewFactory;
-    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
 
-    setDragAndDrop();
-    loadUI();
+    var correctionControl = new CorrectionControl();
+    correctionControl.parent = parentDailyBalanceControl;
+    correctionControl.categoryService = categoryService;
+    correctionControl.correction = correction;
+    correctionControl.viewFactory = viewFactory;
 
-    txtType.textProperty().bind(observableCorrection.commentProperty());
-    var tt = new Tooltip();
-    tt.textProperty().bind(txtType.textProperty());
-    txtType.setTooltip(tt);
-    txtAmount
-        .textProperty()
-        .bindBidirectional(observableCorrection.amountProperty(), currencyFormat);
-    BooleanBinding isPaired =
-        new BooleanBinding() {
-          @Override
-          protected boolean computeValue() {
-            return observableCorrection.getPairedTransaction() != null;
-          }
-        };
-    cirPaired.visibleProperty().bind(isPaired);
+    correctionControl.amountProperty = new SimpleIntegerProperty(correction.getAmount());
+    correctionControl.commentProperty = new SimpleStringProperty(correction.getComment());
+    correctionControl.typeProperty = new SimpleStringProperty(correction.getType());
+    correctionControl.pairedTransaction =
+        new SimpleObjectProperty<>(
+            parentDailyBalanceControl.getTransactions().stream()
+                .filter(t -> t.getId() == correction.getPairedTransactionId())
+                .findFirst()
+                .orElse(null));
+    correctionControl.pairedProperty = new SimpleBooleanProperty(correction.isPaired());
+
+    correctionControl.setDragAndDrop();
+    correctionControl.loadUI();
 
     categoryService
         .selectedCategoryProperty()
         .addListener(
             (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-              if (newValue.equals(observableCorrection.typeProperty().get())) {
-                this.setStyle("-fx-background-color: yellow;");
+              if (newValue.equals(correctionControl.getType())) {
+                correctionControl.setStyle("-fx-background-color: yellow;");
               } else {
-                this.setStyle("-fx-background-color: none;");
+                correctionControl.setStyle("-fx-background-color: none;");
               }
             });
+
+    return correctionControl;
   }
 
   private void loadUI() {
+    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+
     this.setMinWidth(100);
     this.setMaxWidth(100);
     GridPane.setHgrow(this, NEVER);
@@ -92,18 +158,24 @@ public class CorrectionControl extends GridPane {
     cc1.setPrefWidth(100);
     this.getColumnConstraints().addAll(cc1, new ColumnConstraints());
     this.getRowConstraints().addAll(new RowConstraints(), new RowConstraints());
-    txtType = new Label();
+    var txtType = new Label();
+    txtType.textProperty().bind(typeProperty);
+    var tt = new Tooltip();
+    tt.textProperty().bind(txtType.textProperty());
+    txtType.setTooltip(tt);
     GridPane.setColumnIndex(txtType, 0);
     GridPane.setRowIndex(txtType, 0);
     GridPane.setColumnSpan(txtType, 2);
-    txtAmount = new Text();
+    var txtAmount = new Text();
+    txtAmount.textProperty().bindBidirectional(amountProperty, currencyFormat);
     GridPane.setColumnIndex(txtAmount, 0);
     GridPane.setRowIndex(txtAmount, 1);
-    cirPaired = new Circle();
+    var cirPaired = new Circle();
     GridPane.setColumnIndex(cirPaired, 1);
     GridPane.setRowIndex(cirPaired, 1);
     cirPaired.setRadius(5);
     cirPaired.setFill(Color.BLUE);
+    cirPaired.visibleProperty().bind(pairedProperty);
 
     this.getChildren().addAll(txtType, txtAmount, cirPaired);
 
@@ -119,7 +191,7 @@ public class CorrectionControl extends GridPane {
 
           /* Put a string on a dragboard */
           var content = new ClipboardContent();
-          content.put(CORRECTION_DATA_FORMAT, this.observableCorrection);
+          content.put(CORRECTION_DATA_FORMAT, this);
           db.setContent(content);
 
           event.consume();
@@ -129,45 +201,21 @@ public class CorrectionControl extends GridPane {
           /* the drag and drop gesture ended */
           /* if the data was successfully moved, clear it */
           if (event.getTransferMode() == TransferMode.MOVE) {
-            parent.removeCorrection(observableCorrection);
+            parent.removeCorrection(this);
           }
           event.consume();
         });
   }
 
-  public String getType() {
-    return typeProperty().get();
-  }
-
-  public final void setType(String value) {
-    typeProperty().set(value);
-  }
-
-  public StringProperty typeProperty() {
-    return txtType.textProperty();
-  }
-
-  public String getAmount() {
-    return amountProperty().get();
-  }
-
-  public final void setAmount(String value) {
-    amountProperty().set(value);
-  }
-
-  public StringProperty amountProperty() {
-    return txtAmount.textProperty();
-  }
-
   public void doModify(MouseEvent event) {
     if (event.getClickCount() == 1) {
-      if (this.observableCorrection.getType().equals(categoryService.getSelectedCategory())) {
+      if (getType().equals(categoryService.getSelectedCategory())) {
         categoryService.setSelectedCategory("");
       } else {
-        categoryService.setSelectedCategory(this.observableCorrection.getType());
+        categoryService.setSelectedCategory(getType());
       }
     } else if (event.getClickCount() == 2) {
-      var correctionDialog = viewFactory.editCorrectionDialog(observableCorrection, parent);
+      var correctionDialog = viewFactory.editCorrectionDialog(this.correction, parent);
       correctionDialog.showAndWait();
     }
   }

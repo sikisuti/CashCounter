@@ -28,7 +28,7 @@ import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.util.StopWatch;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
-import org.siki.cashcounter.view.model.ObservableAccountTransaction;
+import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
@@ -181,20 +181,20 @@ public class MainScene extends Scene {
           new BufferedReader(
               new InputStreamReader(new FileInputStream(selectedFile), StandardCharsets.UTF_8))) {
         String line;
-        List<ObservableAccountTransaction> newTransactions = new ArrayList<>();
+        List<ObservableTransaction> newTransactions = new ArrayList<>();
 
         while ((line = br.readLine()) != null) {
           transactionService.createObservableTransactionsFromCSV(line, newTransactions);
         }
 
-        newTransactions.sort(Comparator.comparing(ObservableAccountTransaction::getDate));
-        TreeMap<LocalDate, List<ObservableAccountTransaction>> groupped =
+        newTransactions.sort(Comparator.comparing(ObservableTransaction::getDate));
+        TreeMap<LocalDate, List<ObservableTransaction>> groupped =
             newTransactions.stream()
                 .collect(
                     Collectors.groupingBy(
-                        ObservableAccountTransaction::getDate, TreeMap::new, Collectors.toList()));
+                        ObservableTransaction::getDate, TreeMap::new, Collectors.toList()));
 
-        for (Map.Entry<LocalDate, List<ObservableAccountTransaction>> entry : groupped.entrySet()) {
+        for (Map.Entry<LocalDate, List<ObservableTransaction>> entry : groupped.entrySet()) {
           var db = dailyBalanceService.findDailyBalanceByDate(entry.getKey());
           transactionService.storeObservableTransactions(entry.getValue(), db);
         }

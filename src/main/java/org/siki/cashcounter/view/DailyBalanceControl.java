@@ -1,7 +1,12 @@
 package org.siki.cashcounter.view;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,17 +30,37 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import lombok.Getter;
-import org.siki.cashcounter.view.model.ObservableAccountTransaction;
-import org.siki.cashcounter.view.model.ObservableCorrection;
+import lombok.NoArgsConstructor;
+import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
+import org.siki.cashcounter.view.model.ObservableSaving;
+import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public final class DailyBalanceControl extends VBox {
-  private final MonthlyBalanceTitledPane parent;
-  private final ViewFactory viewFactory;
+  private MonthlyBalanceTitledPane parent;
+  private ViewFactory viewFactory;
+
+  private ObservableDailyBalance prevObservableDailyBalance;
+  private ObjectProperty<LocalDate> dateProperty;
+  private IntegerProperty balanceProperty;
+  private BooleanProperty predictedProperty;
+  private BooleanProperty reviewedProperty;
+  private IntegerProperty dailySpendProperty;
+
+  private ObservableList<ObservableSaving> observableSavings;
+  @Getter private ObservableList<CorrectionControl> corrections;
+  @Getter private ObservableList<ObservableTransaction> transactions;
 
   private Label txtDate;
   private Label txtBalance;
@@ -47,22 +72,105 @@ public final class DailyBalanceControl extends VBox {
 
   VBox vbTransactions = new VBox();
 
-  @Getter private final ObservableDailyBalance observableDailyBalance;
+  private DailyBalance dailyBalance;
   private final ObservableList<CorrectionControl> correctionViewList =
       FXCollections.observableArrayList();
 
-  DailyBalanceControl(
-      ObservableDailyBalance observableDailyBalance,
-      MonthlyBalanceTitledPane parent,
-      ViewFactory viewFactory) {
-    this.observableDailyBalance = observableDailyBalance;
-    this.parent = parent;
-    this.viewFactory = viewFactory;
+  public String getDateString() {
+    return dateProperty.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+  }
 
-    setDragAndDrop();
-    loadUI();
-    loadCorrections();
-    setBackground();
+  public LocalDate getDate() {
+    return dateProperty.get();
+  }
+
+  public ObjectProperty<LocalDate> dateProperty() {
+    return dateProperty;
+  }
+
+  public void setBalance(int value) {
+    balanceProperty.set(value);
+  }
+
+  public void addToBalance(int value) {
+    balanceProperty.set(balanceProperty.get() + value);
+  }
+
+  public int getBalance() {
+    return balanceProperty.get();
+  }
+
+  public IntegerProperty balanceProperty() {
+    return balanceProperty;
+  }
+
+  public BooleanProperty predictedProperty() {
+    return predictedProperty;
+  }
+
+  public boolean isReviewed() {
+    return reviewedProperty.get();
+  }
+
+  public boolean isNotReviewed() {
+    return !isReviewed();
+  }
+
+  public BooleanProperty reviewedProperty() {
+    return reviewedProperty;
+  }
+
+  public void setDailySpent(int value) {
+    dailySpendProperty.set(value);
+  }
+
+  public int getDailySpent() {
+    return dailySpendProperty.get();
+  }
+
+  public IntegerProperty dailySpendProperty() {
+    return dailySpendProperty;
+  }
+
+  public static DailyBalanceControl of(
+      DailyBalance dailyBalance, MonthlyBalanceTitledPane parent, ViewFactory viewFactory) {
+    var dailyBalanceControl = new DailyBalanceControl();
+    dailyBalanceControl.dailyBalance = dailyBalance;
+    dailyBalanceControl.parent = parent;
+    dailyBalanceControl.dateProperty = new SimpleObjectProperty<>(dailyBalance.getDate());
+    dailyBalanceControl.balanceProperty = new SimpleIntegerProperty(dailyBalance.getBalance());
+    dailyBalanceControl.predictedProperty = new SimpleBooleanProperty(dailyBalance.isPredicted());
+    dailyBalanceControl.reviewedProperty = new SimpleBooleanProperty(dailyBalance.isReviewed());
+    dailyBalanceControl.dailySpendProperty =
+        new SimpleIntegerProperty(dailyBalance.getDailySpend());
+    dailyBalanceControl.observableSavings =
+        Optional.ofNullable(dailyBalance.getSavings())
+            .map(
+                s ->
+                    s.stream()
+                        .map(ObservableSaving::of)
+                        .collect(Collectors.toCollection(FXCollections::observableArrayList)))
+            .orElse(FXCollections.observableArrayList());
+    dailyBalanceControl.transactions =
+        dailyBalance.getTransactions().stream()
+            .map(ObservableTransaction::of)
+            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    dailyBalanceControl.corrections =
+        dailyBalance.getCorrections().stream()
+            .map(c -> viewFactory.createCorrectionControl(c, dailyBalanceControl))
+            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    dailyBalanceControl.transactions.forEach(
+        t ->
+            dailyBalanceControl.getCorrections().stream()
+                .filter(c -> c.getPairedTransactionId() == t.getId())
+                .forEach(t::addPairedCorrection));
+
+    dailyBalanceControl.setDragAndDrop();
+    dailyBalanceControl.loadUI();
+    dailyBalanceControl.loadCorrections();
+    dailyBalanceControl.setBackground();
+
+    return dailyBalanceControl;
   }
 
   private void setDragAndDrop() {
@@ -106,9 +214,9 @@ public final class DailyBalanceControl extends VBox {
           var db = event.getDragboard();
           var success = false;
           if (db.hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
-            ObservableCorrection data =
-                (ObservableCorrection) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
-            observableDailyBalance.addObservableCorrection(data);
+            CorrectionControl data =
+                (CorrectionControl) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
+            addCorrection(data);
             loadCorrections();
             success = true;
           }
@@ -121,8 +229,8 @@ public final class DailyBalanceControl extends VBox {
   }
 
   private void setBackground() {
-    if (observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SATURDAY
-        || observableDailyBalance.dateProperty().get().getDayOfWeek() == DayOfWeek.SUNDAY) {
+    if (dateProperty().get().getDayOfWeek() == DayOfWeek.SATURDAY
+        || dateProperty().get().getDayOfWeek() == DayOfWeek.SUNDAY) {
       if (chkReviewed.isSelected()) {
         this.setStyle("-fx-background-color: green;");
       } else {
@@ -136,12 +244,10 @@ public final class DailyBalanceControl extends VBox {
   }
 
   public void loadCorrections() {
-    observableDailyBalance
-        .getObservableCorrections()
-        .forEach(
-            observableCorrection ->
-                correctionViewList.add(
-                    viewFactory.createCorrectionControl(observableCorrection, this)));
+    corrections.forEach(
+        correctionControl ->
+            correctionViewList.add(
+                viewFactory.createCorrectionControl(correctionControl.getCorrection(), this)));
   }
 
   private void loadUI() {
@@ -155,19 +261,15 @@ public final class DailyBalanceControl extends VBox {
 
     txtDate = new Label();
     txtDate.setPrefWidth(100);
-    txtDate.disableProperty().bind(observableDailyBalance.predictedProperty());
-    txtDate.setText(observableDailyBalance.getDateString());
+    txtDate.disableProperty().bind(predictedProperty());
+    txtDate.setText(getDateString());
     txtBalance = new Label();
     txtBalance.setPrefWidth(100);
-    txtBalance.disableProperty().bind(observableDailyBalance.predictedProperty());
-    txtBalance
-        .textProperty()
-        .bindBidirectional(this.observableDailyBalance.balanceProperty(), currencyFormat);
+    txtBalance.disableProperty().bind(predictedProperty());
+    txtBalance.textProperty().bindBidirectional(balanceProperty(), currencyFormat);
     var txtDailySpend = new Label();
     txtDailySpend.setPrefWidth(100);
-    txtDailySpend
-        .textProperty()
-        .bindBidirectional(this.observableDailyBalance.dailySpendProperty(), currencyFormat);
+    txtDailySpend.textProperty().bindBidirectional(dailySpendProperty(), currencyFormat);
     btnAdd = new Button("+");
     btnAdd.onActionProperty().set(this::openAddCorrectionDialog);
     btnAdd.setVisible(false);
@@ -178,8 +280,8 @@ public final class DailyBalanceControl extends VBox {
     Bindings.bindContent(hbCorrections.getChildren(), correctionViewList);
 
     chkReviewed = new CheckBox();
-    chkReviewed.visibleProperty().bind(observableDailyBalance.predictedProperty().not());
-    chkReviewed.selectedProperty().bindBidirectional(observableDailyBalance.reviewedProperty());
+    chkReviewed.visibleProperty().bind(predictedProperty().not());
+    chkReviewed.selectedProperty().bindBidirectional(reviewedProperty());
     chkReviewed
         .selectedProperty()
         .addListener(
@@ -197,13 +299,10 @@ public final class DailyBalanceControl extends VBox {
     btnExpand.setOnAction(
         event -> {
           if (btnExpand.isSelected()) {
-            if (vbTransactions.getChildren().isEmpty()
-                && !observableDailyBalance.getObservableTransactions().isEmpty()) {
+            if (vbTransactions.getChildren().isEmpty() && !transactions.isEmpty()) {
               vbTransactions
                   .getChildren()
-                  .add(
-                      viewFactory.createTransactionControl(
-                          observableDailyBalance.getObservableTransactions(), this));
+                  .add(viewFactory.createTransactionControl(transactions, this));
             }
             this.getChildren().add(vbTransactions);
           } else {
@@ -218,46 +317,26 @@ public final class DailyBalanceControl extends VBox {
     validate();
   }
 
-  public String getDate() {
-    return dateProperty().get();
-  }
-
-  public StringProperty dateProperty() {
-    return txtDate.textProperty();
-  }
-
-  public String getBalance() {
-    return balanceProperty().get();
-  }
-
-  public final void setBalance(String value) {
-    balanceProperty().set(value);
-  }
-
-  public StringProperty balanceProperty() {
-    return txtBalance.textProperty();
-  }
-
   protected void openAddCorrectionDialog(ActionEvent event) {
     var correctionDialog = viewFactory.createNewCorrectionDialog(this);
     correctionDialog.showAndWait();
   }
 
-  public void addCorrection(ObservableCorrection observableCorrection) {
-    observableDailyBalance.addObservableCorrection(observableCorrection);
-    correctionViewList.add(viewFactory.createCorrectionControl(observableCorrection, this));
+  public void addCorrection(CorrectionControl correctionControl) {
+    corrections.add(correctionControl);
+    dailyBalance.addCorrection(correctionControl.getCorrection());
+    setDailySpent(dailyBalance.getDailySpend());
+    setBalance(dailyBalance.getBalance());
   }
 
-  public void removeCorrection(ObservableCorrection observableCorrection) {
-    correctionViewList.remove(
-        correctionViewList.stream()
-            .filter(c -> c.getObservableCorrection().equals(observableCorrection))
-            .findFirst()
-            .orElse(null));
-  }
+  //  public void addCorrection(ObservableCorrection observableCorrection) {
+  //    observableDailyBalance.addObservableCorrection(observableCorrection);
+  //    correctionViewList.add(viewFactory.createCorrectionControl(observableCorrection, this));
+  //  }
 
-  public ObservableList<ObservableAccountTransaction> getObservableTransactions() {
-    return observableDailyBalance.getObservableTransactions();
+  public void removeCorrection(CorrectionControl correctionControl) {
+    corrections.remove(
+        corrections.stream().filter(c -> c.equals(correctionControl)).findFirst().orElse(null));
   }
 
   private void mouseEntered(MouseEvent event) {
@@ -274,9 +353,7 @@ public final class DailyBalanceControl extends VBox {
   }
 
   void isValid() {
-    boolean isValid =
-        observableDailyBalance.getObservableTransactions().stream()
-            .allMatch(ObservableAccountTransaction::isValid);
+    boolean isValid = transactions.stream().allMatch(ObservableTransaction::isValid);
 
     if (!isValid) {
       this.setBorder(

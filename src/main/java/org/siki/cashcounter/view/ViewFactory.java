@@ -1,13 +1,13 @@
 package org.siki.cashcounter.view;
 
 import javafx.collections.ObservableList;
+import org.siki.cashcounter.model.Correction;
+import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
-import org.siki.cashcounter.view.model.ObservableAccountTransaction;
-import org.siki.cashcounter.view.model.ObservableCorrection;
-import org.siki.cashcounter.view.model.ObservableDailyBalance;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
+import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.YearMonth;
@@ -35,8 +35,7 @@ public class ViewFactory {
   }
 
   public TransactionControl createTransactionControl(
-      ObservableList<ObservableAccountTransaction> observableTransactions,
-      DailyBalanceControl parent) {
+      ObservableList<ObservableTransaction> observableTransactions, DailyBalanceControl parent) {
     return new TransactionControl(observableTransactions, parent, dataForViewService);
   }
 
@@ -45,18 +44,17 @@ public class ViewFactory {
   }
 
   public CorrectionDialog editCorrectionDialog(
-      ObservableCorrection observableCorrection, DailyBalanceControl parentDailyBalanceControl) {
-    return new CorrectionDialog(
-        dataForViewService, observableCorrection, parentDailyBalanceControl);
+      Correction correction, DailyBalanceControl parentDailyBalanceControl) {
+    return new CorrectionDialog(dataForViewService, correction, parentDailyBalanceControl);
   }
 
   public DailyBalanceControl createDailyBalanceControl(
-      ObservableDailyBalance observableDailyBalance, MonthlyBalanceTitledPane parent) {
-    return new DailyBalanceControl(observableDailyBalance, parent, this);
+      DailyBalance dailyBalance, MonthlyBalanceTitledPane parent) {
+    return DailyBalanceControl.of(dailyBalance, parent, this);
   }
 
   public CorrectionControl createCorrectionControl(
-      ObservableCorrection observableCorrection, DailyBalanceControl parent) {
-    return new CorrectionControl(observableCorrection, parent, categoryService, this);
+      Correction correction, DailyBalanceControl parent) {
+    return CorrectionControl.of(correction, parent, categoryService, this);
   }
 }

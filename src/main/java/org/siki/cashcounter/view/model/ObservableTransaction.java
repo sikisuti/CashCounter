@@ -14,13 +14,14 @@ import javafx.collections.ObservableList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
+import org.siki.cashcounter.view.CorrectionControl;
 
 import java.time.LocalDate;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-public class ObservableAccountTransaction {
+public class ObservableTransaction {
   //  private LongProperty idProperty;
   private StringProperty typeProperty;
   private ObjectProperty<LocalDate> dateProperty;
@@ -32,7 +33,7 @@ public class ObservableAccountTransaction {
   private StringProperty counterProperty;
   private StringProperty categoryProperty;
   private BooleanProperty pairedProperty;
-  private ObservableList<ObservableCorrection> observablePairedCorrections;
+  private ObservableList<CorrectionControl> observablePairedCorrections;
   private BooleanProperty possibleDuplicateProperty;
   private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
 
@@ -103,8 +104,8 @@ public class ObservableAccountTransaction {
     return possibleDuplicateProperty;
   }
 
-  public static ObservableAccountTransaction of(AccountTransaction accountTransaction) {
-    var observableAccountTransaction = new ObservableAccountTransaction();
+  public static ObservableTransaction of(AccountTransaction accountTransaction) {
+    var observableAccountTransaction = new ObservableTransaction();
     observableAccountTransaction.accountTransaction = accountTransaction;
     observableAccountTransaction.typeProperty =
         new SimpleStringProperty(accountTransaction.getType());
@@ -135,13 +136,13 @@ public class ObservableAccountTransaction {
 
   public Integer getNotPairedAmount() {
     return getAmount()
-        - observablePairedCorrections.stream().mapToInt(ObservableCorrection::getAmount).sum();
+        - observablePairedCorrections.stream().mapToInt(CorrectionControl::getAmount).sum();
   }
 
-  public void addPairedCorrection(ObservableCorrection observableCorrection) {
-    //    accountTransaction.addPairedCorrection(observableCorrection.getCorrection());
-    if (!observablePairedCorrections.contains(observableCorrection)) {
-      observablePairedCorrections.add(observableCorrection);
+  public void addPairedCorrection(CorrectionControl correctionControl) {
+    //    accountTransaction.addPairedCorrection(correctionControl.getCorrection());
+    if (!observablePairedCorrections.contains(correctionControl)) {
+      observablePairedCorrections.add(correctionControl);
     }
   }
 
@@ -154,7 +155,7 @@ public class ObservableAccountTransaction {
     return accountTransaction.isValid();
   }
 
-  public boolean similar(ObservableAccountTransaction other) {
+  public boolean similar(ObservableTransaction other) {
     return accountTransaction.similar(other.accountTransaction);
   }
 }

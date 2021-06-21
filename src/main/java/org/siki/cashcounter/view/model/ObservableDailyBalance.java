@@ -29,13 +29,9 @@ public class ObservableDailyBalance {
 
   private ObservableList<ObservableSaving> observableSavings;
   private ObservableList<ObservableCorrection> observableCorrections;
-  private ObservableList<ObservableAccountTransaction> observableTransactions;
+  private ObservableList<ObservableTransaction> observableTransactions;
 
   private DailyBalance dailyBalance;
-
-  public ObjectProperty<LocalDate> dateProperty() {
-    return dateProperty;
-  }
 
   public String getDateString() {
     return dateProperty.get().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
@@ -43,6 +39,10 @@ public class ObservableDailyBalance {
 
   public LocalDate getDate() {
     return dateProperty.get();
+  }
+
+  public ObjectProperty<LocalDate> dateProperty() {
+    return dateProperty;
   }
 
   public void setBalance(int value) {
@@ -93,7 +93,7 @@ public class ObservableDailyBalance {
     return observableCorrections;
   }
 
-  public ObservableList<ObservableAccountTransaction> getObservableTransactions() {
+  public ObservableList<ObservableTransaction> getObservableTransactions() {
     return observableTransactions;
   }
 
@@ -117,7 +117,7 @@ public class ObservableDailyBalance {
             .orElse(FXCollections.observableArrayList());
     observableDailyBalance.observableTransactions =
         dailyBalance.getTransactions().stream()
-            .map(ObservableAccountTransaction::of)
+            .map(ObservableTransaction::of)
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
     observableDailyBalance.observableCorrections =
         dailyBalance.getCorrections().stream()
@@ -146,7 +146,7 @@ public class ObservableDailyBalance {
     setBalance(dailyBalance.getBalance());
   }
 
-  public void addObservableTransaction(ObservableAccountTransaction observableTransaction) {
+  public void addObservableTransaction(ObservableTransaction observableTransaction) {
     if (this.getObservableTransactions().stream().anyMatch(t -> t.similar(observableTransaction))) {
       observableTransaction.setPossibleDuplicate(true);
     }
@@ -158,7 +158,7 @@ public class ObservableDailyBalance {
 
   public int calculateDailySpent() {
     var transactionSum =
-        observableTransactions.stream().mapToInt(ObservableAccountTransaction::getAmount).sum();
+        observableTransactions.stream().mapToInt(ObservableTransaction::getAmount).sum();
     var notPairedCorrectionSum =
         observableCorrections.stream()
             .filter(ObservableCorrection::isNotPaired)

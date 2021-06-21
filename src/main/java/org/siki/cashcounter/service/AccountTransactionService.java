@@ -2,8 +2,8 @@ package org.siki.cashcounter.service;
 
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.view.model.ObservableAccountTransaction;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
+import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ public class AccountTransactionService {
   private Long lastTransactionId;
 
   public void createObservableTransactionsFromCSV(
-      String csvLine, List<ObservableAccountTransaction> newTransactions) {
+      String csvLine, List<ObservableTransaction> newTransactions) {
     csvLine = csvLine.replace("\"", "");
     String[] elements = csvLine.split(";");
 
@@ -46,14 +46,14 @@ public class AccountTransactionService {
               .build();
 
       categoryService.setCategory(newTransaction);
-      newTransactions.add(ObservableAccountTransaction.of(newTransaction));
+      newTransactions.add(ObservableTransaction.of(newTransaction));
     }
   }
 
   public void storeObservableTransactions(
-      List<ObservableAccountTransaction> observableAccountTransactions,
+      List<ObservableTransaction> observableTransactions,
       ObservableDailyBalance observableDailyBalance) {
-    for (var transaction : observableAccountTransactions) {
+    for (var transaction : observableTransactions) {
       observableDailyBalance.addObservableTransaction(transaction);
     }
   }
@@ -66,7 +66,7 @@ public class AccountTransactionService {
                   mb ->
                       mb.getObservableDailyBalances().stream()
                           .flatMap(db -> db.getObservableTransactions().stream()))
-              .mapToLong(ObservableAccountTransaction::getId)
+              .mapToLong(ObservableTransaction::getId)
               .max()
               .orElse(0);
     }

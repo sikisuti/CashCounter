@@ -17,8 +17,7 @@ public class ObservableCorrection {
   private StringProperty typeProperty;
   private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
   private BooleanProperty pairedProperty;
-  private ObjectProperty<ObservableAccountTransaction> pairedTransaction;
-  //  private LongProperty pairedTransactionIdProperty;
+  private ObjectProperty<ObservableTransaction> pairedTransaction;
 
   @Getter private Correction correction;
 
@@ -69,13 +68,9 @@ public class ObservableCorrection {
     return pairedProperty;
   }
 
-  public ObservableAccountTransaction getPairedTransaction() {
+  public ObservableTransaction getPairedTransaction() {
     return pairedTransaction.get();
   }
-
-  //  public LongProperty pairedTransactionIdProperty() {
-  //    return pairedTransactionIdProperty;
-  //  }
 
   public static ObservableCorrection of(
       Correction correction, ObservableDailyBalance parentDailyBalance) {
@@ -99,7 +94,7 @@ public class ObservableCorrection {
     return observableCollection;
   }
 
-  public void setPairedTransaction(ObservableAccountTransaction transaction) {
+  public void setPairedTransaction(ObservableTransaction transaction) {
     pairedTransaction.set(transaction);
     //    pairedProperty.set(transaction != null);
     //    pairedTransactionIdProperty.set(transaction != null ? transaction.getId() : 0);

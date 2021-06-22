@@ -124,7 +124,7 @@ public class CorrectionControl extends GridPane {
     this.typeProperty = new SimpleStringProperty(correction.getType());
     this.pairedTransaction =
         new SimpleObjectProperty<>(
-            parentDailyBalanceControl.getTransactions().stream()
+            parentDailyBalanceControl.getDailyBalance().getTransactions().stream()
                 .filter(t -> t.getId() == correction.getPairedTransactionId())
                 .findFirst()
                 .orElse(null));

@@ -103,10 +103,10 @@ public class ObservableDailyBalance {
     observableDailyBalance.dateProperty = new SimpleObjectProperty<>(dailyBalance.getDate());
     observableDailyBalance.balanceProperty = new SimpleIntegerProperty(dailyBalance.getBalance());
     observableDailyBalance.predictedProperty =
-        new SimpleBooleanProperty(dailyBalance.isPredicted());
-    observableDailyBalance.reviewedProperty = new SimpleBooleanProperty(dailyBalance.isReviewed());
+        new SimpleBooleanProperty(dailyBalance.getPredicted());
+    observableDailyBalance.reviewedProperty = new SimpleBooleanProperty(dailyBalance.getReviewed());
     observableDailyBalance.dailySpendProperty =
-        new SimpleIntegerProperty(dailyBalance.getDailySpend());
+        new SimpleIntegerProperty(dailyBalance.getDailySpent());
     observableDailyBalance.observableSavings =
         Optional.ofNullable(dailyBalance.getSavings())
             .map(
@@ -135,14 +135,14 @@ public class ObservableDailyBalance {
   public void addObservableCorrection(ObservableCorrection observableCorrection) {
     observableCorrections.add(observableCorrection);
     dailyBalance.addCorrection(observableCorrection.getCorrection());
-    setDailySpent(dailyBalance.getDailySpend());
+    setDailySpent(dailyBalance.getDailySpent());
     setBalance(dailyBalance.getBalance());
   }
 
   public void removeObservableCorrection(ObservableCorrection observableCorrection) {
     observableCorrections.remove(observableCorrection);
     dailyBalance.removeCorrection(observableCorrection.getCorrection());
-    setDailySpent(dailyBalance.getDailySpend());
+    setDailySpent(dailyBalance.getDailySpent());
     setBalance(dailyBalance.getBalance());
   }
 

@@ -13,15 +13,16 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import lombok.Getter;
 import org.siki.cashcounter.model.MonthlyBalance;
 
 import java.time.format.DateTimeFormatter;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
-  private final MonthlyBalance monthlyBalance;
+  @Getter private final MonthlyBalance monthlyBalance;
   private final ViewFactory viewFactory;
 
-  private final ObservableList<DailyBalanceControl> dailyBalanceControls;
+  @Getter private final ObservableList<DailyBalanceControl> dailyBalanceControls;
 
   private final VBox vbDailyBalances = new VBox();
 

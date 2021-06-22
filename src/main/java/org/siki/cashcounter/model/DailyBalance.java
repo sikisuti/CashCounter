@@ -2,8 +2,19 @@ package org.siki.cashcounter.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.siki.cashcounter.model.converter.CorrectionListToObservableConverter;
+import org.siki.cashcounter.model.converter.SavingListToObservableConverter;
+import org.siki.cashcounter.model.converter.TransactionListToObservableConverter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,16 +23,93 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class DailyBalance {
-  private LocalDate date;
-  private int balance;
-  private boolean balanceSetManually;
-  private boolean predicted;
-  private boolean reviewed;
-  private int dailySpend;
+  private ObjectProperty<LocalDate> date = new SimpleObjectProperty<>();
+  private IntegerProperty balance = new SimpleIntegerProperty();
+  private BooleanProperty balanceSetManually = new SimpleBooleanProperty();
+  private BooleanProperty predicted = new SimpleBooleanProperty();
+  private BooleanProperty reviewed = new SimpleBooleanProperty();
+  private IntegerProperty dailySpent = new SimpleIntegerProperty();
 
-  private List<Saving> savings;
-  private List<Correction> corrections;
-  private List<AccountTransaction> transactions;
+  @JsonDeserialize(converter = SavingListToObservableConverter.class)
+  private ObservableList<Saving> savings;
+
+  @JsonDeserialize(converter = CorrectionListToObservableConverter.class)
+  private ObservableList<Correction> corrections;
+
+  @JsonDeserialize(converter = TransactionListToObservableConverter.class)
+  private ObservableList<AccountTransaction> transactions;
+
+  public LocalDate getDate() {
+    return date.get();
+  }
+
+  public void setDate(LocalDate value) {
+    date.set(value);
+  }
+
+  public ObjectProperty<LocalDate> dateProperty() {
+    return date;
+  }
+
+  public int getBalance() {
+    return balance.get();
+  }
+
+  public void setBalance(int value) {
+    balance.set(value);
+  }
+
+  public IntegerProperty balanceProperty() {
+    return balance;
+  }
+
+  public boolean getBalanceSetManually() {
+    return balanceSetManually.get();
+  }
+
+  public void setBalanceSetManually(boolean value) {
+    balanceSetManually.set(value);
+  }
+
+  public BooleanProperty balanceSetManuallyProperty() {
+    return balanceSetManually;
+  }
+
+  public boolean getPredicted() {
+    return predicted.get();
+  }
+
+  public void setPredicted(boolean value) {
+    predicted.set(value);
+  }
+
+  public BooleanProperty predictedProperty() {
+    return predicted;
+  }
+
+  public boolean getReviewed() {
+    return reviewed.get();
+  }
+
+  public void setReviewed(boolean value) {
+    reviewed.set(value);
+  }
+
+  public BooleanProperty reviewedProperty() {
+    return reviewed;
+  }
+
+  public int getDailySpent() {
+    return dailySpent.get();
+  }
+
+  public void setDailySpent(int value) {
+    dailySpent.set(value);
+  }
+
+  public IntegerProperty dailySpentProperty() {
+    return dailySpent;
+  }
 
   public void addSaving(Saving saving) {
     savings.add(saving);
@@ -34,23 +122,23 @@ public final class DailyBalance {
 
   public void addCorrection(Correction correction) {
     corrections.add(correction);
-    setDailySpend(dailySpend - correction.getAmount());
+    setDailySpent(dailySpent.get() - correction.getAmount());
     if (correction.isNotPaired()) {
-      balance += correction.getAmount();
+      setBalance(balance.get() + correction.getAmount());
     }
   }
 
   public void removeCorrection(Correction correction) {
     corrections.remove(correction);
-    setDailySpend(dailySpend + correction.getAmount());
+    setDailySpent(dailySpent.get() + correction.getAmount());
     if (correction.isNotPaired()) {
-      balance -= correction.getAmount();
+      setBalance(balance.get() - correction.getAmount());
     }
   }
 
   public void addTransaction(AccountTransaction transaction) {
     transactions.add(transaction);
-    balance += transaction.getAmount();
+    setBalance(balance.get() + transaction.getAmount());
   }
 
   public void addNonExistingTransactions(List<AccountTransaction> newTransactions) {

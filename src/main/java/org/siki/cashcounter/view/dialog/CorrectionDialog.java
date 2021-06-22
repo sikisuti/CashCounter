@@ -105,11 +105,12 @@ public class CorrectionDialog extends Stage {
 
     this.initModality(Modality.APPLICATION_MODAL);
     this.initStyle(StageStyle.UTILITY);
-    this.setTitle(parentDailyBalanceControl.getDate().format(DateTimeFormatter.ISO_DATE));
+    this.setTitle(
+        parentDailyBalanceControl.getDailyBalance().getDate().format(DateTimeFormatter.ISO_DATE));
 
     prepareTable();
     tblTransactions.setItems(
-        parentDailyBalanceControl.getTransactions().stream()
+        parentDailyBalanceControl.getDailyBalance().getTransactions().stream()
             .map(ObservableTransaction::of)
             .collect(Collectors.toCollection(FXCollections::observableArrayList)));
 

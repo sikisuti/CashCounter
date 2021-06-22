@@ -25,6 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.DailyBalanceService;
@@ -32,7 +33,6 @@ import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.util.StopWatch;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
-import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
@@ -194,21 +194,34 @@ public class MainScene extends Scene {
           new BufferedReader(
               new InputStreamReader(new FileInputStream(selectedFile), StandardCharsets.UTF_8))) {
         String line;
-        List<ObservableTransaction> newTransactions = new ArrayList<>();
+        List<AccountTransaction> newTransactions = new ArrayList<>();
 
         while ((line = br.readLine()) != null) {
           transactionService.createObservableTransactionsFromCSV(line, newTransactions);
         }
 
-        newTransactions.sort(Comparator.comparing(ObservableTransaction::getDate));
-        TreeMap<LocalDate, List<ObservableTransaction>> groupped =
+        newTransactions.sort(Comparator.comparing(AccountTransaction::getDate));
+        TreeMap<LocalDate, List<AccountTransaction>> groupped =
             newTransactions.stream()
                 .collect(
                     Collectors.groupingBy(
-                        ObservableTransaction::getDate, TreeMap::new, Collectors.toList()));
+                        AccountTransaction::getDate, TreeMap::new, Collectors.toList()));
 
-        for (Map.Entry<LocalDate, List<ObservableTransaction>> entry : groupped.entrySet()) {
-          var db = dailyBalanceService.findDailyBalanceByDate(entry.getKey());
+        for (Map.Entry<LocalDate, List<AccountTransaction>> entry : groupped.entrySet()) {
+          var db =
+              monthlyBalanceTitledPanes.stream()
+                  .filter(
+                      mb ->
+                          mb.getMonthlyBalance()
+                              .getYearMonth()
+                              .equals(YearMonth.from(entry.getKey())))
+                  .findFirst()
+                  .orElseThrow()
+                  .getDailyBalanceControls()
+                  .stream()
+                  .filter(dbc -> dbc.getDailyBalance().getDate().isEqual(entry.getKey()))
+                  .findFirst()
+                  .orElseThrow();
           transactionService.storeObservableTransactions(entry.getValue(), db);
         }
 

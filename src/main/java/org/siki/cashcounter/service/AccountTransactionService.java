@@ -2,7 +2,7 @@ package org.siki.cashcounter.service;
 
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.view.model.ObservableDailyBalance;
+import org.siki.cashcounter.view.DailyBalanceControl;
 import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,7 +25,7 @@ public class AccountTransactionService {
   private Long lastTransactionId;
 
   public void createObservableTransactionsFromCSV(
-      String csvLine, List<ObservableTransaction> newTransactions) {
+      String csvLine, List<AccountTransaction> newTransactions) {
     csvLine = csvLine.replace("\"", "");
     String[] elements = csvLine.split(";");
 
@@ -46,15 +46,14 @@ public class AccountTransactionService {
               .build();
 
       categoryService.setCategory(newTransaction);
-      newTransactions.add(ObservableTransaction.of(newTransaction));
+      newTransactions.add(newTransaction);
     }
   }
 
   public void storeObservableTransactions(
-      List<ObservableTransaction> observableTransactions,
-      ObservableDailyBalance observableDailyBalance) {
-    for (var transaction : observableTransactions) {
-      observableDailyBalance.addObservableTransaction(transaction);
+      List<AccountTransaction> transactions, DailyBalanceControl dailyBalanceControl) {
+    for (var transaction : transactions) {
+      dailyBalanceControl.addTransaction(transaction);
     }
   }
 

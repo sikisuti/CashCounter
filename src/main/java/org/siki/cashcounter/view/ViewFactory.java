@@ -23,8 +23,10 @@ public class ViewFactory {
 
   public MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(MonthlyBalance monthlyBalance) {
     var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(monthlyBalance, this);
-    boolean isThisMonth = YearMonth.now().equals(monthlyBalance.getYearMonth());
-    monthlyBalanceTitledPane.expandedProperty().set(isThisMonth);
+    monthlyBalanceTitledPane.expandedProperty().set(false);
+    if (YearMonth.now().equals(monthlyBalance.getYearMonth())) {
+      monthlyBalanceTitledPane.expandedProperty().set(true);
+    }
 
     return monthlyBalanceTitledPane;
   }

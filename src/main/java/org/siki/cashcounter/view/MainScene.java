@@ -1,5 +1,8 @@
 package org.siki.cashcounter.view;
 
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.geometry.Pos;
@@ -37,6 +40,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -53,6 +57,9 @@ public class MainScene extends Scene {
   @Autowired private final AccountTransactionService transactionService;
   @Autowired private final DailyBalanceService dailyBalanceService;
   @Autowired private final DataManager dataManager;
+
+  private final ObservableList<MonthlyBalanceTitledPane> monthlyBalanceTitledPanes =
+      FXCollections.observableArrayList();
 
   private final VBox dailyBalancesPH = new VBox();
   private final VBox vbCashFlow = new VBox();
@@ -73,6 +80,9 @@ public class MainScene extends Scene {
     this.transactionService = transactionService;
     this.dailyBalanceService = dailyBalanceService;
     this.dataManager = dataManager;
+
+    Bindings.bindContent(dailyBalancesPH.getChildren(), monthlyBalanceTitledPanes);
+
     draw((BorderPane) getRoot());
     loadCorrections();
     vbCashFlow.getChildren().add(cashFlowChart);
@@ -105,11 +115,10 @@ public class MainScene extends Scene {
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.start("prepareDailyBalances");
     dailyBalancesPH.getChildren().clear();
-    dataManager
-        .getMonthlyBalances()
+    dataManager.getMonthlyBalances().stream()
+        .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().minusYears(1)))
         .forEach(
-            mb ->
-                dailyBalancesPH.getChildren().add(viewFactory.createMonthlyBalanceTitledPane(mb)));
+            mb -> monthlyBalanceTitledPanes.add(viewFactory.createMonthlyBalanceTitledPane(mb)));
     validate();
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.stop("prepareDailyBalances");

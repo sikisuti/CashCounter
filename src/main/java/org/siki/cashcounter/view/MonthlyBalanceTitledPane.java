@@ -1,5 +1,8 @@
 package org.siki.cashcounter.view;
 
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Border;
@@ -10,48 +13,47 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
+import org.siki.cashcounter.model.MonthlyBalance;
 
 import java.time.format.DateTimeFormatter;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
-
-  private final ObservableMonthlyBalance observableMonthlyBalance;
+  private final MonthlyBalance monthlyBalance;
   private final ViewFactory viewFactory;
+
+  private final ObservableList<DailyBalanceControl> dailyBalanceControls;
 
   private final VBox vbDailyBalances = new VBox();
 
-  public MonthlyBalanceTitledPane(
-      ObservableMonthlyBalance observableMonthlyBalance, ViewFactory viewFactory) {
+  public MonthlyBalanceTitledPane(MonthlyBalance monthlyBalance, ViewFactory viewFactory) {
     super(
-        observableMonthlyBalance
-            .getYearMonthProperty()
-            .get()
-            .format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
+        monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
         new GridPane());
-    this.observableMonthlyBalance = observableMonthlyBalance;
+    this.monthlyBalance = monthlyBalance;
     this.viewFactory = viewFactory;
 
+    dailyBalanceControls = FXCollections.observableArrayList();
+
+    loadUI();
+  }
+
+  private void loadUI() {
     GridPane gpRoot = (GridPane) this.getContent();
     GridPane.setColumnIndex(vbDailyBalances, 0);
     gpRoot.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
+    Bindings.bindContent(vbDailyBalances.getChildren(), dailyBalanceControls);
     this.expandedProperty()
         .addListener(
             (observable, oldValue, newValue) -> {
-              if (Boolean.TRUE.equals(newValue) && vbDailyBalances.getChildren().isEmpty()) {
-                fill();
+              if (Boolean.TRUE.equals(newValue) && dailyBalanceControls.isEmpty()) {
+                monthlyBalance
+                    .getDailyBalances()
+                    .forEach(
+                        db ->
+                            dailyBalanceControls.add(
+                                viewFactory.createDailyBalanceControl(db, this)));
               }
             });
-  }
-
-  public void fill() {
-    observableMonthlyBalance
-        .getObservableDailyBalances()
-        .forEach(
-            odb ->
-                vbDailyBalances
-                    .getChildren()
-                    .add(viewFactory.createDailyBalanceControl(odb, this)));
   }
 
   public void validate() {
@@ -59,7 +61,7 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void isValid() {
-    boolean isValid = observableMonthlyBalance.isValid();
+    boolean isValid = monthlyBalance.isValid();
 
     if (!isValid) {
       this.setBorder(

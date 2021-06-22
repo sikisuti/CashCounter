@@ -14,7 +14,7 @@ import javafx.collections.ObservableList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.view.CorrectionControl;
+import org.siki.cashcounter.model.Correction;
 
 import java.time.LocalDate;
 
@@ -33,7 +33,7 @@ public class ObservableTransaction {
   private StringProperty counterProperty;
   private StringProperty categoryProperty;
   private BooleanProperty pairedProperty;
-  private ObservableList<CorrectionControl> observablePairedCorrections;
+  private ObservableList<Correction> pairedCorrections;
   private BooleanProperty possibleDuplicateProperty;
   private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
 
@@ -123,32 +123,29 @@ public class ObservableTransaction {
         new SimpleStringProperty(accountTransaction.getCounter());
     observableAccountTransaction.categoryProperty =
         new SimpleStringProperty(accountTransaction.getCategory());
-    observableAccountTransaction.observablePairedCorrections = FXCollections.observableArrayList();
+    observableAccountTransaction.pairedCorrections = FXCollections.observableArrayList();
     observableAccountTransaction.pairedProperty = new SimpleBooleanProperty();
     observableAccountTransaction.pairedProperty.bind(
         Bindings.createBooleanBinding(
-            () -> !observableAccountTransaction.observablePairedCorrections.isEmpty(),
-            observableAccountTransaction.observablePairedCorrections));
+            () -> !observableAccountTransaction.pairedCorrections.isEmpty(),
+            observableAccountTransaction.pairedCorrections));
     observableAccountTransaction.possibleDuplicateProperty =
         new SimpleBooleanProperty(accountTransaction.isPossibleDuplicate());
     return observableAccountTransaction;
   }
 
   public Integer getNotPairedAmount() {
-    return getAmount()
-        - observablePairedCorrections.stream().mapToInt(CorrectionControl::getAmount).sum();
+    return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
   }
 
-  public void addPairedCorrection(CorrectionControl correctionControl) {
-    //    accountTransaction.addPairedCorrection(correctionControl.getCorrection());
-    if (!observablePairedCorrections.contains(correctionControl)) {
-      observablePairedCorrections.add(correctionControl);
+  public void addPairedCorrection(Correction correction) {
+    if (!pairedCorrections.contains(correction)) {
+      pairedCorrections.add(correction);
     }
   }
 
   public void removePairedCorrection(ObservableCorrection observableCorrection) {
-    //    accountTransaction.removePairedCorrection(observableCorrection.getCorrection());
-    observablePairedCorrections.remove(observableCorrection);
+    pairedCorrections.remove(observableCorrection);
   }
 
   public boolean isValid() {

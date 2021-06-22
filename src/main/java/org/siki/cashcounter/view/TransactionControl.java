@@ -1,6 +1,7 @@
 package org.siki.cashcounter.view;
 
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,11 +15,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.stream.Collectors;
 
 public class TransactionControl extends GridPane {
   private final ObservableList<ObservableTransaction> observableTransactions;
@@ -26,10 +29,13 @@ public class TransactionControl extends GridPane {
   private final DataForViewService dataForViewService;
 
   public TransactionControl(
-      ObservableList<ObservableTransaction> observableTransactions,
+      ObservableList<AccountTransaction> observableTransactions,
       DailyBalanceControl parent,
       DataForViewService dataForViewService) {
-    this.observableTransactions = observableTransactions;
+    this.observableTransactions =
+        observableTransactions.stream()
+            .map(ObservableTransaction::of)
+            .collect(Collectors.toCollection(FXCollections::observableArrayList));
     this.parent = parent;
     this.dataForViewService = dataForViewService;
 

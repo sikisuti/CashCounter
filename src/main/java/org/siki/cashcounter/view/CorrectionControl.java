@@ -25,10 +25,10 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.view.model.ObservableDailyBalance;
-import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -52,7 +52,7 @@ public class CorrectionControl extends GridPane {
   private StringProperty typeProperty;
   private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
   private BooleanProperty pairedProperty;
-  private ObjectProperty<ObservableTransaction> pairedTransaction;
+  private ObjectProperty<AccountTransaction> pairedTransaction;
 
   public int getAmount() {
     return amountProperty.get();
@@ -104,48 +104,45 @@ public class CorrectionControl extends GridPane {
     return correction.getPairedTransactionId();
   }
 
-  public ObservableTransaction getPairedTransaction() {
+  public AccountTransaction getPairedTransaction() {
     return pairedTransaction.get();
   }
 
-  public static CorrectionControl of(
+  public CorrectionControl(
       Correction correction,
       DailyBalanceControl parentDailyBalanceControl,
       CategoryService categoryService,
       ViewFactory viewFactory) {
 
-    var correctionControl = new CorrectionControl();
-    correctionControl.parent = parentDailyBalanceControl;
-    correctionControl.categoryService = categoryService;
-    correctionControl.correction = correction;
-    correctionControl.viewFactory = viewFactory;
+    this.parent = parentDailyBalanceControl;
+    this.categoryService = categoryService;
+    this.correction = correction;
+    this.viewFactory = viewFactory;
 
-    correctionControl.amountProperty = new SimpleIntegerProperty(correction.getAmount());
-    correctionControl.commentProperty = new SimpleStringProperty(correction.getComment());
-    correctionControl.typeProperty = new SimpleStringProperty(correction.getType());
-    correctionControl.pairedTransaction =
+    this.amountProperty = new SimpleIntegerProperty(correction.getAmount());
+    this.commentProperty = new SimpleStringProperty(correction.getComment());
+    this.typeProperty = new SimpleStringProperty(correction.getType());
+    this.pairedTransaction =
         new SimpleObjectProperty<>(
             parentDailyBalanceControl.getTransactions().stream()
                 .filter(t -> t.getId() == correction.getPairedTransactionId())
                 .findFirst()
                 .orElse(null));
-    correctionControl.pairedProperty = new SimpleBooleanProperty(correction.isPaired());
+    this.pairedProperty = new SimpleBooleanProperty(correction.isPaired());
 
-    correctionControl.setDragAndDrop();
-    correctionControl.loadUI();
+    setDragAndDrop();
+    loadUI();
 
     categoryService
         .selectedCategoryProperty()
         .addListener(
             (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-              if (newValue.equals(correctionControl.getType())) {
-                correctionControl.setStyle("-fx-background-color: yellow;");
+              if (newValue.equals(getType())) {
+                setStyle("-fx-background-color: yellow;");
               } else {
-                correctionControl.setStyle("-fx-background-color: none;");
+                setStyle("-fx-background-color: none;");
               }
             });
-
-    return correctionControl;
   }
 
   private void loadUI() {
@@ -201,7 +198,7 @@ public class CorrectionControl extends GridPane {
           /* the drag and drop gesture ended */
           /* if the data was successfully moved, clear it */
           if (event.getTransferMode() == TransferMode.MOVE) {
-            parent.removeCorrection(this);
+            parent.removeCorrection(correction);
           }
           event.consume();
         });

@@ -123,11 +123,11 @@ public class ObservableDailyBalance {
         dailyBalance.getCorrections().stream()
             .map(c -> ObservableCorrection.of(c, observableDailyBalance))
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
-    observableDailyBalance.observableTransactions.forEach(
-        t ->
-            observableDailyBalance.getObservableCorrections().stream()
-                .filter(c -> c.getCorrection().getPairedTransactionId() == t.getId())
-                .forEach(t::addPairedCorrection));
+    //    observableDailyBalance.observableTransactions.forEach(
+    //        t ->
+    //            observableDailyBalance.getObservableCorrections().stream()
+    //                .filter(c -> c.getCorrection().getPairedTransactionId() == t.getId())
+    //                .forEach(t::addPairedCorrection));
 
     return observableDailyBalance;
   }

@@ -34,14 +34,16 @@ public class Config {
       ViewFactory viewFactory,
       DataForViewService dataForViewService,
       AccountTransactionService accountTransactionService,
-      DailyBalanceService dailyBalanceService) {
+      DailyBalanceService dailyBalanceService,
+      DataManager dataManager) {
     return new MainScene(
         cashFlowChart,
         configurationManager,
         viewFactory,
         dataForViewService,
         accountTransactionService,
-        dailyBalanceService);
+        dailyBalanceService,
+        dataManager);
   }
 
   @Bean

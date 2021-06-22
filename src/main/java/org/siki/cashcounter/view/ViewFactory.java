@@ -1,13 +1,13 @@
 package org.siki.cashcounter.view;
 
 import javafx.collections.ObservableList;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
+import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
-import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
-import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.YearMonth;
@@ -21,22 +21,17 @@ public class ViewFactory {
     this.categoryService = categoryService;
   }
 
-  public MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(
-      ObservableMonthlyBalance observableMonthlyBalance) {
-    var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(observableMonthlyBalance, this);
-    boolean isThisMonth =
-        YearMonth.now().equals(observableMonthlyBalance.getYearMonthProperty().get());
+  public MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(MonthlyBalance monthlyBalance) {
+    var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(monthlyBalance, this);
+    boolean isThisMonth = YearMonth.now().equals(monthlyBalance.getYearMonth());
     monthlyBalanceTitledPane.expandedProperty().set(isThisMonth);
-    if (isThisMonth) {
-      monthlyBalanceTitledPane.fill();
-    }
 
     return monthlyBalanceTitledPane;
   }
 
   public TransactionControl createTransactionControl(
-      ObservableList<ObservableTransaction> observableTransactions, DailyBalanceControl parent) {
-    return new TransactionControl(observableTransactions, parent, dataForViewService);
+      ObservableList<AccountTransaction> transactions, DailyBalanceControl parent) {
+    return new TransactionControl(transactions, parent, dataForViewService);
   }
 
   public CorrectionDialog createNewCorrectionDialog(DailyBalanceControl parentDailyBalanceControl) {
@@ -50,11 +45,11 @@ public class ViewFactory {
 
   public DailyBalanceControl createDailyBalanceControl(
       DailyBalance dailyBalance, MonthlyBalanceTitledPane parent) {
-    return DailyBalanceControl.of(dailyBalance, parent, this);
+    return new DailyBalanceControl(dailyBalance, parent, this);
   }
 
   public CorrectionControl createCorrectionControl(
       Correction correction, DailyBalanceControl parent) {
-    return CorrectionControl.of(correction, parent, categoryService, this);
+    return new CorrectionControl(correction, parent, categoryService, this);
   }
 }

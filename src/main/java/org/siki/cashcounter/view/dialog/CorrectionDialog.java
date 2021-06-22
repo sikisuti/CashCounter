@@ -2,6 +2,7 @@ package org.siki.cashcounter.view.dialog;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -33,6 +34,7 @@ import org.siki.cashcounter.view.DailyBalanceControl;
 import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 public class CorrectionDialog extends Stage {
   @Getter private final Correction correction;
@@ -106,7 +108,10 @@ public class CorrectionDialog extends Stage {
     this.setTitle(parentDailyBalanceControl.getDate().format(DateTimeFormatter.ISO_DATE));
 
     prepareTable();
-    tblTransactions.setItems(parentDailyBalanceControl.getTransactions());
+    tblTransactions.setItems(
+        parentDailyBalanceControl.getTransactions().stream()
+            .map(ObservableTransaction::of)
+            .collect(Collectors.toCollection(FXCollections::observableArrayList)));
 
     cbType.setValue(correction.getType());
     tfAmount.setText(String.valueOf(correction.getAmount()));
@@ -126,13 +131,12 @@ public class CorrectionDialog extends Stage {
                   tfAmount.setText(String.valueOf(rowData.getAmount()));
                   if (correction.getPairedTransactionId() != 0
                       && correction.getPairedTransactionId() != rowData.getId()) {
-                    correction.setPairedTransaction(null);
+                    correction.setPairedTransactionId(0);
                   }
                   if (correction.getPairedTransactionId() != rowData.getId()) {
-                    rowData.addPairedCorrection(observableCorrection);
-                    observableCorrection.setPairedTransaction(rowData);
+                    correction.setPairedTransactionId(rowData.getAccountTransaction().getId());
                   } else {
-                    observableCorrection.setPairedTransaction(null);
+                    correction.setPairedTransactionId(0);
                   }
                 }
               });
@@ -178,10 +182,10 @@ public class CorrectionDialog extends Stage {
 
   protected void doSave(ActionEvent event) {
     var newAmount = Integer.parseInt(tfAmount.getText().replaceAll("[^0-9\\-]", ""));
-    observableCorrection.setAmount(newAmount);
-    observableCorrection.setType(cbType.getValue());
-    observableCorrection.setComment(tfComment.getText());
-    parentDailyBalanceControl.addCorrection(observableCorrection);
+    correction.setAmount(newAmount);
+    correction.setType(cbType.getValue());
+    correction.setComment(tfComment.getText());
+    parentDailyBalanceControl.addCorrection(correction);
 
     this.close();
   }
@@ -192,20 +196,11 @@ public class CorrectionDialog extends Stage {
 
   // TODO:
   protected void doRemove(ActionEvent event) {
-    if (observableCorrection.getPairedTransaction() != null) {
-      observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
-    }
-
-    parentDailyBalanceControl.removeCorrection(observableCorrection);
+    parentDailyBalanceControl.removeCorrection(correction);
     this.close();
   }
 
   protected void doRemovePair(ActionEvent event) {
-    if (observableCorrection.getPairedTransaction() != null) {
-      observableCorrection.getPairedTransaction().removePairedCorrection(observableCorrection);
-    }
-    observableCorrection.setPairedTransaction(null);
-    //    observableCorrection.pairedTransactionIdProperty().set(0);
-    //        pairedTransaction = null;
+    correction.setPairedTransactionId(0);
   }
 }

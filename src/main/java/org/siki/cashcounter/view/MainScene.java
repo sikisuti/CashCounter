@@ -22,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
+import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
@@ -51,6 +52,7 @@ public class MainScene extends Scene {
   @Autowired private final DataForViewService dataForViewService;
   @Autowired private final AccountTransactionService transactionService;
   @Autowired private final DailyBalanceService dailyBalanceService;
+  @Autowired private final DataManager dataManager;
 
   private final VBox dailyBalancesPH = new VBox();
   private final VBox vbCashFlow = new VBox();
@@ -62,13 +64,15 @@ public class MainScene extends Scene {
       ViewFactory viewFactory,
       DataForViewService dataForViewService,
       AccountTransactionService transactionService,
-      DailyBalanceService dailyBalanceService) {
+      DailyBalanceService dailyBalanceService,
+      DataManager dataManager) {
     super(new BorderPane(), 640, 480);
     this.configurationManager = configurationManager;
     this.viewFactory = viewFactory;
     this.dataForViewService = dataForViewService;
     this.transactionService = transactionService;
     this.dailyBalanceService = dailyBalanceService;
+    this.dataManager = dataManager;
     draw((BorderPane) getRoot());
     loadCorrections();
     vbCashFlow.getChildren().add(cashFlowChart);
@@ -101,11 +105,11 @@ public class MainScene extends Scene {
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.start("prepareDailyBalances");
     dailyBalancesPH.getChildren().clear();
-    dataForViewService
-        .getObservableMonthlyBalances()
+    dataManager
+        .getMonthlyBalances()
         .forEach(
-            omb ->
-                dailyBalancesPH.getChildren().add(viewFactory.createMonthlyBalanceTitledPane(omb)));
+            mb ->
+                dailyBalancesPH.getChildren().add(viewFactory.createMonthlyBalanceTitledPane(mb)));
     validate();
     if (configurationManager.getBooleanProperty("LogPerformance"))
       StopWatch.stop("prepareDailyBalances");

@@ -25,10 +25,4 @@ public class Correction {
   public boolean isNotPaired() {
     return !isPaired();
   }
-
-  public void setPairedTransaction(AccountTransaction transaction) {
-    //    pairedTransaction = transaction;
-    //    setPaired(transaction != null);
-    setPairedTransactionId(transaction != null ? transaction.getId() : 0);
-  }
 }

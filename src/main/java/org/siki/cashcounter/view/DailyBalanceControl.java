@@ -159,7 +159,7 @@ public final class DailyBalanceControl extends VBox {
     txtDailySpend.setPrefWidth(100);
     txtDailySpend
         .textProperty()
-        .bindBidirectional(dailyBalance.dailySpentProperty(), currencyFormat);
+        .bindBidirectional(dailyBalance.uncoveredDailySpentProperty(), currencyFormat);
     btnAdd = new Button("+");
     btnAdd.onActionProperty().set(this::openAddCorrectionDialog);
     btnAdd.setVisible(false);
@@ -243,8 +243,8 @@ public final class DailyBalanceControl extends VBox {
             .mapToInt(CorrectionControl::getAmount)
             .sum();
 
-    dailyBalance.setDailySpent(transactionSum + notPairedCorrectionSum);
-    return dailyBalance.getDailySpent();
+    dailyBalance.setUncoveredDailySpent(transactionSum + notPairedCorrectionSum);
+    return dailyBalance.getUncoveredDailySpent();
   }
 
   private void mouseEntered(MouseEvent event) {

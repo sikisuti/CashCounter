@@ -1,7 +1,6 @@
 package org.siki.cashcounter.view;
 
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -17,14 +16,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.service.DataForViewService;
-import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.stream.Collectors;
 
 public class TransactionControl extends GridPane {
-  private final ObservableList<ObservableTransaction> observableTransactions;
+  private final ObservableList<AccountTransaction> observableTransactions;
   private final DailyBalanceControl parent;
   private final DataForViewService dataForViewService;
 
@@ -32,10 +29,7 @@ public class TransactionControl extends GridPane {
       ObservableList<AccountTransaction> observableTransactions,
       DailyBalanceControl parent,
       DataForViewService dataForViewService) {
-    this.observableTransactions =
-        observableTransactions.stream()
-            .map(ObservableTransaction::of)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    this.observableTransactions = observableTransactions;
     this.parent = parent;
     this.dataForViewService = dataForViewService;
 
@@ -47,13 +41,13 @@ public class TransactionControl extends GridPane {
 
     this.getChildren().clear();
     int rowCnt = -1;
-    for (ObservableTransaction t : observableTransactions) {
+    for (AccountTransaction t : observableTransactions) {
       rowCnt++;
       var lblType = new Label(t.getType());
       var lblAmount = new Label(currencyFormat.format(t.getAmount()));
       var lblOwner = new Label(t.getOwner());
       var isPaired = new Circle(10, new Color(0, 0, 1, 1));
-      isPaired.visibleProperty().bind(t.pairedProperty());
+      isPaired.visibleProperty().bind(t.paired);
       var lblComment = new Label(t.getComment());
 
       GridPane.setConstraints(lblType, 0, rowCnt);
@@ -90,7 +84,7 @@ public class TransactionControl extends GridPane {
     validate();
   }
 
-  private void addCategoryPicker(ObservableTransaction observableTransaction, int rowCnt) {
+  private void addCategoryPicker(AccountTransaction observableTransaction, int rowCnt) {
     ComboBox cbCategory = null;
     if (observableTransaction.getNotPairedAmount() != 0) {
       cbCategory = new ComboBox();
@@ -113,7 +107,7 @@ public class TransactionControl extends GridPane {
   }
 
   public void isValid() {
-    boolean isValid = observableTransactions.stream().allMatch(ObservableTransaction::isValid);
+    boolean isValid = observableTransactions.stream().allMatch(AccountTransaction::isValid);
 
     if (!isValid) {
       this.setBorder(

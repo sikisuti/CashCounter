@@ -3,12 +3,18 @@ package org.siki.cashcounter.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -28,10 +34,40 @@ public final class AccountTransaction {
   private String counter;
 
   @JsonProperty("subCategory")
-  private String category;
+  private StringProperty category = new SimpleStringProperty();
 
-  //  private boolean paired;
-  //  @Singular private List<Correction> pairedCorrections = new ArrayList<>();
+  public BooleanBinding paired =
+      new BooleanBinding() {
+
+        {
+          super.bind(pairedCorrections);
+        }
+
+        @Override
+        protected boolean computeValue() {
+          return !pairedCorrections.isEmpty();
+        }
+      };
+
+  @JsonIgnore
+  private ObservableList<Correction> pairedCorrections = FXCollections.observableArrayList();
+
+  public String getCategory() {
+    return category.get();
+  }
+
+  public void setCategory(String value) {
+    category.set(value);
+  }
+
+  public StringProperty categoryProperty() {
+    return category;
+  }
+
+  public void addAllPairedCorrection(List<Correction> correction) {
+    pairedCorrections.addAll(correction);
+  }
+
   private boolean possibleDuplicate;
   //  private DailyBalance dailyBalance;
 
@@ -55,10 +91,10 @@ public final class AccountTransaction {
   //    }
   //  }
 
-  //  @JsonIgnore
-  //  public Integer getNotPairedAmount() {
-  //    return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
-  //  }
+  @JsonIgnore
+  public Integer getNotPairedAmount() {
+    return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
+  }
 
   public boolean isValid() {
     return !isPossibleDuplicate() && getCategory() != null && !getCategory().isEmpty();

@@ -111,9 +111,8 @@ public final class DailyBalanceControl extends VBox {
           var db = event.getDragboard();
           var success = false;
           if (db.hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
-            CorrectionControl data =
-                (CorrectionControl) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
-            addCorrection(data.getCorrection());
+            Correction data = (Correction) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
+            addCorrection(data);
             success = true;
           }
           /* let the source know whether the string was successfully
@@ -219,6 +218,7 @@ public final class DailyBalanceControl extends VBox {
             .filter(c -> c.getCorrection().getId() == correction.getId())
             .findFirst()
             .orElse(null));
+    dailyBalance.removeCorrection(correction);
   }
 
   public void addTransaction(AccountTransaction transaction) {

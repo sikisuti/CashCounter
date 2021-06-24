@@ -1,10 +1,8 @@
 package org.siki.cashcounter.service;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.view.DailyBalanceControl;
+import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.view.model.ObservableTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,22 +30,15 @@ public class AccountTransactionService {
     String[] elements = csvLine.split(";");
 
     if (elements.length > 12 && !elements[DATE.getNumber()].isEmpty()) {
-      AccountTransaction newTransaction =
-          AccountTransaction.builder()
-              .id(getNextTransactionId())
-              .amount(Integer.parseInt(elements[AMOUNT.getNumber()]))
-              .date(
-                  LocalDate.parse(
-                      elements[DATE.getNumber()], DateTimeFormatter.ofPattern("yyyyMMdd")))
-              .accountNumber(elements[ACCOUNT_NUMBER.getNumber()])
-              .owner(elements[OWNER.getNumber()])
-              .comment(elements[COMMENT_1.getNumber()] + elements[COMMENT_2.getNumber()])
-              //              .counter("")
-              .type(elements[TYPE.getNumber()])
-              //              .pairedCorrections(new ArrayList<>())
-              .category(new SimpleStringProperty())
-              .pairedCorrections(FXCollections.observableArrayList())
-              .build();
+      var newTransaction = new AccountTransaction();
+      newTransaction.setId(getNextTransactionId());
+      newTransaction.setAmount(Integer.parseInt(elements[AMOUNT.getNumber()]));
+      newTransaction.setDate(
+          LocalDate.parse(elements[DATE.getNumber()], DateTimeFormatter.ofPattern("yyyyMMdd")));
+      newTransaction.setAccountNumber(elements[ACCOUNT_NUMBER.getNumber()]);
+      newTransaction.setOwner(elements[OWNER.getNumber()]);
+      newTransaction.setComment(elements[COMMENT_1.getNumber()] + elements[COMMENT_2.getNumber()]);
+      newTransaction.setType(elements[TYPE.getNumber()]);
 
       categoryService.setCategory(newTransaction);
       newTransactions.add(newTransaction);
@@ -55,9 +46,9 @@ public class AccountTransactionService {
   }
 
   public void storeObservableTransactions(
-      List<AccountTransaction> transactions, DailyBalanceControl dailyBalanceControl) {
+      List<AccountTransaction> transactions, DailyBalance dailyBalance) {
     for (var transaction : transactions) {
-      dailyBalanceControl.addTransaction(transaction);
+      dailyBalance.addTransaction(transaction);
     }
   }
 

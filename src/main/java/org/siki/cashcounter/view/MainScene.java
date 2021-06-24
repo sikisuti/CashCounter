@@ -222,7 +222,7 @@ public class MainScene extends Scene {
                   .filter(dbc -> dbc.getDailyBalance().getDate().isEqual(entry.getKey()))
                   .findFirst()
                   .orElseThrow();
-          transactionService.storeObservableTransactions(entry.getValue(), db);
+          transactionService.storeObservableTransactions(entry.getValue(), db.getDailyBalance());
         }
 
         var alert = new Alert(Alert.AlertType.INFORMATION);

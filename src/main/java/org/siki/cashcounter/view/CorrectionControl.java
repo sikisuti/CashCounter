@@ -39,7 +39,7 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public class CorrectionControl extends GridPane {
   public static final DataFormat CORRECTION_DATA_FORMAT =
-      new DataFormat("com.siki.cashcount.model.Correction");
+      new DataFormat("com.siki.cashcounter.model.Correction");
 
   private CategoryService categoryService;
   private ViewFactory viewFactory;
@@ -188,7 +188,7 @@ public class CorrectionControl extends GridPane {
 
           /* Put a string on a dragboard */
           var content = new ClipboardContent();
-          content.put(CORRECTION_DATA_FORMAT, this);
+          content.put(CORRECTION_DATA_FORMAT, this.correction);
           db.setContent(content);
 
           event.consume();

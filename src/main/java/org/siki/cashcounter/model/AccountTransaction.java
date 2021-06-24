@@ -9,17 +9,13 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class AccountTransaction {
@@ -34,24 +30,11 @@ public final class AccountTransaction {
   //  private String counter;
 
   @JsonProperty("subCategory")
-  private StringProperty category = new SimpleStringProperty();
+  private StringProperty category;
 
-  @JsonIgnore
-  private ObservableList<Correction> pairedCorrections = FXCollections.observableArrayList();
+  @JsonIgnore private ObservableList<Correction> pairedCorrections;
 
-  @JsonIgnore
-  public BooleanBinding paired =
-      new BooleanBinding() {
-
-        {
-          super.bind(pairedCorrections);
-        }
-
-        @Override
-        protected boolean computeValue() {
-          return !pairedCorrections.isEmpty();
-        }
-      };
+  @JsonIgnore public BooleanBinding paired;
 
   public String getCategory() {
     return category.get();
@@ -70,6 +53,24 @@ public final class AccountTransaction {
   }
 
   private boolean possibleDuplicate;
+
+  public AccountTransaction() {
+    category = new SimpleStringProperty();
+    pairedCorrections = FXCollections.observableArrayList();
+    paired =
+        new BooleanBinding() {
+
+          {
+            super.bind(pairedCorrections);
+          }
+
+          @Override
+          protected boolean computeValue() {
+            return !pairedCorrections.isEmpty();
+          }
+        };
+  }
+
   //  private DailyBalance dailyBalance;
 
   //  public void setPairedCorrections(List<Correction> pairedCorrections) {

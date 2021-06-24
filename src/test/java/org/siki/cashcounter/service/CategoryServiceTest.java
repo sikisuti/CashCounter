@@ -19,8 +19,8 @@ class CategoryServiceTest {
 
   @Test
   void testSetCategory() {
-    AccountTransaction accountTransaction =
-        AccountTransaction.builder().comment("E.ON Áramszolgáltató Kft.").build();
+    AccountTransaction accountTransaction = new AccountTransaction();
+    accountTransaction.setComment("E.ON Áramszolgáltató Kft.");
 
     when(dataManager.getCategoryMatchingRules())
         .thenReturn(

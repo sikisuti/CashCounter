@@ -31,11 +31,15 @@ public final class AccountTransaction {
   private String accountNumber;
   private String owner;
   private String comment;
-  private String counter;
+  //  private String counter;
 
   @JsonProperty("subCategory")
   private StringProperty category = new SimpleStringProperty();
 
+  @JsonIgnore
+  private ObservableList<Correction> pairedCorrections = FXCollections.observableArrayList();
+
+  @JsonIgnore
   public BooleanBinding paired =
       new BooleanBinding() {
 
@@ -48,9 +52,6 @@ public final class AccountTransaction {
           return !pairedCorrections.isEmpty();
         }
       };
-
-  @JsonIgnore
-  private ObservableList<Correction> pairedCorrections = FXCollections.observableArrayList();
 
   public String getCategory() {
     return category.get();
@@ -96,6 +97,7 @@ public final class AccountTransaction {
     return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return !isPossibleDuplicate() && getCategory() != null && !getCategory().isEmpty();
   }
@@ -124,7 +126,7 @@ public final class AccountTransaction {
         && this.getAccountNumber().equals(other.getAccountNumber())
         && this.getOwner().equals(other.getOwner())
         && this.getComment().equals(other.getComment())
-        && this.getCounter().equals(other.getCounter());
+    /*&& this.getCounter().equals(other.getCounter())*/ ;
   }
 
   public boolean similar(AccountTransaction other) {
@@ -137,6 +139,7 @@ public final class AccountTransaction {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, type, date, amount, accountNumber, owner, comment, counter, category);
+    return Objects.hash(
+        id, type, date, amount, accountNumber, owner, comment /*, counter*/, category);
   }
 }

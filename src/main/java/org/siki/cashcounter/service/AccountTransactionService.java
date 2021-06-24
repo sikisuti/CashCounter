@@ -1,5 +1,7 @@
 package org.siki.cashcounter.service;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.view.DailyBalanceControl;
@@ -40,9 +42,11 @@ public class AccountTransactionService {
               .accountNumber(elements[ACCOUNT_NUMBER.getNumber()])
               .owner(elements[OWNER.getNumber()])
               .comment(elements[COMMENT_1.getNumber()] + elements[COMMENT_2.getNumber()])
-              .counter("")
+              //              .counter("")
               .type(elements[TYPE.getNumber()])
               //              .pairedCorrections(new ArrayList<>())
+              .category(new SimpleStringProperty())
+              .pairedCorrections(FXCollections.observableArrayList())
               .build();
 
       categoryService.setCategory(newTransaction);

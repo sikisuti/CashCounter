@@ -51,7 +51,8 @@ public final class DailyBalanceControl extends VBox {
   private Button btnAdd;
   ToggleButton btnExpand;
 
-  VBox vbTransactions = new VBox();
+  //  VBox vbTransactions = new VBox();
+  TransactionListView transactionListView;
 
   public DailyBalanceControl(
       DailyBalance dailyBalance, MonthlyBalanceTitledPane parent, ViewFactory viewFactory) {
@@ -157,9 +158,7 @@ public final class DailyBalanceControl extends VBox {
     txtBalance.textProperty().bindBidirectional(dailyBalance.balanceProperty(), currencyFormat);
     var txtDailySpend = new Label();
     txtDailySpend.setPrefWidth(100);
-    txtDailySpend
-        .textProperty()
-        .bindBidirectional(dailyBalance.uncoveredDailySpentProperty(), currencyFormat);
+    txtDailySpend.textProperty().bind(dailyBalance.notPairedDailySpent);
     btnAdd = new Button("+");
     btnAdd.onActionProperty().set(this::openAddCorrectionDialog);
     btnAdd.setVisible(false);
@@ -188,17 +187,13 @@ public final class DailyBalanceControl extends VBox {
     btnExpand = new ToggleButton("...");
     btnExpand.setOnAction(
         event -> {
-          if (btnExpand.isSelected()) {
-            if (vbTransactions.getChildren().isEmpty()
-                && !dailyBalance.getTransactions().isEmpty()) {
-              vbTransactions
-                  .getChildren()
-                  .add(viewFactory.createTransactionControl(dailyBalance.getTransactions(), this));
-            }
-            this.getChildren().add(vbTransactions);
-          } else {
-            this.getChildren().remove(vbTransactions);
+          if (transactionListView == null) {
+            transactionListView =
+                viewFactory.createTransactionListView(dailyBalance.getTransactions(), this);
+            this.getChildren().add(transactionListView);
           }
+
+          transactionListView.setVisible(btnExpand.isSelected());
         });
 
     rightContext.getChildren().addAll(chkReviewed, btnExpand);
@@ -234,19 +229,6 @@ public final class DailyBalanceControl extends VBox {
     dailyBalance.addTransaction(transaction);
   }
 
-  public int calculateDailySpent() {
-    var transactionSum =
-        dailyBalance.getTransactions().stream().mapToInt(AccountTransaction::getAmount).sum();
-    var notPairedCorrectionSum =
-        correctionControls.stream()
-            .filter(CorrectionControl::isNotPaired)
-            .mapToInt(CorrectionControl::getAmount)
-            .sum();
-
-    dailyBalance.setUncoveredDailySpent(transactionSum + notPairedCorrectionSum);
-    return dailyBalance.getUncoveredDailySpent();
-  }
-
   private void mouseEntered(MouseEvent event) {
     btnAdd.setVisible(!chkReviewed.isSelected());
   }
@@ -279,9 +261,9 @@ public final class DailyBalanceControl extends VBox {
     }
 
     if (btnExpand.isSelected()) {
-      for (Node child : vbTransactions.getChildren()) {
-        if (child.getClass() == TransactionControl.class) {
-          ((TransactionControl) child).isValid();
+      for (Node child : this.getChildren()) {
+        if (child.getClass() == TransactionListView.class) {
+          ((TransactionListView) child).isValid();
         }
       }
     }

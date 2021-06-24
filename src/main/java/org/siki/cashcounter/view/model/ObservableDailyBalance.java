@@ -105,8 +105,8 @@ public class ObservableDailyBalance {
     observableDailyBalance.predictedProperty =
         new SimpleBooleanProperty(dailyBalance.getPredicted());
     observableDailyBalance.reviewedProperty = new SimpleBooleanProperty(dailyBalance.getReviewed());
-    observableDailyBalance.dailySpendProperty =
-        new SimpleIntegerProperty(dailyBalance.getUncoveredDailySpent());
+    //    observableDailyBalance.dailySpendProperty =
+    //        new SimpleIntegerProperty(dailyBalance.getUncoveredDailySpent());
     observableDailyBalance.observableSavings =
         Optional.ofNullable(dailyBalance.getSavings())
             .map(
@@ -132,19 +132,19 @@ public class ObservableDailyBalance {
     return observableDailyBalance;
   }
 
-  public void addObservableCorrection(ObservableCorrection observableCorrection) {
-    observableCorrections.add(observableCorrection);
-    dailyBalance.addCorrection(observableCorrection.getCorrection());
-    setDailySpent(dailyBalance.getUncoveredDailySpent());
-    setBalance(dailyBalance.getBalance());
-  }
+  //  public void addObservableCorrection(ObservableCorrection observableCorrection) {
+  //    observableCorrections.add(observableCorrection);
+  //    dailyBalance.addCorrection(observableCorrection.getCorrection());
+  //    setDailySpent(dailyBalance.getUncoveredDailySpent());
+  //    setBalance(dailyBalance.getBalance());
+  //  }
 
-  public void removeObservableCorrection(ObservableCorrection observableCorrection) {
-    observableCorrections.remove(observableCorrection);
-    dailyBalance.removeCorrection(observableCorrection.getCorrection());
-    setDailySpent(dailyBalance.getUncoveredDailySpent());
-    setBalance(dailyBalance.getBalance());
-  }
+  //  public void removeObservableCorrection(ObservableCorrection observableCorrection) {
+  //    observableCorrections.remove(observableCorrection);
+  //    dailyBalance.removeCorrection(observableCorrection.getCorrection());
+  //    setDailySpent(dailyBalance.getUncoveredDailySpent());
+  //    setBalance(dailyBalance.getBalance());
+  //  }
 
   public void addObservableTransaction(ObservableTransaction observableTransaction) {
     if (this.getObservableTransactions().stream().anyMatch(t -> t.similar(observableTransaction))) {

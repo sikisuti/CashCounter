@@ -31,9 +31,9 @@ public class ViewFactory {
     return monthlyBalanceTitledPane;
   }
 
-  public TransactionControl createTransactionControl(
+  public TransactionListView createTransactionListView(
       ObservableList<AccountTransaction> transactions, DailyBalanceControl parent) {
-    return new TransactionControl(transactions, parent, dataForViewService);
+    return new TransactionListView(transactions, parent, dataForViewService);
   }
 
   public CorrectionDialog createNewCorrectionDialog(DailyBalanceControl parentDailyBalanceControl) {

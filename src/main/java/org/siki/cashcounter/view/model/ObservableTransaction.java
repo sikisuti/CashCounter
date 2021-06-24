@@ -119,8 +119,8 @@ public class ObservableTransaction {
         new SimpleStringProperty(accountTransaction.getOwner());
     observableAccountTransaction.commentProperty =
         new SimpleStringProperty(accountTransaction.getComment());
-    observableAccountTransaction.counterProperty =
-        new SimpleStringProperty(accountTransaction.getCounter());
+    //    observableAccountTransaction.counterProperty =
+    //        new SimpleStringProperty(accountTransaction.getCounter());
     observableAccountTransaction.categoryProperty =
         new SimpleStringProperty(accountTransaction.getCategory());
     observableAccountTransaction.pairedCorrections = FXCollections.observableArrayList();

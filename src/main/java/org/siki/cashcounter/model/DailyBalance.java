@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -17,6 +18,7 @@ import org.siki.cashcounter.model.converter.CorrectionListToObservableConverter;
 import org.siki.cashcounter.model.converter.SavingListToObservableConverter;
 import org.siki.cashcounter.model.converter.TransactionListToObservableConverter;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +32,8 @@ public final class DailyBalance {
   private final BooleanProperty balanceSetManually = new SimpleBooleanProperty();
   private final BooleanProperty predicted = new SimpleBooleanProperty();
   private final BooleanProperty reviewed = new SimpleBooleanProperty();
-  private final IntegerProperty uncoveredDailySpent = new SimpleIntegerProperty();
+  //  private final IntegerProperty uncoveredDailySpent = new SimpleIntegerProperty();
+  @JsonIgnore public StringBinding notPairedDailySpent;
 
   private DailyBalance prevDailyBalance;
 
@@ -111,19 +114,19 @@ public final class DailyBalance {
     return reviewed;
   }
 
-  @JsonIgnore
-  public int getUncoveredDailySpent() {
-    return uncoveredDailySpent.get();
-  }
-
-  @JsonIgnore
-  public void setUncoveredDailySpent(int value) {
-    uncoveredDailySpent.set(value);
-  }
-
-  public IntegerProperty uncoveredDailySpentProperty() {
-    return uncoveredDailySpent;
-  }
+  //  @JsonIgnore
+  //  public int getUncoveredDailySpent() {
+  //    return uncoveredDailySpent.get();
+  //  }
+  //
+  //  @JsonIgnore
+  //  public void setUncoveredDailySpent(int value) {
+  //    uncoveredDailySpent.set(value);
+  //  }
+  //
+  //  public IntegerProperty uncoveredDailySpentProperty() {
+  //    return uncoveredDailySpent;
+  //  }
 
   public void addSaving(Saving saving) {
     savings.add(saving);
@@ -136,7 +139,6 @@ public final class DailyBalance {
 
   public void addCorrection(Correction correction) {
     corrections.add(correction);
-    setUncoveredDailySpent(uncoveredDailySpent.get() - correction.getAmount());
     if (correction.isNotPaired()) {
       setBalance(balance.get() + correction.getAmount());
     }
@@ -144,7 +146,6 @@ public final class DailyBalance {
 
   public void removeCorrection(Correction correction) {
     corrections.remove(correction);
-    setUncoveredDailySpent(uncoveredDailySpent.get() + correction.getAmount());
     if (correction.isNotPaired()) {
       setBalance(balance.get() - correction.getAmount());
     }
@@ -170,6 +171,7 @@ public final class DailyBalance {
     setBalance(previousBalance + diff);
   }
 
+  @JsonIgnore
   public int getAllDailySpent() {
     var transactionSum = transactions.stream().mapToInt(AccountTransaction::getAmount).sum();
     var notPairedCorrectionSum =
@@ -180,10 +182,12 @@ public final class DailyBalance {
 
   public void calculateUncoveredDailySpent() {}
 
+  @JsonIgnore
   public Integer getTotalCorrections() {
     return corrections.stream().mapToInt(Correction::getAmount).sum();
   }
 
+  @JsonIgnore
   public boolean isValid() {
     return transactions.stream().allMatch(AccountTransaction::isValid);
   }
@@ -275,6 +279,23 @@ public final class DailyBalance {
                 .filter(c -> c.getPairedTransactionId() == transaction.getId())
                 .collect(Collectors.toList()));
       }
+
+      dailyBalance.notPairedDailySpent =
+          new StringBinding() {
+
+            {
+              super.bind(dailyBalance.transactions, dailyBalance.corrections);
+            }
+
+            @Override
+            protected String computeValue() {
+              return new DecimalFormat("#,###,###' Ft'")
+                  .format(
+                      dailyBalance.transactions.stream()
+                          .mapToInt(AccountTransaction::getNotPairedAmount)
+                          .sum());
+            }
+          };
       return dailyBalance;
     }
   }

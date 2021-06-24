@@ -20,12 +20,12 @@ import org.siki.cashcounter.service.DataForViewService;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-public class TransactionControl extends GridPane {
+public class TransactionListView extends GridPane {
   private final ObservableList<AccountTransaction> observableTransactions;
   private final DailyBalanceControl parent;
   private final DataForViewService dataForViewService;
 
-  public TransactionControl(
+  public TransactionListView(
       ObservableList<AccountTransaction> observableTransactions,
       DailyBalanceControl parent,
       DataForViewService dataForViewService) {
@@ -77,6 +77,8 @@ public class TransactionControl extends GridPane {
 
       this.getChildren().addAll(lblType, lblAmount, lblOwner, isPaired, lblComment);
       addCategoryPicker(t, rowCnt);
+
+      this.managedProperty().bind(this.visibleProperty());
     }
 
     this.setStyle("-fx-background-color: white;");

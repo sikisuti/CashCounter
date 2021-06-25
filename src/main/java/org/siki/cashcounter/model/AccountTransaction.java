@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -34,7 +36,12 @@ public final class AccountTransaction {
 
   @JsonIgnore private ObservableList<Correction> pairedCorrections;
 
-  @JsonIgnore public BooleanBinding paired;
+  private BooleanProperty paired;
+
+  @JsonIgnore
+  public BooleanProperty pairedProperty() {
+    return paired;
+  }
 
   public String getCategory() {
     return category.get();
@@ -48,18 +55,14 @@ public final class AccountTransaction {
     return category;
   }
 
-  public void addAllPairedCorrection(List<Correction> correction) {
-    pairedCorrections.addAll(correction);
-  }
-
   private boolean possibleDuplicate;
 
   public AccountTransaction() {
     category = new SimpleStringProperty();
     pairedCorrections = FXCollections.observableArrayList();
-    paired =
+    paired = new SimpleBooleanProperty();
+    paired.bind(
         new BooleanBinding() {
-
           {
             super.bind(pairedCorrections);
           }
@@ -68,7 +71,7 @@ public final class AccountTransaction {
           protected boolean computeValue() {
             return !pairedCorrections.isEmpty();
           }
-        };
+        });
   }
 
   //  private DailyBalance dailyBalance;
@@ -96,6 +99,22 @@ public final class AccountTransaction {
   @JsonIgnore
   public Integer getNotPairedAmount() {
     return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
+  }
+
+  public void addPairedCorrection(Correction correction) {
+    pairedCorrections.add(correction);
+  }
+
+  public void addAllPairedCorrection(List<Correction> correction) {
+    pairedCorrections.addAll(correction);
+  }
+
+  public void removePairedCorrection(Correction correction) {
+    pairedCorrections.remove(
+        pairedCorrections.stream()
+            .filter(c -> c.getId() == correction.getId())
+            .findFirst()
+            .orElse(null));
   }
 
   @JsonIgnore
@@ -142,5 +161,19 @@ public final class AccountTransaction {
   public int hashCode() {
     return Objects.hash(
         id, type, date, amount, accountNumber, owner, comment /*, counter*/, category);
+  }
+
+  public AccountTransaction clone() {
+    var cloned = new AccountTransaction();
+    cloned.setId(id);
+    cloned.setType(type);
+    cloned.setDate(date);
+    cloned.setAmount(amount);
+    cloned.setAccountNumber(accountNumber);
+    cloned.setOwner(owner);
+    cloned.setComment(comment);
+    cloned.setCategory(category.get());
+    cloned.pairedCorrections.addAll(pairedCorrections);
+    return cloned;
   }
 }

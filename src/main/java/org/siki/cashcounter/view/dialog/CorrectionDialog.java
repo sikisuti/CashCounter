@@ -1,8 +1,8 @@
 package org.siki.cashcounter.view.dialog;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -28,23 +28,24 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 import lombok.Getter;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.DailyBalanceControl;
-import org.siki.cashcounter.view.model.ObservableTransaction;
 
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 
 public class CorrectionDialog extends Stage {
   @Getter private final Correction correction;
   private final DailyBalanceControl parentDailyBalanceControl;
-  private final BooleanProperty pairedProperty = new SimpleBooleanProperty(false);
+  private final BooleanBinding paired;
 
   ComboBox<String> cbType;
   TextField tfAmount;
   TextField tfComment;
-  TableView<ObservableTransaction> tblTransactions;
+  TableView<AccountTransaction> tblTransactions;
+
+  private final LongProperty pairedTransactionId;
 
   public CorrectionDialog(
       DataForViewService dataForViewService,
@@ -53,7 +54,22 @@ public class CorrectionDialog extends Stage {
     this.correction = correction;
     this.parentDailyBalanceControl = parentDailyBalanceControl;
 
+    pairedTransactionId = new SimpleLongProperty(0);
+    paired =
+        new BooleanBinding() {
+          {
+            super.bind(pairedTransactionId);
+          }
+
+          @Override
+          protected boolean computeValue() {
+            return pairedTransactionId.get() != 0;
+          }
+        };
+
     loadUI(dataForViewService);
+
+    pairedTransactionId.set(correction.getPairedTransactionId());
   }
 
   public CorrectionDialog(
@@ -73,7 +89,7 @@ public class CorrectionDialog extends Stage {
     tfComment = new TextField();
     var btnRemovePair = new Button("Párosítás törlése");
     btnRemovePair.setOnAction(this::doRemovePair);
-    btnRemovePair.visibleProperty().bind(pairedProperty);
+    btnRemovePair.visibleProperty().bind(paired);
     var grid = new GridPane();
     grid.getColumnConstraints()
         .addAll(new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints());
@@ -109,57 +125,58 @@ public class CorrectionDialog extends Stage {
         parentDailyBalanceControl.getDailyBalance().getDate().format(DateTimeFormatter.ISO_DATE));
 
     prepareTable();
-    tblTransactions.setItems(
-        parentDailyBalanceControl.getDailyBalance().getTransactions().stream()
-            .map(ObservableTransaction::of)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList)));
+    parentDailyBalanceControl
+        .getDailyBalance()
+        .getTransactions()
+        .forEach(t -> tblTransactions.getItems().add(t.clone()));
 
     cbType.setValue(correction.getType());
     tfAmount.setText(String.valueOf(correction.getAmount()));
     tfComment.setText(correction.getComment());
-
-    pairedProperty.set(correction.isPaired());
   }
 
   private void prepareTable() {
     tblTransactions.setRowFactory(
         tv -> {
-          TableRow<ObservableTransaction> row = new TableRow<>();
+          TableRow<AccountTransaction> row = new TableRow<>();
           row.setOnMouseClicked(
               event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                  ObservableTransaction rowData = row.getItem();
+                  AccountTransaction rowData = row.getItem();
                   tfAmount.setText(String.valueOf(rowData.getAmount()));
-                  if (correction.getPairedTransactionId() != 0
-                      && correction.getPairedTransactionId() != rowData.getId()) {
-                    correction.setPairedTransactionId(0);
+                  if (pairedTransactionId.get() != 0
+                      && pairedTransactionId.get() != rowData.getId()) {
+                    pairedTransactionId.set(0);
+                    rowData.removePairedCorrection(correction);
                   }
-                  if (correction.getPairedTransactionId() != rowData.getId()) {
-                    correction.setPairedTransactionId(rowData.getAccountTransaction().getId());
+                  if (pairedTransactionId.get() != rowData.getId()) {
+                    pairedTransactionId.set(rowData.getId());
+                    rowData.addPairedCorrection(correction);
                   } else {
-                    correction.setPairedTransactionId(0);
+                    pairedTransactionId.set(0);
+                    rowData.removePairedCorrection(correction);
                   }
                 }
               });
           return row;
         });
 
-    TableColumn<ObservableTransaction, String> transactionTypeCol =
+    TableColumn<AccountTransaction, String> transactionTypeCol =
         new TableColumn<>("Forgalom típusa");
     transactionTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-    TableColumn<ObservableTransaction, Integer> amountCol = new TableColumn<>("Összeg");
+    TableColumn<AccountTransaction, Integer> amountCol = new TableColumn<>("Összeg");
     amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
-    TableColumn<ObservableTransaction, String> ownerCol = new TableColumn<>("Ellenoldali név");
+    TableColumn<AccountTransaction, String> ownerCol = new TableColumn<>("Ellenoldali név");
     ownerCol.setCellValueFactory(new PropertyValueFactory<>("owner"));
-    TableColumn<ObservableTransaction, String> commentCol = new TableColumn<>("Közlemény");
+    TableColumn<AccountTransaction, String> commentCol = new TableColumn<>("Közlemény");
     commentCol.setCellValueFactory(new PropertyValueFactory<>("comment"));
-    TableColumn<ObservableTransaction, Boolean> isPairedCol = new TableColumn<>("Párosítva");
+    TableColumn<AccountTransaction, Boolean> isPairedCol = new TableColumn<>("Párosítva");
     isPairedCol.setCellValueFactory(new PropertyValueFactory<>("paired"));
     isPairedCol.setCellFactory(
         new Callback<>() {
           @Override
-          public TableCell<ObservableTransaction, Boolean> call(
-              TableColumn<ObservableTransaction, Boolean> param) {
+          public TableCell<AccountTransaction, Boolean> call(
+              TableColumn<AccountTransaction, Boolean> param) {
             return new TableCell<>() {
 
               @Override
@@ -186,6 +203,8 @@ public class CorrectionDialog extends Stage {
     correction.setAmount(newAmount);
     correction.setType(cbType.getValue());
     correction.setComment(tfComment.getText());
+
+    correction.setPairedTransactionId(pairedTransactionId.get());
     parentDailyBalanceControl.addCorrection(correction);
 
     this.close();

@@ -49,7 +49,7 @@ public class TransactionListView extends GridPane {
       var lblAmount = new Label(currencyFormat.format(t.getAmount()));
       var lblOwner = new Label(t.getOwner());
       var isPaired = new Circle(10, new Color(0, 0, 1, 1));
-      isPaired.visibleProperty().bind(t.paired);
+      isPaired.visibleProperty().bind(t.pairedProperty());
       var lblComment = new Label(t.getComment());
 
       GridPane.setConstraints(lblType, 0, rowCnt);

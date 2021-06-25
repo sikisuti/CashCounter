@@ -3,6 +3,7 @@ package org.siki.cashcounter.view;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -63,6 +64,9 @@ public final class DailyBalanceControl extends VBox {
     setDragAndDrop();
     loadUI();
     setBackground();
+    dailyBalance.getCorrections().addListener((ListChangeListener<Correction>) c -> {
+      c.
+    });
 
     this.correctionControls.addAll(
         dailyBalance.getCorrections().stream()
@@ -208,6 +212,10 @@ public final class DailyBalanceControl extends VBox {
   }
 
   public void addCorrection(Correction correction) {
+    if (correctionControls.stream().anyMatch(cc -> cc.getCorrection().getId() == correction.getId())) {
+      removeCorrection(correction);
+    }
+
     correctionControls.add(viewFactory.createCorrectionControl(correction, this));
     dailyBalance.addCorrection(correction);
   }

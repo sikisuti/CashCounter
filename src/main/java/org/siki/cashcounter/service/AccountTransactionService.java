@@ -3,7 +3,7 @@ package org.siki.cashcounter.service;
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.DailyBalance;
-import org.siki.cashcounter.view.model.ObservableTransaction;
+import org.siki.cashcounter.repository.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -20,8 +20,8 @@ import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.T
 
 @RequiredArgsConstructor
 public class AccountTransactionService {
-  @Autowired private final DataForViewService dataForViewService;
   @Autowired private final CategoryService categoryService;
+  @Autowired private final DataManager dataManager;
   private Long lastTransactionId;
 
   public void createObservableTransactionsFromCSV(
@@ -55,12 +55,10 @@ public class AccountTransactionService {
   private Long getNextTransactionId() {
     if (lastTransactionId == null) {
       lastTransactionId =
-          dataForViewService.getObservableMonthlyBalances().stream()
+          dataManager.getMonthlyBalances().stream()
               .flatMap(
-                  mb ->
-                      mb.getObservableDailyBalances().stream()
-                          .flatMap(db -> db.getObservableTransactions().stream()))
-              .mapToLong(ObservableTransaction::getId)
+                  mb -> mb.getDailyBalances().stream().flatMap(db -> db.getTransactions().stream()))
+              .mapToLong(AccountTransaction::getId)
               .max()
               .orElse(0);
     }

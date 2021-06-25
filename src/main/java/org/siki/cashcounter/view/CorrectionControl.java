@@ -156,7 +156,7 @@ public class CorrectionControl extends GridPane {
     this.getColumnConstraints().addAll(cc1, new ColumnConstraints());
     this.getRowConstraints().addAll(new RowConstraints(), new RowConstraints());
     var txtType = new Label();
-    txtType.textProperty().bind(typeProperty);
+    txtType.textProperty().bind(commentProperty);
     var tt = new Tooltip();
     tt.textProperty().bind(txtType.textProperty());
     txtType.setTooltip(tt);

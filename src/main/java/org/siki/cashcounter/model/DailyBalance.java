@@ -148,6 +148,11 @@ public final class DailyBalance {
     corrections.remove(correction);
     if (correction.isNotPaired()) {
       setBalance(balance.get() - correction.getAmount());
+    } else {
+      transactions.stream()
+          .filter(t -> t.getId() == correction.getPairedTransactionId())
+          .findFirst()
+          .ifPresent(t -> t.removePairedCorrection(correction));
     }
   }
 

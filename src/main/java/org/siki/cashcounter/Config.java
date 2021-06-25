@@ -69,8 +69,8 @@ public class Config {
 
   @Bean
   public AccountTransactionService getTransactionService(
-      DataForViewService dataForViewService, CategoryService categoryService) {
-    return new AccountTransactionService(dataForViewService, categoryService);
+      DataManager dataManager, CategoryService categoryService) {
+    return new AccountTransactionService(categoryService, dataManager);
   }
 
   @Bean

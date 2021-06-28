@@ -90,20 +90,21 @@ public class TransactionListView extends GridPane {
 
   private void addCategoryPicker(AccountTransaction transaction, int rowCnt) {
     ComboBox cbCategory = null;
-    if (transaction.getUnpairedAmount() != 0) {
-      cbCategory = new ComboBox();
-      cbCategory.setEditable(true);
-      cbCategory.setItems(dataForViewService.getAllCategories());
-      cbCategory.valueProperty().bindBidirectional(transaction.categoryProperty());
-      cbCategory.setPrefWidth(200);
-      cbCategory.visibleProperty().bind(transaction.pairedProperty().not());
-      cbCategory
-          .valueProperty()
-          .addListener((ChangeListener<String>) (observable, oldValue, newValue) -> validate());
+    //    if (transaction.getUnpairedAmount() != 0) {
+    cbCategory = new ComboBox();
+    cbCategory.setEditable(true);
+    cbCategory.setItems(dataForViewService.getAllCategories());
+    cbCategory.valueProperty().bindBidirectional(transaction.categoryProperty());
+    cbCategory.setPrefWidth(200);
+    //       Unpaired amount not counted
+    //      cbCategory.visibleProperty().bind(transaction.pairedProperty().not());
+    cbCategory
+        .valueProperty()
+        .addListener((ChangeListener<String>) (observable, oldValue, newValue) -> validate());
 
-      GridPane.setConstraints(cbCategory, 6, rowCnt);
-      this.getChildren().add(cbCategory);
-    }
+    GridPane.setConstraints(cbCategory, 6, rowCnt);
+    this.getChildren().add(cbCategory);
+    //    }
   }
 
   private void validate() {

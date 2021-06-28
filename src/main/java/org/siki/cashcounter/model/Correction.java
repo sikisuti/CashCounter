@@ -28,7 +28,7 @@ public class Correction implements Externalizable {
   private final transient LongProperty pairedTransactionId;
   @JsonIgnore private transient AccountTransaction pairedTransaction;
 
-  public final transient BooleanBinding paired;
+  @JsonIgnore public final transient BooleanBinding paired;
 
   public int getAmount() {
     return amount.get();
@@ -87,6 +87,7 @@ public class Correction implements Externalizable {
         Bindings.createBooleanBinding(() -> getPairedTransactionId() != 0, pairedTransactionId);
   }
 
+  @JsonIgnore
   public int getUnpairedAmount() {
     return pairedTransaction.getAmount() - getAmount();
   }

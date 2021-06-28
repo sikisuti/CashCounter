@@ -37,7 +37,7 @@ public final class DailyBalance {
   private final BooleanProperty predicted;
   private final BooleanProperty reviewed;
   //  private final IntegerProperty uncoveredDailySpent = new SimpleIntegerProperty();
-  @JsonIgnore public StringBinding notPairedDailySpent;
+  @JsonIgnore public StringBinding unpairedDailySpent;
 
   @Setter private DailyBalance prevDailyBalance;
 
@@ -162,6 +162,7 @@ public final class DailyBalance {
       corrections.add(correction);
     }
 
+    unpairedDailySpent.invalidate();
     updateBalance();
   }
 
@@ -175,6 +176,7 @@ public final class DailyBalance {
             .ifPresent(t -> t.removePairedCorrection(correction));
       }
 
+      unpairedDailySpent.invalidate();
       updateBalance();
     }
   }
@@ -334,7 +336,7 @@ public final class DailyBalance {
     }
 
     private void createNotPairedDailySpentBinding(DailyBalance dailyBalance) {
-      dailyBalance.notPairedDailySpent =
+      dailyBalance.unpairedDailySpent =
           Bindings.createStringBinding(
               () ->
                   new DecimalFormat("#,###,###' Ft'")

@@ -66,29 +66,28 @@ public class DataManager {
     }
   }
 
+  private List<DailyBalance> getAllDailyBalances() {
+    return dataSource.monthlyBalances.stream()
+        .flatMap(mb -> mb.getDailyBalances().stream())
+        .collect(Collectors.toList());
+  }
+
   private void wireDependencies() {
-    var allDailyBalances =
-        dataSource.monthlyBalances.stream()
-            .flatMap(mb -> mb.getDailyBalances().stream())
-            .collect(Collectors.toList());
+    var allDailyBalances = getAllDailyBalances();
+    allDailyBalances.get(0).setDataManager(this);
     for (var i = 1; i < allDailyBalances.size(); i++) {
       var actDailyBalance = allDailyBalances.get(i);
       var prevDailyBalance = allDailyBalances.get(i - 1);
+      actDailyBalance.setPrevDailyBalance(prevDailyBalance);
+      actDailyBalance.setDataManager(this);
       prevDailyBalance
           .balanceProperty()
-          .addListener(
-              (observable, oldValue, newValue) -> {
-                int newBalance = newValue.intValue() + actDailyBalance.getAllDailySpent();
-                if (actDailyBalance.isNotReviewed()) {
-                  newBalance += getDayAverage(actDailyBalance.getDate(), allDailyBalances);
-                }
-
-                actDailyBalance.setBalance(newBalance);
-              });
+          .addListener((observable, oldValue, newValue) -> actDailyBalance.updateBalance());
     }
   }
 
-  public int getDayAverage(LocalDate date, List<DailyBalance> allDailyBalances) {
+  public int getDayAverage(LocalDate date) {
+    var allDailyBalances = getAllDailyBalances();
     var averageSum = 0;
     // Consider the last 6 months
     for (int i = -6; i < 0; i++) {

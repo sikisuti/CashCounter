@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ListToObservableConverter<T> extends StdConverter<List<T>, ObservableList<T>> {
   @Override
-  public ObservableList<T> convert(List<T> accountTransactions) {
-    return FXCollections.observableArrayList(accountTransactions);
+  public ObservableList<T> convert(List<T> collection) {
+    return FXCollections.observableArrayList(collection);
   }
 }

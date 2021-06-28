@@ -88,14 +88,15 @@ public class TransactionListView extends GridPane {
     validate();
   }
 
-  private void addCategoryPicker(AccountTransaction observableTransaction, int rowCnt) {
+  private void addCategoryPicker(AccountTransaction transaction, int rowCnt) {
     ComboBox cbCategory = null;
-    if (observableTransaction.getNotPairedAmount() != 0) {
+    if (transaction.getUnpairedAmount() != 0) {
       cbCategory = new ComboBox();
       cbCategory.setEditable(true);
       cbCategory.setItems(dataForViewService.getAllCategories());
-      cbCategory.valueProperty().bindBidirectional(observableTransaction.categoryProperty());
+      cbCategory.valueProperty().bindBidirectional(transaction.categoryProperty());
       cbCategory.setPrefWidth(200);
+      cbCategory.visibleProperty().bind(transaction.pairedProperty().not());
       cbCategory
           .valueProperty()
           .addListener((ChangeListener<String>) (observable, oldValue, newValue) -> validate());

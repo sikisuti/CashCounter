@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.model.ObservableMonthlyBalance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ public class DataForViewService {
   @Autowired private final DataManager dataManager;
 
   private ObservableList<String> categories;
-  private ObservableList<String> correctionTypes;
   private ObservableList<ObservableMonthlyBalance> observableMonthlyBalances;
 
   public ObservableList<ObservableMonthlyBalance> getObservableMonthlyBalances() {
@@ -38,18 +36,6 @@ public class DataForViewService {
     dataManager.save();
   }
 
-  public ObservableList<String> getAllCorrectionTypes() {
-    if (correctionTypes == null) {
-      correctionTypes = FXCollections.observableArrayList();
-    }
-
-    if (correctionTypes.isEmpty()) {
-      collectCorrectionTypes();
-    }
-
-    return correctionTypes;
-  }
-
   public ObservableList<String> getAllCategories() {
     if (categories == null) {
       categories = FXCollections.observableArrayList();
@@ -60,17 +46,6 @@ public class DataForViewService {
     }
 
     return categories;
-  }
-
-  private void collectCorrectionTypes() {
-    correctionTypes.addAll(
-        dataManager.getMonthlyBalances().stream()
-            .flatMap(
-                mb ->
-                    mb.getDailyBalances().stream()
-                        .flatMap(db -> db.getCorrections().stream().map(Correction::getType)))
-            .distinct()
-            .collect(Collectors.toList()));
   }
 
   private void collectCategories() {

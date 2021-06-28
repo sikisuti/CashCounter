@@ -1,25 +1,24 @@
 package org.siki.cashcounter.view;
 
 import javafx.collections.ObservableList;
+import lombok.AllArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.service.CategoryService;
+import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.YearMonth;
 
+@AllArgsConstructor
 public class ViewFactory {
   @Autowired private final DataForViewService dataForViewService;
   @Autowired private final CategoryService categoryService;
-
-  public ViewFactory(DataForViewService dataForViewService, CategoryService categoryService) {
-    this.dataForViewService = dataForViewService;
-    this.categoryService = categoryService;
-  }
+  @Autowired private final CorrectionService correctionService;
 
   public MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(MonthlyBalance monthlyBalance) {
     var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(monthlyBalance, this);
@@ -36,13 +35,13 @@ public class ViewFactory {
     return new TransactionListView(transactions, parent, dataForViewService);
   }
 
-  public CorrectionDialog createNewCorrectionDialog(DailyBalanceControl parentDailyBalanceControl) {
-    return new CorrectionDialog(dataForViewService, parentDailyBalanceControl);
+  public CorrectionDialog createNewCorrectionDialog(DailyBalance parentDailyBalance) {
+    return new CorrectionDialog(correctionService, parentDailyBalance);
   }
 
   public CorrectionDialog editCorrectionDialog(
-      Correction correction, DailyBalanceControl parentDailyBalanceControl) {
-    return new CorrectionDialog(dataForViewService, correction, parentDailyBalanceControl);
+      Correction correction, DailyBalance parentDailyBalance) {
+    return new CorrectionDialog(correctionService, correction, parentDailyBalance);
   }
 
   public DailyBalanceControl createDailyBalanceControl(

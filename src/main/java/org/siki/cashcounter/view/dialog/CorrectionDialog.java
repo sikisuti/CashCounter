@@ -30,14 +30,14 @@ import javafx.util.converter.NumberStringConverter;
 import lombok.Getter;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
-import org.siki.cashcounter.service.DataForViewService;
-import org.siki.cashcounter.view.DailyBalanceControl;
+import org.siki.cashcounter.model.DailyBalance;
+import org.siki.cashcounter.service.CorrectionService;
 
 import java.time.format.DateTimeFormatter;
 
 public class CorrectionDialog extends Stage {
   @Getter private final Correction correction;
-  private final DailyBalanceControl parentDailyBalanceControl;
+  private final DailyBalance parentDailyBalance;
   private final BooleanBinding paired;
 
   ComboBox<String> cbType;
@@ -48,11 +48,9 @@ public class CorrectionDialog extends Stage {
   private final LongProperty pairedTransactionId;
 
   public CorrectionDialog(
-      DataForViewService dataForViewService,
-      Correction correction,
-      DailyBalanceControl parentDailyBalanceControl) {
+      CorrectionService correctionService, Correction correction, DailyBalance parentDailyBalance) {
     this.correction = correction;
-    this.parentDailyBalanceControl = parentDailyBalanceControl;
+    this.parentDailyBalance = parentDailyBalance;
 
     pairedTransactionId = new SimpleLongProperty(0);
     paired =
@@ -67,21 +65,21 @@ public class CorrectionDialog extends Stage {
           }
         };
 
-    loadUI(dataForViewService);
+    loadUI(correctionService);
 
     pairedTransactionId.set(correction.getPairedTransactionId());
   }
 
-  public CorrectionDialog(
-      DataForViewService dataForViewService, DailyBalanceControl parentDailyBalanceControl) {
-    this(dataForViewService, new Correction(), parentDailyBalanceControl);
+  public CorrectionDialog(CorrectionService correctionService, DailyBalance parentDailyBalance) {
+    this(correctionService, new Correction(), parentDailyBalance);
+    correction.setId(correctionService.getNextCorrectionId());
   }
 
-  private void loadUI(DataForViewService dataForViewService) {
+  private void loadUI(CorrectionService correctionService) {
     var lblType = new Label("Típus");
     cbType = new ComboBox<>();
     cbType.setEditable(true);
-    cbType.setItems(dataForViewService.getAllCorrectionTypes());
+    cbType.setItems(correctionService.getAllCorrectionTypes());
     var lblAmount = new Label("Összeg");
     tfAmount = new TextField();
     tfAmount.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
@@ -113,6 +111,11 @@ public class CorrectionDialog extends Stage {
     var btnSave = new Button("Mentés");
     btnSave.setOnAction(this::doSave);
     buttonBar.getButtons().add(btnSave);
+    if (correction.getId() != 0) {
+      var btnRemove = new Button("Töröl");
+      btnRemove.setOnAction(this::doRemove);
+      buttonBar.getButtons().add(btnRemove);
+    }
     var btnCancel = new Button("Mégse");
     btnCancel.setOnAction(this::doCancel);
     buttonBar.getButtons().add(btnCancel);
@@ -121,14 +124,10 @@ public class CorrectionDialog extends Stage {
 
     this.initModality(Modality.APPLICATION_MODAL);
     this.initStyle(StageStyle.UTILITY);
-    this.setTitle(
-        parentDailyBalanceControl.getDailyBalance().getDate().format(DateTimeFormatter.ISO_DATE));
+    this.setTitle(parentDailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
 
     prepareTable();
-    parentDailyBalanceControl
-        .getDailyBalance()
-        .getTransactions()
-        .forEach(t -> tblTransactions.getItems().add(t.clone()));
+    parentDailyBalance.getTransactions().forEach(t -> tblTransactions.getItems().add(t.clone()));
 
     cbType.setValue(correction.getType());
     tfAmount.setText(String.valueOf(correction.getAmount()));
@@ -204,8 +203,17 @@ public class CorrectionDialog extends Stage {
     correction.setType(cbType.getValue());
     correction.setComment(tfComment.getText());
 
+    if (correction.getPairedTransactionId() != 0) {
+      parentDailyBalance
+          .getTransactionById(correction.getPairedTransactionId())
+          .ifPresent(t -> t.removePairedCorrection(correction));
+    }
+
+    parentDailyBalance
+        .getTransactionById(pairedTransactionId.get())
+        .ifPresent(t -> t.addPairedCorrection(correction));
     correction.setPairedTransactionId(pairedTransactionId.get());
-    parentDailyBalanceControl.addCorrection(correction);
+    parentDailyBalance.addCorrection(correction);
 
     this.close();
   }
@@ -214,13 +222,16 @@ public class CorrectionDialog extends Stage {
     this.close();
   }
 
-  // TODO:
   protected void doRemove(ActionEvent event) {
-    parentDailyBalanceControl.removeCorrection(correction);
+    parentDailyBalance.removeCorrection(correction);
     this.close();
   }
 
   protected void doRemovePair(ActionEvent event) {
-    correction.setPairedTransactionId(0);
+    tblTransactions.getItems().stream()
+        .filter(t -> t.getId() == pairedTransactionId.get())
+        .findFirst()
+        .ifPresent(t -> t.removePairedCorrection(correction));
+    pairedTransactionId.set(0);
   }
 }

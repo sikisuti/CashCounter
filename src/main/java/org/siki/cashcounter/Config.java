@@ -4,6 +4,7 @@ import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.ChartService;
+import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.MainScene;
@@ -63,14 +64,21 @@ public class Config {
 
   @Bean
   public ViewFactory getControlFactory(
-      DataForViewService dataForViewService, CategoryService categoryService) {
-    return new ViewFactory(dataForViewService, categoryService);
+      DataForViewService dataForViewService,
+      CategoryService categoryService,
+      CorrectionService correctionService) {
+    return new ViewFactory(dataForViewService, categoryService, correctionService);
   }
 
   @Bean
   public AccountTransactionService getTransactionService(
       DataManager dataManager, CategoryService categoryService) {
     return new AccountTransactionService(categoryService, dataManager);
+  }
+
+  @Bean
+  public CorrectionService getCorrectionService(DataManager dataManager) {
+    return new CorrectionService(dataManager);
   }
 
   @Bean

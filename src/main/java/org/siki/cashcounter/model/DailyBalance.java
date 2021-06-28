@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -13,29 +14,32 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.siki.cashcounter.model.converter.CorrectionListToObservableConverter;
 import org.siki.cashcounter.model.converter.SavingListToObservableConverter;
 import org.siki.cashcounter.model.converter.TransactionListToObservableConverter;
+import org.siki.cashcounter.repository.DataManager;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize(converter = DailyBalance.PostConstruct.class)
 public final class DailyBalance {
-  private final ObjectProperty<LocalDate> date = new SimpleObjectProperty<>();
-  private final IntegerProperty balance = new SimpleIntegerProperty();
-  private final BooleanProperty balanceSetManually = new SimpleBooleanProperty();
-  private final BooleanProperty predicted = new SimpleBooleanProperty();
-  private final BooleanProperty reviewed = new SimpleBooleanProperty();
+  @Setter private DataManager dataManager;
+
+  private final ObjectProperty<LocalDate> date;
+  private final IntegerProperty balance;
+  private final BooleanProperty balanceSetManually;
+  private final BooleanProperty predicted;
+  private final BooleanProperty reviewed;
   //  private final IntegerProperty uncoveredDailySpent = new SimpleIntegerProperty();
   @JsonIgnore public StringBinding notPairedDailySpent;
 
-  private DailyBalance prevDailyBalance;
+  @Setter private DailyBalance prevDailyBalance;
 
   @Getter
   @JsonDeserialize(converter = SavingListToObservableConverter.class)
@@ -67,6 +71,14 @@ public final class DailyBalance {
 
   public void setBalance(int value) {
     balance.set(value);
+  }
+
+  public void addBalance(int value) {
+    balance.set(balance.get() + value);
+  }
+
+  public void minusBalance(int value) {
+    balance.set(balance.get() - value);
   }
 
   public IntegerProperty balanceProperty() {
@@ -128,6 +140,14 @@ public final class DailyBalance {
   //    return uncoveredDailySpent;
   //  }
 
+  public DailyBalance() {
+    date = new SimpleObjectProperty<>();
+    balance = new SimpleIntegerProperty();
+    balanceSetManually = new SimpleBooleanProperty();
+    predicted = new SimpleBooleanProperty();
+    reviewed = new SimpleBooleanProperty();
+  }
+
   public void addSaving(Saving saving) {
     savings.add(saving);
   }
@@ -138,21 +158,24 @@ public final class DailyBalance {
   }
 
   public void addCorrection(Correction correction) {
-    corrections.add(correction);
-    if (correction.isNotPaired()) {
-      setBalance(balance.get() + correction.getAmount());
+    if (corrections.stream().noneMatch(c -> c.getId() == correction.getId())) {
+      corrections.add(correction);
     }
+
+    updateBalance();
   }
 
   public void removeCorrection(Correction correction) {
-    corrections.remove(correction);
-    if (correction.isNotPaired()) {
-      setBalance(balance.get() - correction.getAmount());
-    } else {
-      transactions.stream()
-          .filter(t -> t.getId() == correction.getPairedTransactionId())
-          .findFirst()
-          .ifPresent(t -> t.removePairedCorrection(correction));
+    var isRemoved = corrections.remove(correction);
+    if (isRemoved) {
+      if (correction.paired.get()) {
+        transactions.stream()
+            .filter(t -> t.getId() == correction.getPairedTransactionId())
+            .findFirst()
+            .ifPresent(t -> t.removePairedCorrection(correction));
+      }
+
+      updateBalance();
     }
   }
 
@@ -171,16 +194,28 @@ public final class DailyBalance {
     }
   }
 
-  public void calculateBalance(int previousBalance) {
-    int diff = transactions.stream().mapToInt(AccountTransaction::getAmount).sum();
-    setBalance(previousBalance + diff);
+  @JsonIgnore
+  public Optional<AccountTransaction> getTransactionById(long id) {
+    return transactions.stream().filter(t -> t.getId() == id).findFirst();
+  }
+
+  public void updateBalance() {
+    int newBalance = prevDailyBalance.getBalance() + getAllDailySpent();
+    if (isNotReviewed()) {
+      newBalance += dataManager.getDayAverage(getDate());
+    }
+
+    setBalance(newBalance);
   }
 
   @JsonIgnore
   public int getAllDailySpent() {
     var transactionSum = transactions.stream().mapToInt(AccountTransaction::getAmount).sum();
     var notPairedCorrectionSum =
-        corrections.stream().filter(Correction::isNotPaired).mapToInt(Correction::getAmount).sum();
+        corrections.stream()
+            .filter(c -> c.paired.not().get())
+            .mapToInt(Correction::getAmount)
+            .sum();
 
     return transactionSum + notPairedCorrectionSum;
   }
@@ -278,30 +313,37 @@ public final class DailyBalance {
 
     @Override
     public DailyBalance convert(DailyBalance dailyBalance) {
+      addPairedCorrectionsToTransactions(dailyBalance);
+      createNotPairedDailySpentBinding(dailyBalance);
+
+      dailyBalance.reviewed.addListener(
+          (observable, oldValue, newValue) -> {
+            dailyBalance.updateBalance();
+          });
+
+      return dailyBalance;
+    }
+
+    private void addPairedCorrectionsToTransactions(DailyBalance dailyBalance) {
       for (var transaction : dailyBalance.transactions) {
         transaction.addAllPairedCorrection(
             dailyBalance.corrections.stream()
                 .filter(c -> c.getPairedTransactionId() == transaction.getId())
                 .collect(Collectors.toList()));
       }
+    }
 
+    private void createNotPairedDailySpentBinding(DailyBalance dailyBalance) {
       dailyBalance.notPairedDailySpent =
-          new StringBinding() {
-
-            {
-              super.bind(dailyBalance.transactions, dailyBalance.corrections);
-            }
-
-            @Override
-            protected String computeValue() {
-              return new DecimalFormat("#,###,###' Ft'")
-                  .format(
-                      dailyBalance.transactions.stream()
-                          .mapToInt(AccountTransaction::getNotPairedAmount)
-                          .sum());
-            }
-          };
-      return dailyBalance;
+          Bindings.createStringBinding(
+              () ->
+                  new DecimalFormat("#,###,###' Ft'")
+                      .format(
+                          dailyBalance.transactions.stream()
+                              .mapToInt(AccountTransaction::getUnpairedAmount)
+                              .sum()),
+              dailyBalance.transactions,
+              dailyBalance.corrections);
     }
   }
 }

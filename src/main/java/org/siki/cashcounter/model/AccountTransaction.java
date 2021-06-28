@@ -36,9 +36,8 @@ public final class AccountTransaction {
 
   @JsonIgnore private ObservableList<Correction> pairedCorrections;
 
-  private BooleanProperty paired;
+  @JsonIgnore private BooleanProperty paired;
 
-  @JsonIgnore
   public BooleanProperty pairedProperty() {
     return paired;
   }
@@ -97,7 +96,7 @@ public final class AccountTransaction {
   //  }
 
   @JsonIgnore
-  public Integer getNotPairedAmount() {
+  public Integer getUnpairedAmount() {
     return getAmount() - pairedCorrections.stream().mapToInt(Correction::getAmount).sum();
   }
 

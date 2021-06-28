@@ -40,8 +40,6 @@ public final class DailyBalanceControl extends VBox {
   private final MonthlyBalanceTitledPane parent;
   private final ViewFactory viewFactory;
 
-  private DailyBalanceControl prevDailyBalanceControl;
-
   @Getter
   private final ObservableList<CorrectionControl> correctionControls =
       FXCollections.observableArrayList();
@@ -64,9 +62,23 @@ public final class DailyBalanceControl extends VBox {
     setDragAndDrop();
     loadUI();
     setBackground();
-    dailyBalance.getCorrections().addListener((ListChangeListener<Correction>) c -> {
-      c.
-    });
+    dailyBalance
+        .getCorrections()
+        .addListener(
+            (ListChangeListener<Correction>)
+                c -> {
+                  while (c.next()) {
+                    if (c.wasRemoved()) {
+                      for (Correction removedItem : c.getRemoved()) {
+                        removeCorrectionControl(removedItem);
+                      }
+                    } else if (c.wasAdded()) {
+                      for (Correction addedItem : c.getAddedSubList()) {
+                        addCorrectionControl(addedItem);
+                      }
+                    }
+                  }
+                });
 
     this.correctionControls.addAll(
         dailyBalance.getCorrections().stream()
@@ -116,7 +128,7 @@ public final class DailyBalanceControl extends VBox {
           var success = false;
           if (db.hasContent(CorrectionControl.CORRECTION_DATA_FORMAT)) {
             Correction data = (Correction) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
-            addCorrection(data);
+            dailyBalance.addCorrection(data);
             success = true;
           }
           /* let the source know whether the string was successfully
@@ -207,26 +219,25 @@ public final class DailyBalanceControl extends VBox {
   }
 
   protected void openAddCorrectionDialog(ActionEvent event) {
-    var correctionDialog = viewFactory.createNewCorrectionDialog(this);
+    var correctionDialog = viewFactory.createNewCorrectionDialog(this.getDailyBalance());
     correctionDialog.showAndWait();
   }
 
-  public void addCorrection(Correction correction) {
-    if (correctionControls.stream().anyMatch(cc -> cc.getCorrection().getId() == correction.getId())) {
-      removeCorrection(correction);
+  public void addCorrectionControl(Correction correction) {
+    if (correctionControls.stream()
+        .anyMatch(cc -> cc.getCorrection().getId() == correction.getId())) {
+      removeCorrectionControl(correction);
     }
 
     correctionControls.add(viewFactory.createCorrectionControl(correction, this));
-    dailyBalance.addCorrection(correction);
   }
 
-  public void removeCorrection(Correction correction) {
+  public void removeCorrectionControl(Correction correction) {
     correctionControls.remove(
         correctionControls.stream()
             .filter(c -> c.getCorrection().getId() == correction.getId())
             .findFirst()
             .orElse(null));
-    dailyBalance.removeCorrection(correction);
   }
 
   public void addTransaction(AccountTransaction transaction) {

@@ -1,9 +1,7 @@
 package org.siki.cashcounter.view;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -51,7 +49,6 @@ public class CorrectionControl extends GridPane {
   private StringProperty commentProperty;
   private StringProperty typeProperty;
   private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
-  private BooleanProperty pairedProperty;
   private ObjectProperty<AccountTransaction> pairedTransaction;
 
   public int getAmount() {
@@ -88,18 +85,6 @@ public class CorrectionControl extends GridPane {
     return typeProperty;
   }
 
-  public boolean isPaired() {
-    return pairedProperty.get();
-  }
-
-  public boolean isNotPaired() {
-    return !isPaired();
-  }
-
-  public BooleanProperty pairedProperty() {
-    return pairedProperty;
-  }
-
   public long getPairedTransactionId() {
     return correction.getPairedTransactionId();
   }
@@ -119,16 +104,18 @@ public class CorrectionControl extends GridPane {
     this.correction = correction;
     this.viewFactory = viewFactory;
 
-    this.amountProperty = new SimpleIntegerProperty(correction.getAmount());
-    this.commentProperty = new SimpleStringProperty(correction.getComment());
-    this.typeProperty = new SimpleStringProperty(correction.getType());
+    this.amountProperty = new SimpleIntegerProperty();
+    amountProperty.bind(correction.amountProperty());
+    this.commentProperty = new SimpleStringProperty();
+    commentProperty.bind(correction.commentProperty());
+    this.typeProperty = new SimpleStringProperty();
+    typeProperty.bind(correction.typeProperty());
     this.pairedTransaction =
         new SimpleObjectProperty<>(
             parentDailyBalanceControl.getDailyBalance().getTransactions().stream()
                 .filter(t -> t.getId() == correction.getPairedTransactionId())
                 .findFirst()
                 .orElse(null));
-    this.pairedProperty = new SimpleBooleanProperty(correction.isPaired());
 
     setDragAndDrop();
     loadUI();
@@ -172,7 +159,7 @@ public class CorrectionControl extends GridPane {
     GridPane.setRowIndex(cirPaired, 1);
     cirPaired.setRadius(5);
     cirPaired.setFill(Color.BLUE);
-    cirPaired.visibleProperty().bind(pairedProperty);
+    cirPaired.visibleProperty().bind(correction.paired);
 
     this.getChildren().addAll(txtType, txtAmount, cirPaired);
 
@@ -198,7 +185,7 @@ public class CorrectionControl extends GridPane {
           /* the drag and drop gesture ended */
           /* if the data was successfully moved, clear it */
           if (event.getTransferMode() == TransferMode.MOVE) {
-            parent.removeCorrection(correction);
+            parent.getDailyBalance().removeCorrection(correction);
           }
           event.consume();
         });
@@ -212,7 +199,8 @@ public class CorrectionControl extends GridPane {
         categoryService.setSelectedCategory(getType());
       }
     } else if (event.getClickCount() == 2) {
-      var correctionDialog = viewFactory.editCorrectionDialog(this.correction, parent);
+      var correctionDialog =
+          viewFactory.editCorrectionDialog(this.correction, parent.getDailyBalance());
       correctionDialog.showAndWait();
     }
   }

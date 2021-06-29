@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -12,6 +13,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,20 +38,24 @@ public final class DailyBalance {
   private final BooleanProperty balanceSetManually;
   private final BooleanProperty predicted;
   private final BooleanProperty reviewed;
-  //  private final IntegerProperty uncoveredDailySpent = new SimpleIntegerProperty();
   @JsonIgnore public StringBinding unpairedDailySpent;
+  @JsonIgnore public IntegerBinding balanceWithSaving;
+  @JsonIgnore public IntegerBinding dailySavings;
 
   @Setter private DailyBalance prevDailyBalance;
 
   @Getter
+  @Setter
   @JsonDeserialize(converter = SavingListToObservableConverter.class)
   private ObservableList<Saving> savings;
 
   @Getter
+  @Setter
   @JsonDeserialize(converter = CorrectionListToObservableConverter.class)
   private ObservableList<Correction> corrections;
 
   @Getter
+  @Setter
   @JsonDeserialize(converter = TransactionListToObservableConverter.class)
   private ObservableList<AccountTransaction> transactions;
 
@@ -126,26 +132,16 @@ public final class DailyBalance {
     return reviewed;
   }
 
-  //  @JsonIgnore
-  //  public int getUncoveredDailySpent() {
-  //    return uncoveredDailySpent.get();
-  //  }
-  //
-  //  @JsonIgnore
-  //  public void setUncoveredDailySpent(int value) {
-  //    uncoveredDailySpent.set(value);
-  //  }
-  //
-  //  public IntegerProperty uncoveredDailySpentProperty() {
-  //    return uncoveredDailySpent;
-  //  }
-
   public DailyBalance() {
     date = new SimpleObjectProperty<>();
     balance = new SimpleIntegerProperty();
     balanceSetManually = new SimpleBooleanProperty();
     predicted = new SimpleBooleanProperty();
     reviewed = new SimpleBooleanProperty();
+
+    savings = FXCollections.observableArrayList();
+    corrections = FXCollections.observableArrayList();
+    transactions = FXCollections.observableArrayList();
   }
 
   public void addSaving(Saving saving) {
@@ -317,6 +313,9 @@ public final class DailyBalance {
     public DailyBalance convert(DailyBalance dailyBalance) {
       addPairedCorrectionsToTransactions(dailyBalance);
       createNotPairedDailySpentBinding(dailyBalance);
+      createBalanceWithSavingBinding(dailyBalance);
+      dailyBalance.dailySavings =
+          Bindings.createIntegerBinding(dailyBalance::getTotalSavings, dailyBalance.savings);
 
       dailyBalance.reviewed.addListener(
           (observable, oldValue, newValue) -> {
@@ -324,6 +323,16 @@ public final class DailyBalance {
           });
 
       return dailyBalance;
+    }
+
+    private void createBalanceWithSavingBinding(DailyBalance dailyBalance) {
+      dailyBalance.balanceWithSaving =
+          Bindings.createIntegerBinding(
+              () ->
+                  dailyBalance.getBalance()
+                      + dailyBalance.savings.stream().mapToInt(Saving::getAmount).sum(),
+              dailyBalance.balance,
+              dailyBalance.savings);
     }
 
     private void addPairedCorrectionsToTransactions(DailyBalance dailyBalance) {

@@ -57,6 +57,7 @@ public class MainScene extends Scene {
   @Autowired private final AccountTransactionService transactionService;
   @Autowired private final DailyBalanceService dailyBalanceService;
   @Autowired private final DataManager dataManager;
+  @Autowired private final CashFlowChart cashFlowChart;
 
   private final ObservableList<MonthlyBalanceTitledPane> monthlyBalanceTitledPanes =
       FXCollections.observableArrayList();
@@ -74,6 +75,7 @@ public class MainScene extends Scene {
       DailyBalanceService dailyBalanceService,
       DataManager dataManager) {
     super(new BorderPane(), 640, 480);
+    this.cashFlowChart = cashFlowChart;
     this.configurationManager = configurationManager;
     this.viewFactory = viewFactory;
     this.dataForViewService = dataForViewService;
@@ -244,7 +246,11 @@ public class MainScene extends Scene {
 
   private void scrollChart(ScrollEvent scrollEvent) {}
 
-  private void refreshChart(Event event) {}
+  private void refreshChart(Event event) {
+    if (((Tab) (event.getSource())).isSelected()) {
+      cashFlowChart.refreshChart();
+    }
+  }
 
   private void refreshStatistics(Event event) {}
 }

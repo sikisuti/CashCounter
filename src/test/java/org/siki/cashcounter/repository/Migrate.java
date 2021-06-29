@@ -2,6 +2,7 @@ package org.siki.cashcounter.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javafx.collections.FXCollections;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -49,7 +50,20 @@ class Migrate {
     List<DailyBalance> dailyBalances = new ArrayList<>();
     List<String> dailyBalanceSources = Files.readAllLines(Paths.get(dailyBalancesSourcePath));
     for (String dailyBalanceSource : dailyBalanceSources) {
-      dailyBalances.add(objectMapper.readValue(dailyBalanceSource, DailyBalance.class));
+      var dailyBalance = objectMapper.readValue(dailyBalanceSource, DailyBalance.class);
+      if (dailyBalance.getSavings() == null) {
+        dailyBalance.setSavings(FXCollections.observableArrayList());
+      }
+
+      if (dailyBalance.getCorrections() == null) {
+        dailyBalance.setCorrections(FXCollections.observableArrayList());
+      }
+
+      if (dailyBalance.getTransactions() == null) {
+        dailyBalance.setTransactions(FXCollections.observableArrayList());
+      }
+
+      dailyBalances.add(dailyBalance);
     }
 
     log.info(dailyBalances.size() + " DailyBalance read");

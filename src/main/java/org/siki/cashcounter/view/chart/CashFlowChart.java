@@ -15,9 +15,15 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
     super(
         new DateAxis(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)),
         new NumberAxis());
-    this.setCreateSymbols(false);
+    this.chartService = chartService;
 
-    var series = chartService.getBalances();
-    this.getData().add(series);
+    this.setCreateSymbols(false);
+  }
+
+  public void refreshChart() {
+    var series = chartService.getSeries();
+    this.setData(series);
+
+    ((NumberAxis) this.getYAxis()).setUpperBound(7000000);
   }
 }

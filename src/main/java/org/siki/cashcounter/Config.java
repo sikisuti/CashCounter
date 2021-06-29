@@ -7,6 +7,7 @@ import org.siki.cashcounter.service.ChartService;
 import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
+import org.siki.cashcounter.service.PredictionService;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.ViewFactory;
 import org.siki.cashcounter.view.chart.CashFlowChart;
@@ -36,15 +37,17 @@ public class Config {
       DataForViewService dataForViewService,
       AccountTransactionService accountTransactionService,
       DailyBalanceService dailyBalanceService,
-      DataManager dataManager) {
+      DataManager dataManager,
+      PredictionService predictionService) {
     return new MainScene(
-        cashFlowChart,
         configurationManager,
         viewFactory,
         dataForViewService,
         accountTransactionService,
         dailyBalanceService,
-        dataManager);
+        dataManager,
+        cashFlowChart,
+        predictionService);
   }
 
   @Bean
@@ -82,12 +85,18 @@ public class Config {
   }
 
   @Bean
-  public DailyBalanceService getDailyBalanceService(DataForViewService dataForViewService) {
-    return new DailyBalanceService(dataForViewService);
+  public DailyBalanceService getDailyBalanceService(DataManager dataManager) {
+    return new DailyBalanceService(dataManager);
   }
 
   @Bean
   public CategoryService getCategoryService(DataManager dataManager) {
     return new CategoryService(dataManager);
+  }
+
+  @Bean
+  public PredictionService getPredictionService(
+      DataManager dataManager, DailyBalanceService dailyBalanceService) {
+    return new PredictionService(dataManager, dailyBalanceService);
   }
 }

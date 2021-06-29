@@ -26,10 +26,12 @@ import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.AccountTransaction;
+import org.siki.cashcounter.model.PredictedCorrection;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
+import org.siki.cashcounter.service.PredictionService;
 import org.siki.cashcounter.util.StopWatch;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -58,6 +61,7 @@ public class MainScene extends Scene {
   @Autowired private final DailyBalanceService dailyBalanceService;
   @Autowired private final DataManager dataManager;
   @Autowired private final CashFlowChart cashFlowChart;
+  @Autowired private final PredictionService predictionService;
 
   private final ObservableList<MonthlyBalanceTitledPane> monthlyBalanceTitledPanes =
       FXCollections.observableArrayList();
@@ -67,13 +71,14 @@ public class MainScene extends Scene {
   private final VBox vbStatistics = new VBox();
 
   public MainScene(
-      CashFlowChart cashFlowChart,
       ConfigurationManager configurationManager,
       ViewFactory viewFactory,
       DataForViewService dataForViewService,
       AccountTransactionService transactionService,
       DailyBalanceService dailyBalanceService,
-      DataManager dataManager) {
+      DataManager dataManager,
+      CashFlowChart cashFlowChart,
+      PredictionService predictionService) {
     super(new BorderPane(), 640, 480);
     this.cashFlowChart = cashFlowChart;
     this.configurationManager = configurationManager;
@@ -82,6 +87,7 @@ public class MainScene extends Scene {
     this.transactionService = transactionService;
     this.dailyBalanceService = dailyBalanceService;
     this.dataManager = dataManager;
+    this.predictionService = predictionService;
 
     Bindings.bindContent(dailyBalancesPH.getChildren(), monthlyBalanceTitledPanes);
 
@@ -242,7 +248,32 @@ public class MainScene extends Scene {
 
   private void showCategories(ActionEvent actionEvent) {}
 
-  private void loadPredictedCorrections(ActionEvent actionEvent) {}
+  private void loadPredictedCorrections(ActionEvent event) {
+    var fileChooser = new FileChooser();
+    fileChooser.setTitle("Válaszd ki a korrekciós fájlt");
+    fileChooser
+        .getExtensionFilters()
+        .addAll(
+            new FileChooser.ExtensionFilter("json files", "*.jsn"),
+            new FileChooser.ExtensionFilter("Minden fájl", "*.*"));
+    var selectedFile = fileChooser.showOpenDialog(getWindow());
+    if (selectedFile != null) {
+      List<PredictedCorrection> pcList;
+      try {
+        pcList = predictionService.loadPredictedCorrections(selectedFile.getAbsolutePath());
+        predictionService.clearPredictedCorrections();
+        predictionService.fillPredictedCorrections(pcList);
+      } catch (IOException ex) {
+        log.error("", ex);
+      }
+
+      var alert = new Alert(Alert.AlertType.INFORMATION);
+      alert.setTitle("Üzenet");
+      alert.setHeaderText("Végrehajtva");
+      alert.setContentText("Korrekciók betöltve");
+      alert.showAndWait();
+    }
+  }
 
   private void scrollChart(ScrollEvent scrollEvent) {}
 

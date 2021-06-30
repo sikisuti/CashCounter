@@ -96,7 +96,9 @@ public class Config {
 
   @Bean
   public PredictionService getPredictionService(
-      DataManager dataManager, DailyBalanceService dailyBalanceService) {
-    return new PredictionService(dataManager, dailyBalanceService);
+      DataManager dataManager,
+      DailyBalanceService dailyBalanceService,
+      CorrectionService correctionService) {
+    return new PredictionService(dataManager, dailyBalanceService, correctionService);
   }
 }

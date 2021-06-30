@@ -1,0 +1,74 @@
+# Bér
+{"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":770000,"startDate":"2021-07-01"}
+{"category":"Siki bér","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":200000}
+{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":120000,"startDate":"2019-10-01"}
+{"category":"Gabó bér","subCategory":"Waldorf","day":3,"amount":50000,"startDate":"2021-10-01","endDate":"2022-07-01"}
+
+# Juttatás
+{"category":"Gabó bér","subCategory":"Családi pótlék","day":3,"amount":26600}
+
+# Hitel
+{"category":"Hitel","subCategory":"Siki Fundamenta","day":8,"amount":-38750,"startDate":"2018-11-01","endDate":"2029-09-01"}
+{"category":"Hitel","subCategory":"Gabó OTP","day":3,"amount":-24953}
+{"category":"Hitel","subCategory":"Timótól hitelre","day":13,"amount":24953}
+{"category":"Hitel","subCategory":"Autó lízing","day":13,"amount":-61915}
+
+# Üzemanyag
+{"category":"Üzemanyag","subCategory":"Tankolás","day":7,"amount":-20000}
+{"category":"Üzemanyag","subCategory":"Tankolás","day":14,"amount":-20000}
+{"category":"Üzemanyag","subCategory":"Tankolás","day":21,"amount":-20000}
+{"category":"Üzemanyag","subCategory":"Tankolás","day":28,"amount":-20000}
+
+# Kulcs rezsi
+{"category":"Kulcs rezsi","subCategory":"Kulcs biztosítás","day":8,"amount":-2306}
+{"category":"Kulcs rezsi","subCategory":"Kulcs villany","day":28,"amount":-6000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs víz","day":20,"amount":-9000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":2,"monthDay":7,"amount":-6000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":5,"monthDay":7,"amount":-6000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":8,"monthDay":7,"amount":-6000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":11,"monthDay":7,"amount":-6000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs Gáz","day":26,"amount":-15000}
+{"category":"Kulcs rezsi","subCategory":"Tarr TV","day":3,"amount":-10000}
+
+# Ruha
+{"category":"Ruha","subCategory":"Ruha","dayOfWeek":2,"amount":-20000}
+
+# Gyógyszer
+{"category":"Gyógyszer","subCategory":"Gyógyszer","dayOfWeek":2,"amount":-22000}
+
+# Autó
+{"category":"Autó","subCategory":"Autó szervíz","day":5,"amount":-10000}
+{"category":"Autó","subCategory":"Mazda 3 KGFB","month":1,"monthDay":5,"amount":-25000}
+{"category":"Autó","subCategory":"Mazda 2 KGFB","month":1,"monthDay":5,"amount":-25000}
+{"category":"Autó","subCategory":"Autópálya díj","month":1,"monthDay":5,"amount":-10000}
+{"category":"Autó","subCategory":"Mazda 3 Gépjárműadó","month":3,"monthDay":5,"amount":-9100}
+{"category":"Autó","subCategory":"Mazda 2 Gépjárműadó","month":3,"monthDay":5,"amount":-13000}
+
+# Megtakarítás
+{"category":"Megtakarítás","subCategory":"Vince Fundamenta","day":10,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Siki Fundamenta","day":8,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Anna Fundamenta","day":8,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Vince Fundi gyerekszámla","day":10,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Anna Fundi gyerekszámla","day":10,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Union","month":6,"monthDay":20,"amount":-260000}
+
+# Szórakozás
+{"category":"Szórakozás","subCategory":"Szórakozás","day":25,"amount":-5000}
+{"category":"Szórakozás","subCategory":"Netflix, HBO","day":2,"amount":-5200}
+
+# Telefon
+{"category":"Telefon","subCategory":"Gabó telefon","day":5,"amount":-4000}
+
+# Egyéb
+# Szülinapok
+{"category":"Ajándék","subCategory":"Vince szülinap","month":10,"monthDay":10,"amount":-20000}
+{"category":"Ajándék","subCategory":"Anna szülinap","month":8,"monthDay":5,"amount":-20000}
+# Autex
+#{"category":"Egyéb","subCategory":"Autex éves pénz","month":12,"monthDay":5,"amount":80000}
+# Karácsony
+{"category":"Ajándék","subCategory":"Karácsony","month":12,"monthDay":10,"amount":-80000}
+# Gabó kontaktlencse
+{"category":"Gabó kontaktlencse","subCategory":"Gabó féléves kontaktlencse","month":6,"monthDay":28,"amount":-30000}
+{"category":"Gabó kontaktlencse","subCategory":"Gabó féléves kontaktlencse","month":12,"monthDay":28,"amount":-30000}
+# Nyaralás
+{"category":"Szórakozás","subCategory":"Nyaralás","month":7,"monthDay":25,"amount":-200000}

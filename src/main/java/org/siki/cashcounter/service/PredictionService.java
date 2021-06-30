@@ -25,6 +25,7 @@ import static java.util.Optional.ofNullable;
 public class PredictionService {
   private final DataManager dataManager;
   private final DailyBalanceService dailyBalanceService;
+  private final CorrectionService correctionService;
 
   public List<PredictedCorrection> loadPredictedCorrections(String path) throws IOException {
     List<PredictedCorrection> pcList = new ArrayList<>();
@@ -90,6 +91,7 @@ public class PredictionService {
                 .forEach(
                     db -> {
                       var correctionToAdd = new Correction();
+                      correctionToAdd.setId(correctionService.getNextCorrectionId());
                       correctionToAdd.setType(pc.getCategory());
                       correctionToAdd.setComment(pc.getSubCategory());
                       correctionToAdd.setAmount(pc.getAmount());
@@ -105,6 +107,7 @@ public class PredictionService {
                   && dbSchedList.get(i).getDate().getDayOfWeek().getValue() <= 5
                   && found) {
                 var correctionToAdd = new Correction();
+                correctionToAdd.setId(correctionService.getNextCorrectionId());
                 correctionToAdd.setType(pc.getCategory());
                 correctionToAdd.setComment(pc.getSubCategory());
                 correctionToAdd.setAmount(pc.getAmount());
@@ -123,6 +126,7 @@ public class PredictionService {
                   && dbSchedList.get(i).getDate().getDayOfWeek().getValue() <= 5
                   && found) {
                 var correctionToAdd = new Correction();
+                correctionToAdd.setId(correctionService.getNextCorrectionId());
                 correctionToAdd.setType(pc.getCategory());
                 correctionToAdd.setComment(pc.getSubCategory());
                 correctionToAdd.setAmount(pc.getAmount());

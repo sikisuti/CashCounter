@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.util.Optional.ofNullable;
 
 @AllArgsConstructor
 public class PredictionService {
@@ -63,7 +64,6 @@ public class PredictionService {
   }
 
   public void fillPredictedCorrections(List<PredictedCorrection> predictedCorrections) {
-
     List<DailyBalance> futureDailyBalances =
         dataManager.getMonthlyBalances().stream()
             .flatMap(mb -> mb.getDailyBalances().stream())
@@ -72,19 +72,17 @@ public class PredictionService {
 
     predictedCorrections.forEach(
         pc -> {
-          List<DailyBalance> dbSchedList = futureDailyBalances;
-          if (pc.getStartDate() != null) {
-            dbSchedList =
-                dbSchedList.stream()
-                    .filter(db -> db.getDate().isAfter(pc.getStartDate()))
-                    .collect(Collectors.toList());
-          }
-          if (pc.getEndDate() != null) {
-            dbSchedList =
-                dbSchedList.stream()
-                    .filter(db -> db.getDate().isBefore(pc.getEndDate()))
-                    .collect(Collectors.toList());
-          }
+          List<DailyBalance> dbSchedList =
+              futureDailyBalances.stream()
+                  .filter(
+                      db ->
+                          ofNullable(pc.getStartDate())
+                                  .map(pcStartDate -> db.getDate().isAfter(pcStartDate))
+                                  .orElse(true)
+                              && ofNullable(pc.getEndDate())
+                                  .map(pcEndDate -> db.getDate().isBefore(pcEndDate))
+                                  .orElse(true))
+                  .collect(Collectors.toList());
 
           if (pc.getDayOfWeek() != null) {
             dbSchedList.stream()
@@ -98,7 +96,7 @@ public class PredictionService {
                       db.addCorrection(correctionToAdd);
                     });
           } else if (pc.getDay() != null) {
-            boolean found = false;
+            var found = false;
             for (int i = dbSchedList.size() - 1; i >= 0; i--) {
               if (dbSchedList.get(i).getDate().getDayOfMonth() == pc.getDay()) {
                 found = true;
@@ -115,7 +113,7 @@ public class PredictionService {
               }
             }
           } else if (pc.getMonth() != null && pc.getMonthDay() != null) {
-            boolean found = false;
+            var found = false;
             for (int i = dbSchedList.size() - 1; i >= 0; i--) {
               if (dbSchedList.get(i).getDate().getMonth().equals(pc.getMonth())
                   && dbSchedList.get(i).getDate().getDayOfMonth() == pc.getMonthDay()) {

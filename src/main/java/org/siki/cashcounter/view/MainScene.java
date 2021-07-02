@@ -283,5 +283,10 @@ public class MainScene extends Scene {
     }
   }
 
-  private void refreshStatistics(Event event) {}
+  private void refreshStatistics(Event event) {
+    if (((Tab) (event.getSource())).isSelected()) {
+      vbStatistics.getChildren().clear();
+      vbStatistics.getChildren().add(viewFactory.createStatisticsView());
+    }
+  }
 }

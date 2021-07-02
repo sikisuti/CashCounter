@@ -54,6 +54,11 @@ public final class AccountTransaction {
     return category;
   }
 
+  @JsonIgnore
+  public boolean isPaired() {
+    return paired.get();
+  }
+
   private boolean possibleDuplicate;
 
   public AccountTransaction() {

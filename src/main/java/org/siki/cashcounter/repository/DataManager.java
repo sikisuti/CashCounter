@@ -66,7 +66,7 @@ public class DataManager {
     }
   }
 
-  private List<DailyBalance> getAllDailyBalances() {
+  public List<DailyBalance> getAllDailyBalances() {
     return dataSource.monthlyBalances.stream()
         .flatMap(mb -> mb.getDailyBalances().stream())
         .collect(Collectors.toList());

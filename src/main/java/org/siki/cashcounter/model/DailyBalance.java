@@ -317,6 +317,9 @@ public final class DailyBalance {
       dailyBalance.dailySavings =
           Bindings.createIntegerBinding(dailyBalance::getTotalSavings, dailyBalance.savings);
 
+      dailyBalance.corrections.forEach(c -> c.setParentDailyBalance(dailyBalance));
+      dailyBalance.transactions.forEach(t -> t.setDate(dailyBalance.getDate()));
+
       dailyBalance.reviewed.addListener(
           (observable, oldValue, newValue) -> {
             dailyBalance.updateBalance();

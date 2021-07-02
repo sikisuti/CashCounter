@@ -69,8 +69,11 @@ public class Config {
   public ViewFactory getControlFactory(
       DataForViewService dataForViewService,
       CategoryService categoryService,
-      CorrectionService correctionService) {
-    return new ViewFactory(dataForViewService, categoryService, correctionService);
+      CorrectionService correctionService,
+      DataManager dataManager,
+      ConfigurationManager configurationManager) {
+    return new ViewFactory(
+        dataForViewService, categoryService, correctionService, dataManager, configurationManager);
   }
 
   @Bean

@@ -73,6 +73,7 @@ public class CorrectionDialog extends Stage {
   public CorrectionDialog(CorrectionService correctionService, DailyBalance parentDailyBalance) {
     this(correctionService, new Correction(), parentDailyBalance);
     correction.setId(correctionService.getNextCorrectionId());
+    correction.setParentDailyBalance(parentDailyBalance);
   }
 
   private void loadUI(CorrectionService correctionService) {

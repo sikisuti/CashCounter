@@ -27,8 +27,8 @@ public class Correction implements Externalizable {
   private final transient StringProperty type;
   private final transient LongProperty pairedTransactionId;
   @JsonIgnore private transient AccountTransaction pairedTransaction;
-
   @JsonIgnore public final transient BooleanBinding paired;
+  @JsonIgnore private DailyBalance parentDailyBalance;
 
   public int getAmount() {
     return amount.get();

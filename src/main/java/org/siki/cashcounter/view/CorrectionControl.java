@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.CategoryService;
-import org.siki.cashcounter.view.model.ObservableDailyBalance;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -48,7 +47,6 @@ public class CorrectionControl extends GridPane {
   private IntegerProperty amountProperty;
   private StringProperty commentProperty;
   private StringProperty typeProperty;
-  private ObjectProperty<ObservableDailyBalance> observableDailyBalance;
   private ObjectProperty<AccountTransaction> pairedTransaction;
 
   public int getAmount() {

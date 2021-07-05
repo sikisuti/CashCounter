@@ -13,8 +13,10 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 import org.siki.cashcounter.ConfigurationManager;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Map.Entry;
@@ -119,7 +121,7 @@ public class StatisticsView extends GridPane {
     Label lblValue;
 
     value = categoryEntry.getValue().getAmount();
-    lblValue = new Label(NumberFormat.getCurrencyInstance().format(value));
+    lblValue = new Label(new DecimalFormat("#,###,###' Ft'").format(value));
     setCellStyle(cell, lblValue, date);
     addToolTip(categoryEntry, lblValue);
     cell.getChildren().add(lblValue);
@@ -163,6 +165,7 @@ public class StatisticsView extends GridPane {
     }
 
     var tt = new Tooltip(tooltipBuilder.toString());
+    tt.setShowDuration(Duration.minutes(1));
     lblValue.setTooltip(tt);
   }
 

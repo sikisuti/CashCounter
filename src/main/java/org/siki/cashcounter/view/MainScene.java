@@ -263,6 +263,7 @@ public class MainScene extends Scene {
         pcList = predictionService.loadPredictedCorrections(selectedFile.getAbsolutePath());
         predictionService.clearPredictedCorrections();
         predictionService.fillPredictedCorrections(pcList);
+        predictionService.storePredictions(pcList);
       } catch (IOException ex) {
         log.error("", ex);
       }

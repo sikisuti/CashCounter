@@ -4,6 +4,8 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
@@ -11,6 +13,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import lombok.Getter;
@@ -25,11 +28,13 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   @Getter private final ObservableList<DailyBalanceControl> dailyBalanceControls;
 
   private final VBox vbDailyBalances = new VBox();
+  private final GridPane content = new GridPane();
 
   public MonthlyBalanceTitledPane(MonthlyBalance monthlyBalance, ViewFactory viewFactory) {
-    super(
-        monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
-        new GridPane());
+    //    super(
+    //        monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
+    //        new GridPane());
+    this.setContent(content);
     this.monthlyBalance = monthlyBalance;
     this.viewFactory = viewFactory;
 
@@ -39,9 +44,8 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void loadUI() {
-    GridPane gpRoot = (GridPane) this.getContent();
     GridPane.setColumnIndex(vbDailyBalances, 0);
-    gpRoot.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
+    content.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
     Bindings.bindContent(vbDailyBalances.getChildren(), dailyBalanceControls);
     this.expandedProperty()
         .addListener(
@@ -55,6 +59,25 @@ public class MonthlyBalanceTitledPane extends TitledPane {
                                 viewFactory.createDailyBalanceControl(db, this)));
               }
             });
+
+    var infoButton = new Button("i");
+    //    infoButton.setShape(new Circle(5));
+    infoButton.setStyle(
+        "-fx-background-color: #bbbbff; "
+            + "-fx-background-radius: 5em; "
+            + "-fx-min-width: 15px; "
+            + "-fx-min-height: 15px; "
+            + "-fx-max-width: 15px; "
+            + "-fx-max-height: 15px; "
+            + "-fx-background-insets: 0px; "
+            + "-fx-padding: 0px;"
+            + "-fx-margin: 5,5,5,5");
+    infoButton.setOnAction(event -> viewFactory.getMonthInfoDialog(monthlyBalance).showAndWait());
+    var title =
+        new Label(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
+    var header = new HBox(infoButton, title);
+    header.setSpacing(5);
+    this.setGraphic(header);
   }
 
   public void validate() {

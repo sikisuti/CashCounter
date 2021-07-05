@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -132,6 +133,25 @@ public class PredictionService {
                 correctionToAdd.setAmount(pc.getAmount());
                 dbSchedList.get(i).addCorrection(correctionToAdd);
                 found = false;
+              }
+            }
+          }
+        });
+  }
+
+  public void storePredictions(List<PredictedCorrection> predictedCorrections) {
+    var futureMonths = dataManager.getMonthlyBalances();
+    futureMonths.forEach(
+        mb -> {
+          if (mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1))) {
+            mb.clearPredictions();
+          }
+
+          if (mb.getPredictions().isEmpty()) {
+            for (var prediction : predictedCorrections) {
+              if (prediction.getMonth() == null
+                  || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
+                mb.addPrediction(prediction.getCategory(), prediction.getAmount());
               }
             }
           }

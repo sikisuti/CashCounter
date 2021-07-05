@@ -13,6 +13,7 @@ import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
+import org.siki.cashcounter.view.dialog.MonthInfoDialog;
 import org.siki.cashcounter.view.statistics.StatisticsProvider;
 import org.siki.cashcounter.view.statistics.StatisticsView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,5 +65,9 @@ public class ViewFactory {
   public GridPane createStatisticsView() {
     var statisticsProvider = new StatisticsProvider(dataManager, configurationManager);
     return new StatisticsView(configurationManager, statisticsProvider);
+  }
+
+  public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {
+    return new MonthInfoDialog(monthlyBalance);
   }
 }

@@ -174,7 +174,7 @@ public final class DailyBalanceControl extends VBox {
     txtBalance.textProperty().bindBidirectional(dailyBalance.balanceProperty(), currencyFormat);
     var txtDailySpend = new Label();
     txtDailySpend.setPrefWidth(100);
-    txtDailySpend.textProperty().bind(dailyBalance.unpairedDailySpent);
+    txtDailySpend.textProperty().bind(dailyBalance.unpairedDailySpentBinding);
     btnAdd = new Button("+");
     btnAdd.onActionProperty().set(this::openAddCorrectionDialog);
     btnAdd.setVisible(false);

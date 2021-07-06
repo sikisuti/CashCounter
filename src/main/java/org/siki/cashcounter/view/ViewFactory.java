@@ -68,6 +68,6 @@ public class ViewFactory {
   }
 
   public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {
-    return new MonthInfoDialog(monthlyBalance);
+    return new MonthInfoDialog(monthlyBalance, dataManager);
   }
 }

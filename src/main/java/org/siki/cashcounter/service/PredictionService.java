@@ -13,8 +13,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -151,10 +154,23 @@ public class PredictionService {
             for (var prediction : predictedCorrections) {
               if (prediction.getMonth() == null
                   || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
-                mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                if (prediction.getDayOfWeek() != null) {
+                  for (var i = 0;
+                      i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
+                      i++) {
+                    mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                  }
+                } else {
+                  mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                }
               }
             }
           }
         });
+  }
+
+  public static int countDayOccurenceInMonth(DayOfWeek dow, YearMonth month) {
+    LocalDate start = month.atDay(1).with(TemporalAdjusters.nextOrSame(dow));
+    return (int) ChronoUnit.WEEKS.between(start, month.atEndOfMonth()) + 1;
   }
 }

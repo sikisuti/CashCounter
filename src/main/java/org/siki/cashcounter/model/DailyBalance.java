@@ -38,7 +38,7 @@ public final class DailyBalance {
   private final BooleanProperty balanceSetManually;
   private final BooleanProperty predicted;
   private final BooleanProperty reviewed;
-  @JsonIgnore public StringBinding unpairedDailySpent;
+  @JsonIgnore public StringBinding unpairedDailySpentBinding;
   @JsonIgnore public IntegerBinding balanceWithSaving;
   @JsonIgnore public IntegerBinding dailySavings;
 
@@ -132,6 +132,11 @@ public final class DailyBalance {
     return reviewed;
   }
 
+  @JsonIgnore
+  public int getUnpairedDailySpent() {
+    return transactions.stream().mapToInt(AccountTransaction::getUnpairedAmount).sum();
+  }
+
   public DailyBalance() {
     date = new SimpleObjectProperty<>();
     balance = new SimpleIntegerProperty();
@@ -158,7 +163,7 @@ public final class DailyBalance {
       corrections.add(correction);
     }
 
-    unpairedDailySpent.invalidate();
+    unpairedDailySpentBinding.invalidate();
     updateBalance();
   }
 
@@ -172,7 +177,7 @@ public final class DailyBalance {
             .ifPresent(t -> t.removePairedCorrection(correction));
       }
 
-      unpairedDailySpent.invalidate();
+      unpairedDailySpentBinding.invalidate();
       updateBalance();
     }
   }
@@ -348,14 +353,10 @@ public final class DailyBalance {
     }
 
     private void createNotPairedDailySpentBinding(DailyBalance dailyBalance) {
-      dailyBalance.unpairedDailySpent =
+      dailyBalance.unpairedDailySpentBinding =
           Bindings.createStringBinding(
               () ->
-                  new DecimalFormat("#,###,###' Ft'")
-                      .format(
-                          dailyBalance.transactions.stream()
-                              .mapToInt(AccountTransaction::getUnpairedAmount)
-                              .sum()),
+                  new DecimalFormat("#,###,###' Ft'").format(dailyBalance.getUnpairedDailySpent()),
               dailyBalance.transactions,
               dailyBalance.corrections);
     }

@@ -12,8 +12,9 @@ public class CompareRow {
   String category;
   int predictedAmount;
   int amount;
+  boolean bold;
 
   public int getDifference() {
-    return predictedAmount - amount;
+    return amount - predictedAmount;
   }
 }

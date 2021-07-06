@@ -7,6 +7,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 
+import static java.util.Optional.ofNullable;
+
 @Data
 @NoArgsConstructor
 public class PredictedCorrection {
@@ -22,5 +24,13 @@ public class PredictedCorrection {
 
   public void setMonth(int value) {
     month = Month.of(value);
+  }
+
+  public LocalDate getStartDate() {
+    return ofNullable(startDate).orElse(LocalDate.MIN);
+  }
+
+  public LocalDate getEndDate() {
+    return ofNullable(endDate).orElse(LocalDate.MAX);
   }
 }

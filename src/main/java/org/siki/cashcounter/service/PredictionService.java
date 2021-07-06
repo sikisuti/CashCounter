@@ -81,12 +81,8 @@ public class PredictionService {
               futureDailyBalances.stream()
                   .filter(
                       db ->
-                          ofNullable(pc.getStartDate())
-                                  .map(pcStartDate -> db.getDate().isAfter(pcStartDate))
-                                  .orElse(true)
-                              && ofNullable(pc.getEndDate())
-                                  .map(pcEndDate -> db.getDate().isBefore(pcEndDate))
-                                  .orElse(true))
+                          db.getDate().isAfter(pc.getStartDate())
+                              && db.getDate().isBefore(pc.getEndDate()))
                   .collect(Collectors.toList());
 
           if (pc.getDayOfWeek() != null) {
@@ -95,6 +91,7 @@ public class PredictionService {
                 .forEach(
                     db -> {
                       var correctionToAdd = new Correction();
+                      correctionToAdd.setParentDailyBalance(db);
                       correctionToAdd.setId(correctionService.getNextCorrectionId());
                       correctionToAdd.setType(pc.getCategory());
                       correctionToAdd.setComment(pc.getSubCategory());
@@ -111,6 +108,7 @@ public class PredictionService {
                   && dbSchedList.get(i).getDate().getDayOfWeek().getValue() <= 5
                   && found) {
                 var correctionToAdd = new Correction();
+                correctionToAdd.setParentDailyBalance(dbSchedList.get(i));
                 correctionToAdd.setId(correctionService.getNextCorrectionId());
                 correctionToAdd.setType(pc.getCategory());
                 correctionToAdd.setComment(pc.getSubCategory());
@@ -130,6 +128,7 @@ public class PredictionService {
                   && dbSchedList.get(i).getDate().getDayOfWeek().getValue() <= 5
                   && found) {
                 var correctionToAdd = new Correction();
+                correctionToAdd.setParentDailyBalance(dbSchedList.get(i));
                 correctionToAdd.setId(correctionService.getNextCorrectionId());
                 correctionToAdd.setType(pc.getCategory());
                 correctionToAdd.setComment(pc.getSubCategory());
@@ -143,8 +142,8 @@ public class PredictionService {
   }
 
   public void storePredictions(List<PredictedCorrection> predictedCorrections) {
-    var futureMonths = dataManager.getMonthlyBalances();
-    futureMonths.forEach(
+    var months = dataManager.getMonthlyBalances();
+    months.forEach(
         mb -> {
           if (mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1))) {
             mb.clearPredictions();
@@ -161,7 +160,13 @@ public class PredictionService {
                     mb.addPrediction(prediction.getCategory(), prediction.getAmount());
                   }
                 } else {
-                  mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                  var date =
+                      mb.getYearMonth()
+                          .atDay(ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
+                  if (date.isAfter(prediction.getStartDate())
+                      && date.isBefore(prediction.getEndDate())) {
+                    mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                  }
                 }
               }
             }

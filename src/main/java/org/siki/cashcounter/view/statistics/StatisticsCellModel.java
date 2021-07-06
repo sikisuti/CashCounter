@@ -4,10 +4,10 @@ import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class StatisticsCellModel {
@@ -52,31 +52,28 @@ public class StatisticsCellModel {
   }
 
   public String getDetails() {
-    var details = "";
+    var details = new StringBuilder();
     if (!corrections.isEmpty()) {
-      details =
+      var groupedCorrection =
           corrections.stream()
-              .map(
-                  c ->
+              .collect(
+                  Collectors.groupingBy(Correction::getComment, TreeMap::new, Collectors.toList()));
+      groupedCorrection.forEach(
+          (type, groupedCorrections) ->
+              details
+                  .append(
                       String.format(
                           "%15s  %s",
-                          new DecimalFormat("#,###,###' Ft'").format(c.getAmount()),
-                          c.getComment()))
-              .collect(Collectors.joining("\n"));
-    } else if (!transactions.isEmpty()) {
-      details =
-          transactions.stream()
-              .map(
-                  t ->
-                      t.getType()
-                          + "\t"
-                          + t.getComment()
-                          + "\t"
-                          + NumberFormat.getCurrencyInstance().format(t.getAmount()))
-              .collect(Collectors.joining("\n"));
+                          new DecimalFormat("#,###,###' Ft'")
+                              .format(
+                                  groupedCorrections.stream()
+                                      .mapToInt(Correction::getAmount)
+                                      .sum()),
+                          type))
+                  .append("\n"));
     }
 
-    return details;
+    return details.toString();
   }
 
   public void setAverage(Integer average) {

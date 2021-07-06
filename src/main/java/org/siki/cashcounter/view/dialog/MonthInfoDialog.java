@@ -4,10 +4,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.siki.cashcounter.model.Correction;
@@ -56,8 +58,22 @@ public class MonthInfoDialog extends Stage {
             new TableRow<>() {
               @Override
               protected void updateItem(CompareRow item, boolean empty) {
-                if (!empty && item.bold) {
-                  setStyle("-fx-font-weight: bold");
+                var style = new StringBuilder();
+                if (!empty) {
+                  if (item.bold) {
+                    style.append("-fx-font-weight: bold;");
+                  }
+
+                  var diff = item.amount - item.predictedAmount;
+                  if (diff > -10000 && diff < 10000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.LIGHTGRAY));
+                  } else if (diff < -50000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.FIREBRICK));
+                  } else if (diff > 50000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.SEAGREEN));
+                  }
+
+                  setStyle(style.toString());
                 }
               }
             });

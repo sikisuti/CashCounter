@@ -80,11 +80,15 @@ public class StatisticsProvider {
   }
 
   private void getCorrections(List<DailyBalance> dailyBalances) {
-    Stream<Correction> allCorrections =
-        dailyBalances.stream().map(DailyBalance::getCorrections).flatMap(Collection::stream);
+    var allCorrections =
+        dailyBalances.stream()
+            .map(DailyBalance::getCorrections)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     Map<LocalDate, List<Correction>> dateGroupedCorrections =
-        allCorrections.collect(
-            Collectors.groupingBy(c -> c.getParentDailyBalance().getDate().withDayOfMonth(1)));
+        allCorrections.stream()
+            .collect(
+                Collectors.groupingBy(c -> c.getParentDailyBalance().getDate().withDayOfMonth(1)));
 
     Map<LocalDate, Map<String, List<Correction>>> dateAndTypeGroupedCorrections =
         dateGroupedCorrections.entrySet().stream()

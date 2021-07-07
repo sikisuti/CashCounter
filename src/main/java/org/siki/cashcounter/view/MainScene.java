@@ -231,6 +231,11 @@ public class MainScene extends Scene {
                   .findFirst()
                   .orElseThrow();
           transactionService.storeObservableTransactions(entry.getValue(), db.getDailyBalance());
+          dataManager.getAllDailyBalances().stream()
+              .filter(
+                  daily ->
+                      daily.getDate().isBefore(entry.getKey().plusDays(1)) && daily.getPredicted())
+              .forEach(daily -> daily.setPredicted(false));
         }
 
         var alert = new Alert(Alert.AlertType.INFORMATION);

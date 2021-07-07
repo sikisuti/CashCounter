@@ -203,12 +203,14 @@ public final class DailyBalance {
   }
 
   public void updateBalance() {
-    int newBalance = prevDailyBalance.getBalance() + getAllDailySpent();
-    if (isNotReviewed()) {
-      newBalance += dataManager.getDayAverage(getDate());
-    }
+    if (!getBalanceSetManually()) {
+      int newBalance = prevDailyBalance.getBalance() + getAllDailySpent();
+      if (isNotReviewed()) {
+        newBalance += dataManager.getDayAverage(getDate());
+      }
 
-    setBalance(newBalance);
+      setBalance(newBalance);
+    }
   }
 
   @JsonIgnore

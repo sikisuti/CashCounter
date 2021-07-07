@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
@@ -24,6 +25,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import lombok.Getter;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
@@ -172,6 +174,7 @@ public final class DailyBalanceControl extends VBox {
     txtBalance.setPrefWidth(100);
     txtBalance.disableProperty().bind(dailyBalance.predictedProperty());
     txtBalance.textProperty().bindBidirectional(dailyBalance.balanceProperty(), currencyFormat);
+    txtBalance.setOnMouseClicked(this::setBalanceManually);
     var txtDailySpend = new Label();
     txtDailySpend.setPrefWidth(100);
     txtDailySpend.textProperty().bind(dailyBalance.unpairedDailySpentBinding);
@@ -217,6 +220,26 @@ public final class DailyBalanceControl extends VBox {
 
     this.getChildren().addAll(bp);
     validate();
+  }
+
+  private void setBalanceManually(MouseEvent event) {
+    var dialog =
+        new TextInputDialog(new DecimalFormat("#,###,###' Ft'").format(dailyBalance.getBalance()));
+    dialog.setHeaderText(dailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
+    dialog.setContentText("Nap végi egyenleg:");
+    dialog.initOwner(this.getScene().getWindow());
+    dialog.initModality(Modality.APPLICATION_MODAL);
+    var result = dialog.showAndWait();
+    result.ifPresent(
+        s -> {
+          if (s.isEmpty()) {
+            dailyBalance.setBalanceSetManually(false);
+            dailyBalance.updateBalance();
+          } else {
+            dailyBalance.setBalance(Integer.parseInt(s.replaceAll("[^0-9]*", "")));
+            dailyBalance.setBalanceSetManually(true);
+          }
+        });
   }
 
   protected void openAddCorrectionDialog(ActionEvent event) {

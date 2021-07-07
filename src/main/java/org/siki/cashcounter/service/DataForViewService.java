@@ -41,7 +41,8 @@ public class DataForViewService {
                     mb.getDailyBalances().stream()
                         .flatMap(
                             db ->
-                                db.getTransactions().stream().map(AccountTransaction::getCategory)))
+                                db.getTransactions().stream().map(AccountTransaction::getCategory))
+                        .distinct())
             .collect(Collectors.toList()));
   }
 }

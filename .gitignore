@@ -3,4 +3,5 @@ target
 out
 *.iml
 data.json
+savings.jsn
 Backup

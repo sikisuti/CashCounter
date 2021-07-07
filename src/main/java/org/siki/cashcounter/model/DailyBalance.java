@@ -18,7 +18,6 @@ import javafx.collections.ObservableList;
 import lombok.Getter;
 import lombok.Setter;
 import org.siki.cashcounter.model.converter.CorrectionListToObservableConverter;
-import org.siki.cashcounter.model.converter.SavingListToObservableConverter;
 import org.siki.cashcounter.model.converter.TransactionListToObservableConverter;
 import org.siki.cashcounter.repository.DataManager;
 
@@ -44,10 +43,7 @@ public final class DailyBalance {
 
   @Setter private DailyBalance prevDailyBalance;
 
-  @Getter
-  @Setter
-  @JsonDeserialize(converter = SavingListToObservableConverter.class)
-  private ObservableList<Saving> savings;
+  @Getter @Setter @JsonIgnore private ObservableList<Saving> savings;
 
   @Getter
   @Setter

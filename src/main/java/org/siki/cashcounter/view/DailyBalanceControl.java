@@ -175,6 +175,23 @@ public final class DailyBalanceControl extends VBox {
     txtBalance.disableProperty().bind(dailyBalance.predictedProperty());
     txtBalance.textProperty().bindBidirectional(dailyBalance.balanceProperty(), currencyFormat);
     txtBalance.setOnMouseClicked(this::setBalanceManually);
+    txtBalance
+        .borderProperty()
+        .bind(
+            Bindings.createObjectBinding(
+                () -> {
+                  if (dailyBalance.getBalanceSetManually()) {
+                    return new Border(
+                        new BorderStroke(
+                            Color.PURPLE,
+                            BorderStrokeStyle.DASHED,
+                            CornerRadii.EMPTY,
+                            BorderWidths.DEFAULT));
+                  } else {
+                    return null;
+                  }
+                },
+                dailyBalance.balanceSetManuallyProperty()));
     var txtDailySpend = new Label();
     txtDailySpend.setPrefWidth(100);
     txtDailySpend.textProperty().bind(dailyBalance.unpairedDailySpentBinding);
@@ -223,23 +240,26 @@ public final class DailyBalanceControl extends VBox {
   }
 
   private void setBalanceManually(MouseEvent event) {
-    var dialog =
-        new TextInputDialog(new DecimalFormat("#,###,###' Ft'").format(dailyBalance.getBalance()));
-    dialog.setHeaderText(dailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
-    dialog.setContentText("Nap végi egyenleg:");
-    dialog.initOwner(this.getScene().getWindow());
-    dialog.initModality(Modality.APPLICATION_MODAL);
-    var result = dialog.showAndWait();
-    result.ifPresent(
-        s -> {
-          if (s.isEmpty()) {
-            dailyBalance.setBalanceSetManually(false);
-            dailyBalance.updateBalance();
-          } else {
-            dailyBalance.setBalance(Integer.parseInt(s.replaceAll("[^0-9]*", "")));
-            dailyBalance.setBalanceSetManually(true);
-          }
-        });
+    if (event.getClickCount() == 2) {
+      var dialog =
+          new TextInputDialog(
+              new DecimalFormat("#,###,###' Ft'").format(dailyBalance.getBalance()));
+      dialog.setHeaderText(dailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
+      dialog.setContentText("Nap végi egyenleg:");
+      dialog.initOwner(this.getScene().getWindow());
+      dialog.initModality(Modality.APPLICATION_MODAL);
+      var result = dialog.showAndWait();
+      result.ifPresent(
+          s -> {
+            if (s.isEmpty()) {
+              dailyBalance.setBalanceSetManually(false);
+              dailyBalance.updateBalance();
+            } else {
+              dailyBalance.setBalance(Integer.parseInt(s.replaceAll("[^0-9]*", "")));
+              dailyBalance.setBalanceSetManually(true);
+            }
+          });
+    }
   }
 
   protected void openAddCorrectionDialog(ActionEvent event) {

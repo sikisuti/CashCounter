@@ -8,11 +8,15 @@ import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.CategoryMatchingRule;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
+import org.siki.cashcounter.model.Saving;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
@@ -37,6 +41,7 @@ public class DataManager {
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
     loadDataFromFile();
+    loadSavings();
   }
 
   public List<MonthlyBalance> getMonthlyBalances() {
@@ -45,11 +50,39 @@ public class DataManager {
 
   private void loadDataFromFile() {
     var dataPath = configurationManager.getStringProperty("DataPath");
+    log.info("Loading data from " + dataPath);
     try (var inputStream = new FileInputStream(dataPath)) {
       dataSource = objectMapper.readValue(inputStream, DataSource.class);
-      wireDependencies();
+      log.info(dataSource.monthlyBalances.size() + " months loaded");
     } catch (IOException e) {
       log.error("Unable to load data file " + dataPath, e);
+    }
+
+    wireDependencies();
+  }
+
+  private void loadSavings() {
+    var savingsPath = configurationManager.getStringProperty("SavingStorePath");
+    var lineCnt = 0;
+    try (var fileInputStream = new FileInputStream(savingsPath);
+        var inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+        var br = new BufferedReader(inputStreamReader)) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        lineCnt++;
+        if (line.startsWith("#") || line.trim().isEmpty()) {
+          continue;
+        }
+        var saving = objectMapper.readValue(line, Saving.class);
+        getAllDailyBalances().stream()
+            .filter(
+                db ->
+                    db.getDate().isAfter(saving.getFrom().minusDays(1))
+                        && db.getDate().isBefore(saving.getTo()))
+            .forEach(db -> db.addSaving(saving));
+      }
+    } catch (IOException e) {
+      log.error("Unable to load data file " + savingsPath, e);
     }
   }
 

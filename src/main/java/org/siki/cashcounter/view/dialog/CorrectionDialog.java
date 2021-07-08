@@ -1,5 +1,6 @@
 package org.siki.cashcounter.view.dialog;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -54,16 +55,7 @@ public class CorrectionDialog extends Stage {
 
     pairedTransactionId = new SimpleLongProperty(0);
     paired =
-        new BooleanBinding() {
-          {
-            super.bind(pairedTransactionId);
-          }
-
-          @Override
-          protected boolean computeValue() {
-            return pairedTransactionId.get() != 0;
-          }
-        };
+        Bindings.createBooleanBinding(() -> pairedTransactionId.get() != 0, pairedTransactionId);
 
     loadUI(correctionService);
 

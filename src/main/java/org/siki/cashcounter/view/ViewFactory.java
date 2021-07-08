@@ -13,7 +13,7 @@ import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
-import org.siki.cashcounter.view.dialog.MonthInfoDialog;
+import org.siki.cashcounter.view.dialog.monthlyInfo.MonthInfoDialog;
 import org.siki.cashcounter.view.statistics.StatisticsProvider;
 import org.siki.cashcounter.view.statistics.StatisticsView;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view.dialog;
+package org.siki.cashcounter.view.dialog.monthlyInfo;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompareRow {
-  String category;
+  String type;
   int predictedAmount;
   int amount;
   boolean bold;

@@ -52,7 +52,6 @@ public final class DailyBalanceControl extends VBox {
   private Button btnAdd;
   ToggleButton btnExpand;
 
-  //  VBox vbTransactions = new VBox();
   TransactionListView transactionListView;
 
   public DailyBalanceControl(
@@ -282,14 +281,6 @@ public final class DailyBalanceControl extends VBox {
             .filter(c -> c.getCorrection().getId() == correction.getId())
             .findFirst()
             .orElse(null));
-  }
-
-  public void addTransaction(AccountTransaction transaction) {
-    if (dailyBalance.getTransactions().stream().anyMatch(t -> t.similar(transaction))) {
-      transaction.setPossibleDuplicate(true);
-    }
-
-    dailyBalance.addTransaction(transaction);
   }
 
   private void mouseEntered(MouseEvent event) {

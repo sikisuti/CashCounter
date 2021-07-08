@@ -215,6 +215,7 @@ public class MainScene extends Scene {
                     Collectors.groupingBy(
                         AccountTransaction::getDate, TreeMap::new, Collectors.toList()));
 
+        int counter = 0;
         for (Map.Entry<LocalDate, List<AccountTransaction>> entry : groupped.entrySet()) {
           var db =
               monthlyBalanceTitledPanes.stream()
@@ -230,7 +231,9 @@ public class MainScene extends Scene {
                   .filter(dbc -> dbc.getDailyBalance().getDate().isEqual(entry.getKey()))
                   .findFirst()
                   .orElseThrow();
-          transactionService.storeObservableTransactions(entry.getValue(), db.getDailyBalance());
+          counter +=
+              transactionService.storeObservableTransactions(
+                  entry.getValue(), db.getDailyBalance());
           dataManager.getAllDailyBalances().stream()
               .filter(
                   daily ->
@@ -241,7 +244,7 @@ public class MainScene extends Scene {
         var alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Üzenet");
         alert.setHeaderText("Importálás kész");
-        alert.setContentText(newTransactions.size() + " új tranzakció importálva");
+        alert.setContentText(counter + " új tranzakció importálva");
         alert.showAndWait();
         validate();
       } catch (Exception e) {

@@ -45,11 +45,17 @@ public class AccountTransactionService {
     }
   }
 
-  public void storeObservableTransactions(
+  public int storeObservableTransactions(
       List<AccountTransaction> transactions, DailyBalance dailyBalance) {
+    var counter = 0;
     for (var transaction : transactions) {
-      dailyBalance.addTransaction(transaction);
+      if (dailyBalance.getTransactions().stream().noneMatch(t -> t.similar(transaction))) {
+        dailyBalance.addTransaction(transaction);
+        counter++;
+      }
     }
+
+    return counter;
   }
 
   private Long getNextTransactionId() {

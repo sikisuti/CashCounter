@@ -128,7 +128,9 @@ public class CorrectionDialog extends Stage {
     this.setTitle(parentDailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
 
     prepareTable();
-    parentDailyBalance.getTransactions().forEach(t -> tblTransactions.getItems().add(t.clone()));
+    parentDailyBalance
+        .getTransactions()
+        .forEach(t -> tblTransactions.getItems().add(new AccountTransaction(t)));
 
     cbType.setValue(correction.getType());
     tfAmount.setText(String.valueOf(correction.getAmount()));

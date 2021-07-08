@@ -3,7 +3,7 @@ package org.siki.cashcounter.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -29,7 +29,6 @@ public final class AccountTransaction {
   private String accountNumber;
   private String owner;
   private String comment;
-  //  private String counter;
 
   @JsonProperty("subCategory")
   private StringProperty category;
@@ -59,46 +58,26 @@ public final class AccountTransaction {
     return paired.get();
   }
 
-  private boolean possibleDuplicate;
-
   public AccountTransaction() {
     category = new SimpleStringProperty();
     pairedCorrections = FXCollections.observableArrayList();
     paired = new SimpleBooleanProperty();
     paired.bind(
-        new BooleanBinding() {
-          {
-            super.bind(pairedCorrections);
-          }
-
-          @Override
-          protected boolean computeValue() {
-            return !pairedCorrections.isEmpty();
-          }
-        });
+        Bindings.createBooleanBinding(() -> !pairedCorrections.isEmpty(), pairedCorrections));
   }
 
-  //  private DailyBalance dailyBalance;
-
-  //  public void setPairedCorrections(List<Correction> pairedCorrections) {
-  //    if (pairedCorrections != null) {
-  //      this.pairedCorrections = pairedCorrections;
-  //    }
-  //  }
-
-  //  public void addPairedCorrection(Correction correction) {
-  //    if (!pairedCorrections.contains(correction)) {
-  //      pairedCorrections.add(correction);
-  //    }
-  //    setPaired(true);
-  //  }
-
-  //  public void removePairedCorrection(Correction correction) {
-  //    pairedCorrections.remove(correction);
-  //    if (pairedCorrections.isEmpty()) {
-  //      setPaired(false);
-  //    }
-  //  }
+  public AccountTransaction(AccountTransaction clonable) {
+    this();
+    this.setId(clonable.getId());
+    this.setType(clonable.getType());
+    this.setDate(clonable.getDate());
+    this.setAmount(clonable.getAmount());
+    this.setAccountNumber(clonable.getAccountNumber());
+    this.setOwner(clonable.getOwner());
+    this.setComment(clonable.getComment());
+    this.setCategory(clonable.getCategory());
+    this.pairedCorrections.addAll(clonable.getPairedCorrections());
+  }
 
   @JsonIgnore
   public Integer getUnpairedAmount() {
@@ -123,7 +102,7 @@ public final class AccountTransaction {
 
   @JsonIgnore
   public boolean isValid() {
-    return !isPossibleDuplicate() && getCategory() != null && !getCategory().isEmpty();
+    return getCategory() != null && !getCategory().isEmpty();
   }
 
   @Override
@@ -158,26 +137,16 @@ public final class AccountTransaction {
       return false;
     }
 
-    return this.getType().equals(other.getType()) && this.getAmount() == other.getAmount();
+    return this.getType().equals(other.getType())
+        && this.getAmount() == other.getAmount()
+        && this.getAccountNumber().equals(other.getAccountNumber())
+        && this.getOwner().equals(other.getOwner())
+        && this.getComment().equals(other.getComment());
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
         id, type, date, amount, accountNumber, owner, comment /*, counter*/, category);
-  }
-
-  public AccountTransaction clone() {
-    var cloned = new AccountTransaction();
-    cloned.setId(id);
-    cloned.setType(type);
-    cloned.setDate(date);
-    cloned.setAmount(amount);
-    cloned.setAccountNumber(accountNumber);
-    cloned.setOwner(owner);
-    cloned.setComment(comment);
-    cloned.setCategory(category.get());
-    cloned.pairedCorrections.addAll(pairedCorrections);
-    return cloned;
   }
 }

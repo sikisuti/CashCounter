@@ -23,7 +23,6 @@ import org.siki.cashcounter.repository.DataManager;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -183,16 +182,6 @@ public final class DailyBalance {
     setBalance(balance.get() + transaction.getAmount());
   }
 
-  public void addNonExistingTransactions(List<AccountTransaction> newTransactions) {
-    findPossibleDuplicates(newTransactions);
-    if (newTransactions.stream().filter(AccountTransaction::isPossibleDuplicate).count()
-        == transactions.size()) {
-      newTransactions.stream().filter(t -> !t.isPossibleDuplicate()).forEach(this::addTransaction);
-    } else {
-      newTransactions.forEach(this::addTransaction);
-    }
-  }
-
   @JsonIgnore
   public Optional<AccountTransaction> getTransactionById(long id) {
     return transactions.stream().filter(t -> t.getId() == id).findFirst();
@@ -221,8 +210,6 @@ public final class DailyBalance {
     return transactionSum + notPairedCorrectionSum;
   }
 
-  public void calculateUncoveredDailySpent() {}
-
   @JsonIgnore
   public Integer getTotalCorrections() {
     return corrections.stream().mapToInt(Correction::getAmount).sum();
@@ -231,14 +218,6 @@ public final class DailyBalance {
   @JsonIgnore
   public boolean isValid() {
     return transactions.stream().allMatch(AccountTransaction::isValid);
-  }
-
-  private void findPossibleDuplicates(List<AccountTransaction> newTransactions) {
-    for (AccountTransaction newTransaction : newTransactions) {
-      if (transactions.stream().anyMatch(t -> t.similar(newTransaction))) {
-        newTransaction.setPossibleDuplicate(true);
-      }
-    }
   }
 
   @Override
@@ -324,9 +303,7 @@ public final class DailyBalance {
       dailyBalance.transactions.forEach(t -> t.setDate(dailyBalance.getDate()));
 
       dailyBalance.reviewed.addListener(
-          (observable, oldValue, newValue) -> {
-            dailyBalance.updateBalance();
-          });
+          (observable, oldValue, newValue) -> dailyBalance.updateBalance());
 
       return dailyBalance;
     }

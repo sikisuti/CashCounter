@@ -2,11 +2,15 @@ package org.siki.cashcounter.service;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.repository.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.Collator;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -14,30 +18,27 @@ public class CorrectionService {
 
   @Autowired private final DataManager dataManager;
 
-  private ObservableList<String> correctionTypes;
+  private SortedList<String> correctionTypes;
   private Long lastCorrectionId;
 
   public ObservableList<String> getAllCorrectionTypes() {
-    if (correctionTypes == null) {
-      correctionTypes = FXCollections.observableArrayList();
-    }
-
-    if (correctionTypes.isEmpty()) {
-      collectCorrectionTypes();
+    if (correctionTypes == null || correctionTypes.isEmpty()) {
+      correctionTypes = collectCorrectionTypes();
     }
 
     return correctionTypes;
   }
 
-  private void collectCorrectionTypes() {
-    correctionTypes.addAll(
-        dataManager.getMonthlyBalances().stream()
-            .flatMap(
-                mb ->
-                    mb.getDailyBalances().stream()
-                        .flatMap(db -> db.getCorrections().stream().map(Correction::getType)))
-            .distinct()
-            .collect(Collectors.toList()));
+  private SortedList<String> collectCorrectionTypes() {
+    return dataManager.getMonthlyBalances().stream()
+        .flatMap(
+            mb ->
+                mb.getDailyBalances().stream()
+                    .flatMap(db -> db.getCorrections().stream().map(Correction::getType)))
+        .distinct()
+        .filter(c -> Optional.ofNullable(c).isPresent())
+        .collect(Collectors.toCollection(FXCollections::observableArrayList))
+        .sorted((o1, o2) -> Collator.getInstance(new Locale("hu", "HU")).compare(o1, o2));
   }
 
   public long getNextCorrectionId() {

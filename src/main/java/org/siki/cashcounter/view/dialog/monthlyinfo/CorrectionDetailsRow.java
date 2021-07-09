@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view.dialog.monthlyInfo;
+package org.siki.cashcounter.view.dialog.monthlyinfo;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

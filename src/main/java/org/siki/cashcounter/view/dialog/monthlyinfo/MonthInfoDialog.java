@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view.dialog.monthlyInfo;
+package org.siki.cashcounter.view.dialog.monthlyinfo;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -35,17 +35,23 @@ public class MonthInfoDialog extends Stage {
   }
 
   private void loadUI() {
-    TableView<CorrectionDetailsRow> correctionDetailsTable = new TableView<>();
-    GridPane.setColumnIndex(correctionDetailsTable, 1);
-    TableColumn<CorrectionDetailsRow, String> commentCol = new TableColumn<>("Megnevezés");
-    commentCol.setCellValueFactory(new PropertyValueFactory<>("comment"));
-    TableColumn<CorrectionDetailsRow, String> amountCol = new TableColumn<>("Költés");
-    amountCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
-    amountCol.setCellValueFactory(
-        cellData ->
-            new SimpleStringProperty(currencyFormat.format(cellData.getValue().getAmount())));
-    correctionDetailsTable.getColumns().addAll(commentCol, amountCol);
+    this.setScene(new Scene(initRootGrid()));
 
+    this.initStyle(StageStyle.UTILITY);
+    this.setTitle(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
+  }
+
+  private GridPane initRootGrid() {
+    var rootGrid = new GridPane();
+    rootGrid.setHgap(10);
+    rootGrid.setVgap(10);
+    var summaryTable = initSummaryTable();
+    var detailsTable = initDetailsTable(summaryTable);
+    rootGrid.getChildren().addAll(summaryTable, detailsTable);
+    return rootGrid;
+  }
+
+  private TableView<CompareRow> initSummaryTable() {
     TableView<CompareRow> summaryTable = new TableView<>();
     summaryTable.setPrefWidth(400);
     summaryTable.setPrefHeight(450);
@@ -68,76 +74,89 @@ public class MonthInfoDialog extends Stage {
         cellData ->
             new SimpleStringProperty(currencyFormat.format(cellData.getValue().getDifference())));
     summaryTable.setRowFactory(
-        tableView -> {
-          TableRow<CompareRow> tr =
-              new TableRow<>() {
-                @Override
-                protected void updateItem(CompareRow item, boolean empty) {
-                  var style = new StringBuilder();
-                  if (!empty) {
-                    if (item.bold) {
-                      style.append("-fx-font-weight: bold;");
-                    }
-
-                    var diff = item.amount - item.predictedAmount;
-                    if (diff > -10000 && diff < 10000) {
-                      getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.LIGHTGRAY));
-                    } else if (diff < -50000) {
-                      getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.FIREBRICK));
-                    } else if (diff > 50000) {
-                      getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.SEAGREEN));
-                    }
-
-                    setStyle(style.toString());
+        tableView ->
+            new TableRow<>() {
+              @Override
+              protected void updateItem(CompareRow item, boolean empty) {
+                var style = new StringBuilder();
+                if (!empty) {
+                  if (item.bold) {
+                    style.append("-fx-font-weight: bold;");
                   }
-                }
-              };
 
-          tr.setOnMouseClicked(
-              event -> {
-                CompareRow cr =
-                    ((TableRow<CompareRow>) event.getSource())
-                        .getTableView()
-                        .getSelectionModel()
-                        .getSelectedItem();
-                correctionDetailsTable.setItems(getCorrectionDetailsData(cr.getType()));
-              });
-          return tr;
-        });
+                  var diff = item.amount - item.predictedAmount;
+                  if (diff > -10000 && diff < 10000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.LIGHTGRAY));
+                  } else if (diff < -50000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.FIREBRICK));
+                  } else if (diff > 50000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.SEAGREEN));
+                  }
+
+                  setStyle(style.toString());
+                }
+              }
+            });
     summaryTable.getColumns().addAll(categoryCol, predictedCol, spentCol, diffCol);
     summaryTable.setItems(getSummaryTableData());
-
-    var rootGrid = new GridPane();
-    rootGrid.setHgap(10);
-    rootGrid.setVgap(10);
-    rootGrid.getChildren().addAll(summaryTable, correctionDetailsTable);
-    this.setScene(new Scene(rootGrid));
-
-    this.initStyle(StageStyle.UTILITY);
-    this.setTitle(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
+    return summaryTable;
   }
 
-  private ObservableList<CorrectionDetailsRow> getCorrectionDetailsData(String type) {
-    ObservableList<CorrectionDetailsRow> data = FXCollections.observableArrayList();
+  private TableView<CompareRow> initDetailsTable(TableView<CompareRow> summaryTable) {
+    TableView<CompareRow> correctionDetailsTable = new TableView<>();
+    GridPane.setColumnIndex(correctionDetailsTable, 1);
+    TableColumn<CompareRow, String> commentCol = new TableColumn<>("Megjegyzés");
+    commentCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+    //    TableColumn<CompareRow, String> predictedCol = new TableColumn<>("Tervezett");
+    //    predictedCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
+    //    predictedCol.setCellValueFactory(
+    //        cellData ->
+    //            new SimpleStringProperty(
+    //                currencyFormat.format(cellData.getValue().getPredictedAmount())));
+    TableColumn<CompareRow, String> amountCol = new TableColumn<>("Valós");
+    amountCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
+    amountCol.setCellValueFactory(
+        cellData ->
+            new SimpleStringProperty(currencyFormat.format(cellData.getValue().getAmount())));
+    //    TableColumn<CompareRow, String> diffCol = new TableColumn<>("Különbség");
+    //    diffCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
+    //    diffCol.setCellValueFactory(
+    //        cellData ->
+    //            new
+    // SimpleStringProperty(currencyFormat.format(cellData.getValue().getDifference())));
+    correctionDetailsTable
+        .getColumns()
+        .addAll(commentCol /*, predictedCol*/, amountCol /*, diffCol*/);
+
+    summaryTable
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(
+            (observable, oldValue, newValue) ->
+                correctionDetailsTable.setItems(getCorrectionDetailsData(newValue.getType())));
+
+    return correctionDetailsTable;
+  }
+
+  private ObservableList<CompareRow> getCorrectionDetailsData(String type) {
+    ObservableList<CompareRow> data = FXCollections.observableArrayList();
 
     monthlyBalance.getDailyBalances().stream()
         .flatMap(db -> db.getCorrections().stream())
         .filter(c -> c.getType().equals(type))
         .forEach(
-            c -> {
-              data.stream()
-                  .filter(cdr -> cdr.getComment().equals(c.getComment()))
-                  .findFirst()
-                  .ifPresentOrElse(
-                      cdr -> cdr.addAmount(c.getAmount()),
-                      () ->
-                          data.add(
-                              CorrectionDetailsRow.builder()
-                                  .comment(c.getComment())
-                                  .amount(c.getAmount())
-                                  .build()));
-            });
-
+            c ->
+                data.stream()
+                    .filter(cr -> cr.getType().equals(c.getComment()))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        cr -> cr.setAmount(cr.getAmount() + c.getAmount()),
+                        () ->
+                            data.add(
+                                CompareRow.builder()
+                                    .type(c.getComment())
+                                    .amount(c.getAmount())
+                                    .build())));
     return data;
   }
 

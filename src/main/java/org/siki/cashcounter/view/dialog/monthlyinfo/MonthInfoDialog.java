@@ -300,29 +300,41 @@ public class MonthInfoDialog extends Stage {
   private ObservableList<CompareRow> getUnpairedTransactions() {
     ObservableList<CompareRow> data = FXCollections.observableArrayList();
 
-    var grouppedTransactions =
+    var sumAmount = 0;
+
+    var byTypeTransactions =
         monthlyBalance.getDailyBalances().stream()
             .flatMap(db -> db.getTransactions().stream())
             .filter(t -> t.getUnpairedAmount() != 0)
-            .collect(Collectors.groupingBy(AccountTransaction::getOwner));
-    for (var transactionGroupEntry : grouppedTransactions.entrySet()) {
+            .collect(Collectors.groupingBy(AccountTransaction::getCategory));
+
+    for (var byTypeEntry : byTypeTransactions.entrySet()) {
+      var byOwnerTransactions =
+          byTypeEntry.getValue().stream()
+              .collect(Collectors.groupingBy(AccountTransaction::getOwner));
+      for (var byOwnerEntry : byOwnerTransactions.entrySet()) {
+        data.add(
+            CompareRow.builder()
+                .type(byOwnerEntry.getKey() + "\t- " + byTypeEntry.getKey())
+                .amount(
+                    byOwnerEntry.getValue().stream()
+                        .mapToInt(AccountTransaction::getUnpairedAmount)
+                        .sum())
+                .build());
+      }
+
+      var groupAmount =
+          byTypeEntry.getValue().stream().mapToInt(AccountTransaction::getAmount).sum();
       data.add(
           CompareRow.builder()
-              .type(transactionGroupEntry.getKey())
-              .amount(
-                  transactionGroupEntry.getValue().stream()
-                      .mapToInt(AccountTransaction::getUnpairedAmount)
-                      .sum())
+              .type(byTypeEntry.getKey() + " összesen")
+              .amount(groupAmount)
+              .bold(true)
               .build());
+      sumAmount += groupAmount;
     }
 
-    var summaryRow =
-        CompareRow.builder()
-            .type("Összesen")
-            .amount(data.stream().mapToInt(d -> d.amount).sum())
-            .bold(true)
-            .build();
-    data.add(summaryRow);
+    data.add(CompareRow.builder().type("Összesen").amount(sumAmount).bold(true).build());
 
     return data;
   }

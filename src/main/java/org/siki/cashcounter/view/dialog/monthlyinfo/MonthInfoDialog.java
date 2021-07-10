@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
@@ -48,7 +49,8 @@ public class MonthInfoDialog extends Stage {
     rootGrid.setVgap(10);
     var summaryTable = initSummaryTable();
     var detailsTable = initDetailsTable(summaryTable);
-    rootGrid.getChildren().addAll(summaryTable, detailsTable);
+    var unpairedTransactionTable = initUnpairedTransactionsTable();
+    rootGrid.getChildren().addAll(summaryTable, detailsTable, unpairedTransactionTable);
     return rootGrid;
   }
 
@@ -105,7 +107,8 @@ public class MonthInfoDialog extends Stage {
 
   private TableView<CompareRow> initDetailsTable(TableView<CompareRow> summaryTable) {
     TableView<CompareRow> correctionDetailsTable = new TableView<>();
-    GridPane.setColumnIndex(correctionDetailsTable, 1);
+    correctionDetailsTable.setPrefHeight(300);
+    GridPane.setRowIndex(correctionDetailsTable, 1);
     TableColumn<CompareRow, String> commentCol = new TableColumn<>("Megjegyzés");
     commentCol.setCellValueFactory(new PropertyValueFactory<>("type"));
     TableColumn<CompareRow, String> predictedCol = new TableColumn<>("Tervezett");
@@ -253,6 +256,69 @@ public class MonthInfoDialog extends Stage {
         CompareRow.builder()
             .type("Összesen")
             .predictedAmount(data.stream().mapToInt(d -> d.predictedAmount).sum())
+            .amount(data.stream().mapToInt(d -> d.amount).sum())
+            .bold(true)
+            .build();
+    data.add(summaryRow);
+
+    return data;
+  }
+
+  private TableView<CompareRow> initUnpairedTransactionsTable() {
+    TableView<CompareRow> unpairedTransactionsTable = new TableView<>();
+    unpairedTransactionsTable.setPrefWidth(400);
+    GridPane.setColumnIndex(unpairedTransactionsTable, 1);
+    GridPane.setRowSpan(unpairedTransactionsTable, 2);
+    TableColumn<CompareRow, String> commentCol = new TableColumn<>("Hely");
+    commentCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+    TableColumn<CompareRow, String> amountCol = new TableColumn<>("Költés");
+    amountCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
+    amountCol.setCellValueFactory(
+        cellData ->
+            new SimpleStringProperty(currencyFormat.format(cellData.getValue().getAmount())));
+    unpairedTransactionsTable.setRowFactory(
+        tableView ->
+            new TableRow<>() {
+              @Override
+              protected void updateItem(CompareRow item, boolean empty) {
+                var style = new StringBuilder();
+                if (!empty) {
+                  if (item.bold) {
+                    style.append("-fx-font-weight: bold;");
+                  }
+
+                  setStyle(style.toString());
+                }
+              }
+            });
+    unpairedTransactionsTable.getColumns().addAll(commentCol, amountCol);
+    unpairedTransactionsTable.setItems(getUnpairedTransactions());
+
+    return unpairedTransactionsTable;
+  }
+
+  private ObservableList<CompareRow> getUnpairedTransactions() {
+    ObservableList<CompareRow> data = FXCollections.observableArrayList();
+
+    var grouppedTransactions =
+        monthlyBalance.getDailyBalances().stream()
+            .flatMap(db -> db.getTransactions().stream())
+            .filter(t -> t.getUnpairedAmount() != 0)
+            .collect(Collectors.groupingBy(AccountTransaction::getOwner));
+    for (var transactionGroupEntry : grouppedTransactions.entrySet()) {
+      data.add(
+          CompareRow.builder()
+              .type(transactionGroupEntry.getKey())
+              .amount(
+                  transactionGroupEntry.getValue().stream()
+                      .mapToInt(AccountTransaction::getUnpairedAmount)
+                      .sum())
+              .build());
+    }
+
+    var summaryRow =
+        CompareRow.builder()
+            .type("Összesen")
             .amount(data.stream().mapToInt(d -> d.amount).sum())
             .bold(true)
             .build();

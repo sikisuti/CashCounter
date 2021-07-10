@@ -5,19 +5,17 @@ import lombok.Data;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data
 public class MonthlyBalance {
   private YearMonth yearMonth;
   private List<DailyBalance> dailyBalances;
-  private Map<String, Integer> predictions;
+  private List<Correction> predictions;
 
   public MonthlyBalance() {
     this.dailyBalances = new ArrayList<>();
-    this.predictions = new HashMap<>();
+    this.predictions = new ArrayList<>();
   }
 
   @JsonIgnore
@@ -26,9 +24,12 @@ public class MonthlyBalance {
   }
 
   @JsonIgnore
-  public void addPrediction(String category, int amount) {
-    predictions.put(
-        category, predictions.containsKey(category) ? predictions.get(category) + amount : amount);
+  public void addPrediction(String category, String comment, int amount) {
+    var predictedCorrection = new Correction();
+    predictedCorrection.setType(category);
+    predictedCorrection.setComment(comment);
+    predictedCorrection.setAmount(amount);
+    predictions.add(predictedCorrection);
   }
 
   @JsonIgnore

@@ -157,7 +157,10 @@ public class PredictionService {
                   for (var i = 0;
                       i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
                       i++) {
-                    mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                    mb.addPrediction(
+                        prediction.getCategory(),
+                        prediction.getSubCategory(),
+                        prediction.getAmount());
                   }
                 } else {
                   var date =
@@ -165,7 +168,10 @@ public class PredictionService {
                           .atDay(ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
                   if (date.isAfter(prediction.getStartDate())
                       && date.isBefore(prediction.getEndDate())) {
-                    mb.addPrediction(prediction.getCategory(), prediction.getAmount());
+                    mb.addPrediction(
+                        prediction.getCategory(),
+                        prediction.getSubCategory(),
+                        prediction.getAmount());
                   }
                 }
               }

@@ -20,6 +20,7 @@ import org.siki.cashcounter.repository.DataManager;
 
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class MonthInfoDialog extends Stage {
@@ -107,26 +108,40 @@ public class MonthInfoDialog extends Stage {
     GridPane.setColumnIndex(correctionDetailsTable, 1);
     TableColumn<CompareRow, String> commentCol = new TableColumn<>("Megjegyzés");
     commentCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-    //    TableColumn<CompareRow, String> predictedCol = new TableColumn<>("Tervezett");
-    //    predictedCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
-    //    predictedCol.setCellValueFactory(
-    //        cellData ->
-    //            new SimpleStringProperty(
-    //                currencyFormat.format(cellData.getValue().getPredictedAmount())));
+    TableColumn<CompareRow, String> predictedCol = new TableColumn<>("Tervezett");
+    predictedCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
+    predictedCol.setCellValueFactory(
+        cellData ->
+            new SimpleStringProperty(
+                currencyFormat.format(cellData.getValue().getPredictedAmount())));
     TableColumn<CompareRow, String> amountCol = new TableColumn<>("Valós");
     amountCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
     amountCol.setCellValueFactory(
         cellData ->
             new SimpleStringProperty(currencyFormat.format(cellData.getValue().getAmount())));
-    //    TableColumn<CompareRow, String> diffCol = new TableColumn<>("Különbség");
-    //    diffCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
-    //    diffCol.setCellValueFactory(
-    //        cellData ->
-    //            new
-    // SimpleStringProperty(currencyFormat.format(cellData.getValue().getDifference())));
-    correctionDetailsTable
-        .getColumns()
-        .addAll(commentCol /*, predictedCol*/, amountCol /*, diffCol*/);
+    TableColumn<CompareRow, String> diffCol = new TableColumn<>("Különbség");
+    diffCol.setStyle(FX_ALIGNMENT_CENTER_RIGHT);
+    diffCol.setCellValueFactory(
+        cellData ->
+            new SimpleStringProperty(currencyFormat.format(cellData.getValue().getDifference())));
+    correctionDetailsTable.setRowFactory(
+        tableView ->
+            new TableRow<>() {
+              @Override
+              protected void updateItem(CompareRow item, boolean empty) {
+                if (!empty) {
+                  var diff = item.amount - item.predictedAmount;
+                  if (diff > -3000 && diff < 3000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.LIGHTGRAY));
+                  } else if (diff < -10000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.FIREBRICK));
+                  } else if (diff > 10000) {
+                    getChildren().forEach(cell -> ((Labeled) cell).setTextFill(Color.SEAGREEN));
+                  }
+                }
+              }
+            });
+    correctionDetailsTable.getColumns().addAll(commentCol, predictedCol, amountCol, diffCol);
 
     summaryTable
         .getSelectionModel()
@@ -140,6 +155,22 @@ public class MonthInfoDialog extends Stage {
 
   private ObservableList<CompareRow> getCorrectionDetailsData(String type) {
     ObservableList<CompareRow> data = FXCollections.observableArrayList();
+
+    monthlyBalance.getPredictions().stream()
+        .filter(c -> c.getType().equals(type))
+        .forEach(
+            c ->
+                data.stream()
+                    .filter(cr -> cr.getType().equals(c.getComment()))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        cr -> cr.setAmount(cr.getPredictedAmount() + c.getAmount()),
+                        () ->
+                            data.add(
+                                CompareRow.builder()
+                                    .type(c.getComment())
+                                    .predictedAmount(c.getAmount())
+                                    .build())));
 
     monthlyBalance.getDailyBalances().stream()
         .flatMap(db -> db.getCorrections().stream())
@@ -163,11 +194,18 @@ public class MonthInfoDialog extends Stage {
   private ObservableList<CompareRow> getSummaryTableData() {
     ObservableList<CompareRow> data = FXCollections.observableArrayList();
 
-    for (var predictedEntry : monthlyBalance.getPredictions().entrySet()) {
+    var groupedPredictedCorrections =
+        monthlyBalance.getPredictions().stream()
+            .collect(Collectors.groupingBy(Correction::getType, TreeMap::new, Collectors.toList()));
+
+    for (var predictedCorrectionGroupEntry : groupedPredictedCorrections.entrySet()) {
       data.add(
           CompareRow.builder()
-              .type(predictedEntry.getKey())
-              .predictedAmount(predictedEntry.getValue())
+              .type(predictedCorrectionGroupEntry.getKey())
+              .predictedAmount(
+                  predictedCorrectionGroupEntry.getValue().stream()
+                      .mapToInt(Correction::getAmount)
+                      .sum())
               .build());
     }
 

@@ -302,32 +302,37 @@ public class MonthInfoDialog extends Stage {
 
     var sumAmount = 0;
 
-    var byTypeTransactions =
+    var byCategoryTransactions =
         monthlyBalance.getDailyBalances().stream()
             .flatMap(db -> db.getTransactions().stream())
             .filter(t -> t.getUnpairedAmount() != 0)
             .collect(Collectors.groupingBy(AccountTransaction::getCategory));
 
-    for (var byTypeEntry : byTypeTransactions.entrySet()) {
+    for (var byCategoryEntry : byCategoryTransactions.entrySet()) {
       var byOwnerTransactions =
-          byTypeEntry.getValue().stream()
+          byCategoryEntry.getValue().stream()
               .collect(Collectors.groupingBy(AccountTransaction::getOwner));
       for (var byOwnerEntry : byOwnerTransactions.entrySet()) {
-        data.add(
-            CompareRow.builder()
-                .type(byOwnerEntry.getKey() + "\t- " + byTypeEntry.getKey())
-                .amount(
-                    byOwnerEntry.getValue().stream()
-                        .mapToInt(AccountTransaction::getUnpairedAmount)
-                        .sum())
-                .build());
+        var byTypeTransactions =
+            byOwnerEntry.getValue().stream()
+                .collect(Collectors.groupingBy(AccountTransaction::getType));
+        for (var byTypeEntry : byTypeTransactions.entrySet()) {
+          data.add(
+              CompareRow.builder()
+                  .type(byOwnerEntry.getKey() + "\t- " + byTypeEntry.getKey())
+                  .amount(
+                      byTypeEntry.getValue().stream()
+                          .mapToInt(AccountTransaction::getUnpairedAmount)
+                          .sum())
+                  .build());
+        }
       }
 
       var groupAmount =
-          byTypeEntry.getValue().stream().mapToInt(AccountTransaction::getAmount).sum();
+          byCategoryEntry.getValue().stream().mapToInt(AccountTransaction::getAmount).sum();
       data.add(
           CompareRow.builder()
-              .type(byTypeEntry.getKey() + " összesen")
+              .type(byCategoryEntry.getKey() + " összesen")
               .amount(groupAmount)
               .bold(true)
               .build());

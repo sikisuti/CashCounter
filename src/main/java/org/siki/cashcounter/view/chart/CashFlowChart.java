@@ -56,7 +56,7 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
 
     maxUpperBound = Math.ceil(max / 100000d) * 100000;
     double lowerBound = Math.floor((min - 350000) / 100000d) * 100000;
-    double upperBound = lowerBound + 2000000;
+    double upperBound = lowerBound + 3000000;
     yDistance = upperBound - lowerBound;
 
     getYAxis().setUpperBound(upperBound);

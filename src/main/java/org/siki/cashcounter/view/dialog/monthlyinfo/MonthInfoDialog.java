@@ -266,7 +266,7 @@ public class MonthInfoDialog extends Stage {
 
   private TableView<CompareRow> initUnpairedTransactionsTable() {
     TableView<CompareRow> unpairedTransactionsTable = new TableView<>();
-    unpairedTransactionsTable.setPrefWidth(400);
+    unpairedTransactionsTable.setPrefWidth(500);
     GridPane.setColumnIndex(unpairedTransactionsTable, 1);
     GridPane.setRowSpan(unpairedTransactionsTable, 2);
     TableColumn<CompareRow, String> commentCol = new TableColumn<>("Hely");
@@ -329,7 +329,7 @@ public class MonthInfoDialog extends Stage {
       }
 
       var groupAmount =
-          byCategoryEntry.getValue().stream().mapToInt(AccountTransaction::getAmount).sum();
+          byCategoryEntry.getValue().stream().mapToInt(AccountTransaction::getUnpairedAmount).sum();
       data.add(
           CompareRow.builder()
               .type(byCategoryEntry.getKey() + " összesen")

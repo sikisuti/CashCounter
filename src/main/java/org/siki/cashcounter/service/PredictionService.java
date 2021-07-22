@@ -145,34 +145,30 @@ public class PredictionService {
     var months = dataManager.getMonthlyBalances();
     months.forEach(
         mb -> {
-          if (mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1))) {
-            mb.clearPredictions();
-          }
+          mb.clearPredictions();
 
-          if (mb.getPredictions().isEmpty()) {
-            for (var prediction : predictedCorrections) {
-              if (prediction.getMonth() == null
-                  || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
-                if (prediction.getDayOfWeek() != null) {
-                  for (var i = 0;
-                      i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
-                      i++) {
-                    mb.addPrediction(
-                        prediction.getCategory(),
-                        prediction.getSubCategory(),
-                        prediction.getAmount());
-                  }
-                } else {
-                  var date =
-                      mb.getYearMonth()
-                          .atDay(ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
-                  if (date.isAfter(prediction.getStartDate())
-                      && date.isBefore(prediction.getEndDate())) {
-                    mb.addPrediction(
-                        prediction.getCategory(),
-                        prediction.getSubCategory(),
-                        prediction.getAmount());
-                  }
+          for (var prediction : predictedCorrections) {
+            if (prediction.getMonth() == null
+                || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
+              if (prediction.getDayOfWeek() != null) {
+                for (var i = 0;
+                    i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
+                    i++) {
+                  mb.addPrediction(
+                      prediction.getCategory(),
+                      prediction.getSubCategory(),
+                      prediction.getAmount());
+                }
+              } else {
+                var date =
+                    mb.getYearMonth()
+                        .atDay(ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
+                if (date.isAfter(prediction.getStartDate())
+                    && date.isBefore(prediction.getEndDate())) {
+                  mb.addPrediction(
+                      prediction.getCategory(),
+                      prediction.getSubCategory(),
+                      prediction.getAmount());
                 }
               }
             }

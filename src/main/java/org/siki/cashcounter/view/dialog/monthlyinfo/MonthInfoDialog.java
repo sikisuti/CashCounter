@@ -167,7 +167,7 @@ public class MonthInfoDialog extends Stage {
                     .filter(cr -> cr.getType().equals(c.getComment()))
                     .findFirst()
                     .ifPresentOrElse(
-                        cr -> cr.setAmount(cr.getPredictedAmount() + c.getAmount()),
+                        cr -> cr.setPredictedAmount(cr.getPredictedAmount() + c.getAmount()),
                         () ->
                             data.add(
                                 CompareRow.builder()

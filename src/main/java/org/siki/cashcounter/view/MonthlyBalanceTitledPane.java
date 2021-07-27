@@ -72,7 +72,12 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             + "-fx-background-insets: 0px; "
             + "-fx-padding: 0px;"
             + "-fx-margin: 5,5,5,5");
-    infoButton.setOnAction(event -> viewFactory.getMonthInfoDialog(monthlyBalance).showAndWait());
+    infoButton.setOnAction(
+        event -> {
+          var infoDialog = viewFactory.getMonthInfoDialog(monthlyBalance);
+          infoDialog.initOwner(this.getScene().getWindow());
+          infoDialog.showAndWait();
+        });
     var title =
         new Label(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
     var header = new HBox(infoButton, title);

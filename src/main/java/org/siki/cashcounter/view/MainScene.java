@@ -9,9 +9,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -20,8 +22,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
@@ -79,7 +84,7 @@ public class MainScene extends Scene {
       DataManager dataManager,
       CashFlowChart cashFlowChart,
       PredictionService predictionService) {
-    super(new BorderPane(), 640, 480);
+    super(new StackPane(), 640, 480);
     this.cashFlowChart = cashFlowChart;
     this.configurationManager = configurationManager;
     this.viewFactory = viewFactory;
@@ -91,7 +96,22 @@ public class MainScene extends Scene {
 
     Bindings.bindContent(dailyBalancesPH.getChildren(), monthlyBalanceTitledPanes);
 
-    draw((BorderPane) getRoot());
+    var root = (StackPane) getRoot();
+    var borderPane = new BorderPane();
+    var veil = new Region();
+    veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
+    var progressIndicator = new ProgressIndicator();
+    progressIndicator.setStyle("-fx-min-width: 100; -fx-min-height: 100;");
+    VBox.setVgrow(progressIndicator, Priority.ALWAYS);
+    var progressMessage = new Label();
+    progressMessage.setFont(new Font("System Bold", 18));
+    var progressInfo = new VBox(progressIndicator, progressMessage);
+    progressInfo.setAlignment(Pos.CENTER);
+    StackPane.setAlignment(progressInfo, Pos.CENTER);
+    var busyVeil = new StackPane(veil, progressInfo);
+    StackPane.setAlignment(busyVeil, Pos.CENTER);
+    root.getChildren().addAll(borderPane, busyVeil);
+    draw(borderPane);
     loadCorrections();
     vbCashFlow.getChildren().add(cashFlowChart);
   }

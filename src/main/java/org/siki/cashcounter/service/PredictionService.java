@@ -97,6 +97,7 @@ public class PredictionService {
                       correctionToAdd.setComment(pc.getSubCategory());
                       correctionToAdd.setAmount(pc.getAmount());
                       db.addCorrection(correctionToAdd);
+                      db.setReviewed(false);
                     });
           } else if (pc.getDay() != null) {
             var found = false;
@@ -114,6 +115,7 @@ public class PredictionService {
                 correctionToAdd.setComment(pc.getSubCategory());
                 correctionToAdd.setAmount(pc.getAmount());
                 dbSchedList.get(i).addCorrection(correctionToAdd);
+                dbSchedList.get(i).setReviewed(false);
                 found = false;
               }
             }
@@ -134,6 +136,7 @@ public class PredictionService {
                 correctionToAdd.setComment(pc.getSubCategory());
                 correctionToAdd.setAmount(pc.getAmount());
                 dbSchedList.get(i).addCorrection(correctionToAdd);
+                dbSchedList.get(i).setReviewed(false);
                 found = false;
               }
             }

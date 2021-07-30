@@ -98,6 +98,14 @@ public class MainScene extends Scene {
 
     var root = (StackPane) getRoot();
     var borderPane = new BorderPane();
+    root.getChildren().addAll(borderPane);
+    draw(borderPane);
+    loadCorrections();
+    vbCashFlow.getChildren().add(cashFlowChart);
+  }
+
+  // For future use
+  private StackPane initBusyVeil() {
     var veil = new Region();
     veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4)");
     var progressIndicator = new ProgressIndicator();
@@ -110,10 +118,7 @@ public class MainScene extends Scene {
     StackPane.setAlignment(progressInfo, Pos.CENTER);
     var busyVeil = new StackPane(veil, progressInfo);
     StackPane.setAlignment(busyVeil, Pos.CENTER);
-    root.getChildren().addAll(borderPane, busyVeil);
-    draw(borderPane);
-    loadCorrections();
-    vbCashFlow.getChildren().add(cashFlowChart);
+    return busyVeil;
   }
 
   private void draw(BorderPane pane) {

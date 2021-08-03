@@ -251,14 +251,13 @@ public class MainScene extends Scene {
                               .equals(YearMonth.from(entry.getKey())))
                   .findFirst()
                   .orElseThrow()
-                  .getDailyBalanceControls()
+                  .getMonthlyBalance()
+                  .getDailyBalances()
                   .stream()
-                  .filter(dbc -> dbc.getDailyBalance().getDate().isEqual(entry.getKey()))
+                  .filter(dbc -> dbc.getDate().isEqual(entry.getKey()))
                   .findFirst()
                   .orElseThrow();
-          counter +=
-              transactionService.storeObservableTransactions(
-                  entry.getValue(), db.getDailyBalance());
+          counter += transactionService.storeObservableTransactions(entry.getValue(), db);
           dataManager.getAllDailyBalances().stream()
               .filter(
                   daily ->

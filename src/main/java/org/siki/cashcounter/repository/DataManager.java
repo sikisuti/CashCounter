@@ -24,9 +24,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 public class DataManager {
@@ -78,7 +80,8 @@ public class DataManager {
             .filter(
                 db ->
                     db.getDate().isAfter(saving.getFrom().minusDays(1))
-                        && db.getDate().isBefore(saving.getTo()))
+                        && db.getDate()
+                            .isBefore(ofNullable(saving.getTo()).orElse(LocalDate.MAX)))
             .forEach(db -> db.addSaving(saving));
       }
     } catch (IOException e) {

@@ -3,6 +3,7 @@ package org.siki.cashcounter.view;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,9 +17,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import lombok.Getter;
 import org.siki.cashcounter.model.MonthlyBalance;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
@@ -44,6 +48,7 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void loadUI() {
+    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
     GridPane.setColumnIndex(vbDailyBalances, 0);
     content.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
     Bindings.bindContent(vbDailyBalances.getChildren(), dailyBalanceControls);
@@ -80,7 +85,18 @@ public class MonthlyBalanceTitledPane extends TitledPane {
         });
     var title =
         new Label(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
-    var header = new HBox(infoButton, title);
+    title.setPrefWidth(100);
+    var startBalance = new Label();
+    startBalance.setPrefWidth(100);
+    startBalance.setAlignment(Pos.CENTER_RIGHT);
+    startBalance
+        .textProperty()
+        .bindBidirectional(
+                monthlyBalance.getDailyBalances().stream()
+                        .findFirst()
+                        .orElseThrow()
+                        .balanceProperty(), currencyFormat);
+    var header = new HBox(infoButton, title, startBalance);
     header.setSpacing(5);
     this.setGraphic(header);
   }

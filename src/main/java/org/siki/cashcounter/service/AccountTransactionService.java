@@ -51,6 +51,7 @@ public class AccountTransactionService {
     for (var transaction : transactions) {
       if (dailyBalance.getTransactions().stream().noneMatch(t -> t.similar(transaction))) {
         dailyBalance.addTransaction(transaction);
+        dailyBalance.setReviewed(false);
         counter++;
       }
     }

@@ -262,10 +262,10 @@ public class MainScene extends Scene {
               .filter(
                   daily ->
                       daily.getDate().isBefore(entry.getKey().plusDays(1)) && daily.getPredicted())
-              .forEach(daily -> {
-                daily.setPredicted(false);
-                daily.setReviewed(false);
-              });
+              .forEach(
+                  daily -> {
+                    daily.setPredicted(false);
+                  });
         }
 
         var alert = new Alert(Alert.AlertType.INFORMATION);

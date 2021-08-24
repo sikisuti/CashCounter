@@ -137,11 +137,11 @@ public final class AccountTransaction {
       return false;
     }
 
-    return this.getType().equals(other.getType())
+    return this.getType().replaceAll("\\s", "").equals(other.getType().replaceAll("\\s", ""))
         && this.getAmount() == other.getAmount()
         && this.getAccountNumber().equals(other.getAccountNumber())
-        && this.getOwner().equals(other.getOwner())
-        && this.getComment().equals(other.getComment());
+        && this.getOwner().replaceAll("\\s", "").equals(other.getOwner().replaceAll("\\s", ""))
+        && this.getComment().replaceAll("\\s", "").equals(other.getComment().replaceAll("\\s", ""));
   }
 
   @Override

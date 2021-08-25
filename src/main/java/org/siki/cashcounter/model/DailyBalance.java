@@ -330,8 +330,13 @@ public final class DailyBalance {
     private void createNotPairedDailySpentBinding(DailyBalance dailyBalance) {
       dailyBalance.unpairedDailySpentBinding =
           Bindings.createStringBinding(
-              () ->
-                  new DecimalFormat("#,###,###' Ft'").format(dailyBalance.getUnpairedDailySpent()),
+              () -> {
+                var decimalFormat = new DecimalFormat("#,###,###' Ft'");
+                return dailyBalance.getPredicted()
+                    ? decimalFormat.format(
+                        dailyBalance.dataManager.getDayAverage(dailyBalance.getDate()))
+                    : decimalFormat.format(dailyBalance.getUnpairedDailySpent());
+              },
               dailyBalance.transactions,
               dailyBalance.corrections);
     }

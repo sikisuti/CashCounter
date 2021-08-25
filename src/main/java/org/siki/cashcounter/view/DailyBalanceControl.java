@@ -50,9 +50,9 @@ public final class DailyBalanceControl extends VBox {
   private HBox hbCorrections;
 
   private Button btnAdd;
-  ToggleButton btnExpand;
+  private ToggleButton btnExpand;
 
-  TransactionListView transactionListView;
+  private TransactionListView transactionListView;
 
   public DailyBalanceControl(
       DailyBalance dailyBalance, MonthlyBalanceTitledPane parent, ViewFactory viewFactory) {
@@ -163,8 +163,6 @@ public final class DailyBalanceControl extends VBox {
     this.setOnMouseExited(this::mouseExited);
     this.setSpacing(0);
 
-    var bp = new BorderPane();
-
     var txtDate = new Label();
     txtDate.setPrefWidth(100);
     txtDate.disableProperty().bind(dailyBalance.predictedProperty());
@@ -215,6 +213,7 @@ public final class DailyBalanceControl extends VBox {
     var hbLine = new HBox();
     hbLine.disableProperty().bind(chkReviewed.selectedProperty());
     hbLine.getChildren().addAll(txtDate, txtBalance, txtDailySpend, btnAdd, hbCorrections);
+    var bp = new BorderPane();
     bp.setCenter(hbLine);
 
     var rightContext = new HBox();
@@ -261,7 +260,7 @@ public final class DailyBalanceControl extends VBox {
     }
   }
 
-  protected void openAddCorrectionDialog(ActionEvent event) {
+  private void openAddCorrectionDialog(ActionEvent event) {
     var correctionDialog = viewFactory.createNewCorrectionDialog(this.getDailyBalance());
     correctionDialog.showAndWait();
   }

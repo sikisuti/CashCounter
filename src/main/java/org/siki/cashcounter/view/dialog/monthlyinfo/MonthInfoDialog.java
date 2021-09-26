@@ -177,7 +177,7 @@ public class MonthInfoDialog extends Stage {
 
     monthlyBalance.getDailyBalances().stream()
         .flatMap(db -> db.getCorrections().stream())
-        .filter(c -> c.getType().equals(type))
+        .filter(c -> c.getType().equals(type) && !c.getOnlyMove())
         .forEach(
             c ->
                 data.stream()
@@ -215,6 +215,7 @@ public class MonthInfoDialog extends Stage {
     var groupedCorrections =
         monthlyBalance.getDailyBalances().stream()
             .flatMap(db -> db.getCorrections().stream())
+            .filter(c -> !c.getOnlyMove())
             .collect(Collectors.groupingBy(Correction::getType));
     for (var correctionGroup : groupedCorrections.entrySet()) {
       var dataItem =

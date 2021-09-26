@@ -5,7 +5,7 @@
 {"category":"Siki bér","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":200000}
 {"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":110000,"startDate":"2019-10-01"}
 {"category":"Gabó bér","subCategory":"Waldorf","day":3,"amount":50000,"startDate":"2020-10-01","endDate":"2021-08-01"}
-{"category":"Gabó bér","subCategory":"Waldorf","day":3,"amount":50000,"startDate":"2021-10-01","endDate":"2022-08-01"}
+{"category":"Gabó bér","subCategory":"Waldorf","day":5,"amount":50000,"startDate":"2021-10-01","endDate":"2022-08-01"}
 
 # Juttatás
 {"category":"Gabó bér","subCategory":"Családi pótlék","day":3,"amount":26600}
@@ -14,7 +14,7 @@
 {"category":"Hitel","subCategory":"Siki Fundamenta","day":8,"amount":-38750,"startDate":"2018-11-01","endDate":"2029-09-01"}
 {"category":"Hitel","subCategory":"Gabó OTP","day":3,"amount":-24953}
 {"category":"Hitel","subCategory":"Timótól hitelre","day":13,"amount":24953}
-{"category":"Hitel","subCategory":"Autó lízing","day":13,"amount":-61915,"startDate":"2021-08-01","endDate":"2026-09-01"}
+{"category":"Hitel","subCategory":"Autó lízing","day":28,"amount":-61915,"startDate":"2021-08-01","endDate":"2026-09-01"}
 
 # Üzemanyag
 {"category":"Üzemanyag","subCategory":"Tankolás","day":7,"amount":-20000}
@@ -24,7 +24,7 @@
 
 # Kulcs rezsi
 {"category":"Kulcs rezsi","subCategory":"Kulcs biztosítás","day":8,"amount":-2306}
-{"category":"Kulcs rezsi","subCategory":"Kulcs villany","day":28,"amount":-8500}
+{"category":"Kulcs rezsi","subCategory":"Kulcs villany","day":3,"amount":-8500}
 {"category":"Kulcs rezsi","subCategory":"Kulcs építményadó","month":2,"monthDay":7,"amount":-35000}
 {"category":"Kulcs rezsi","subCategory":"Kulcs víz","day":20,"amount":-10000}
 {"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":2,"monthDay":7,"amount":-6000}
@@ -42,17 +42,17 @@
 
 # Autó
 {"category":"Autó","subCategory":"Kia előleg","month":7,"monthDay":5,"amount":-700000,"startDate":"2021-07-01","endDate":"2021-08-01"}
-{"category":"Autó","subCategory":"Kia vásárlás","month":7,"monthDay":5,"amount":-3500000,"startDate":"2021-07-01","endDate":"2021-08-01"}
+{"category":"Autó","subCategory":"Kia vásárlás","month":7,"monthDay":5,"amount":-3538500,"startDate":"2021-07-01","endDate":"2021-08-01"}
 {"category":"Autó","subCategory":"Autó szervíz","day":5,"amount":-10000}
 {"category":"Autó","subCategory":"Kia Kötelező szervíz","month":7,"monthDay":5,"amount":-70000,"startDate":"2022-01-01"}
 {"category":"Autó","subCategory":"Mazda 3 KGFB","month":1,"monthDay":5,"amount":-25000}
 {"category":"Autó","subCategory":"Mazda 2 KGFB","month":1,"monthDay":5,"amount":-25000}
-{"category":"Autó","subCategory":"Kia KGFB","month":7,"monthDay":5,"amount":-60000}
-{"category":"Autó","subCategory":"Autópálya díj","month":1,"monthDay":5,"amount":-10000}
+{"category":"Autó","subCategory":"Kia KGFB","month":8,"monthDay":5,"amount":-32000}
+{"category":"Autó","subCategory":"Autópálya díj","month":1,"monthDay":5,"amount":-20000}
 {"category":"Autó","subCategory":"Mazda 3 Gépjárműadó","month":3,"monthDay":5,"amount":-9100}
 {"category":"Autó","subCategory":"Mazda 2 Gépjárműadó","month":3,"monthDay":5,"amount":-13000}
 {"category":"Autó","subCategory":"Kia Gépjárműadó","month":3,"monthDay":5,"amount":-13000}
-{"category":"Autó","subCategory":"Kia CASCO","month":7,"monthDay":5,"amount":-120000}
+{"category":"Autó","subCategory":"Kia CASCO","month":8,"monthDay":5,"amount":-172000}
 
 # Megtakarítás
 {"category":"Megtakarítás","subCategory":"Vince Fundamenta","day":10,"amount":-20150}
@@ -60,7 +60,8 @@
 {"category":"Megtakarítás","subCategory":"Anna Fundamenta","day":8,"amount":-20150}
 {"category":"Megtakarítás","subCategory":"Vince Fundi gyerekszámla","day":10,"amount":-20150}
 {"category":"Megtakarítás","subCategory":"Anna Fundi gyerekszámla","day":10,"amount":-20150}
-{"category":"Megtakarítás","subCategory":"Union","month":7,"monthDay":3,"amount":-270000,"startDate":"2021-07-01"}
+{"category":"Megtakarítás","subCategory":"Union","month":7,"monthDay":3,"amount":-250000,"startDate":"2021-07-01","endDate":"2022-07-01"}
+{"category":"Megtakarítás","subCategory":"Union","month":7,"monthDay":3,"amount":-270000,"startDate":"2022-07-01"}
 
 # Szórakozás
 {"category":"Szórakozás","subCategory":"Szórakozás","day":25,"amount":-5000}
@@ -73,12 +74,17 @@
 # Szülinapok
 {"category":"Ajándék","subCategory":"Vince szülinap","month":10,"monthDay":10,"amount":-20000}
 {"category":"Ajándék","subCategory":"Anna szülinap","month":8,"monthDay":5,"amount":-20000}
-# Autex
-#{"category":"Egyéb","subCategory":"Autex éves pénz","month":12,"monthDay":5,"amount":80000}
 # Karácsony
 {"category":"Ajándék","subCategory":"Karácsony","month":12,"monthDay":10,"amount":-80000}
 # Gabó kontaktlencse
 {"category":"Gabó kontaktlencse","subCategory":"Gabó féléves kontaktlencse","month":6,"monthDay":28,"amount":-30000}
 {"category":"Gabó kontaktlencse","subCategory":"Gabó féléves kontaktlencse","month":12,"monthDay":28,"amount":-30000}
 # Nyaralás
-{"category":"Szórakozás","subCategory":"Nyaralás","month":7,"monthDay":25,"amount":-200000}
+{"category":"Szórakozás","subCategory":"Nyaralás","month":8,"monthDay":25,"amount":-200000}
+#Kert
+{"category":"Kert","subCategory":"Trágya","month":4,"monthDay":15,"amount":-50000}
+
+
+{"category":"Egyéb","subCategory":"riasztó","month":11,"monthDay":15,"amount":-300000,"startDate":"2021-11-01","endDate":"2021-12-01"}
+{"category":"Autó","subCategory":"Kia téli gumi","month":11,"monthDay":15,"amount":-100000,"startDate":"2021-11-01","endDate":"2021-12-01"}
+{"category":"Egyéb","subCategory":"Klíma","month":2,"monthDay":15,"amount":-250000,"startDate":"2022-02-01","endDate":"2022-03-01"}

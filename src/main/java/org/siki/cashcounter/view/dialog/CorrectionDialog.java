@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -44,6 +45,7 @@ public class CorrectionDialog extends Stage {
   ComboBox<String> cbType;
   TextField tfAmount;
   TextField tfComment;
+  CheckBox cbOnlyMove;
   TableView<AccountTransaction> tblTransactions;
 
   private final LongProperty pairedTransactionId;
@@ -78,6 +80,8 @@ public class CorrectionDialog extends Stage {
     tfAmount.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
     var lblComment = new Label("Megjegyzés");
     tfComment = new TextField();
+    var lblOnlyMove = new Label("Csak áthelyezés");
+    cbOnlyMove = new CheckBox();
     var btnRemovePair = new Button("Párosítás törlése");
     btnRemovePair.setOnAction(this::doRemovePair);
     btnRemovePair.visibleProperty().bind(paired);
@@ -87,7 +91,16 @@ public class CorrectionDialog extends Stage {
     grid.getRowConstraints()
         .addAll(new RowConstraints(), new RowConstraints(), new RowConstraints());
     grid.getChildren()
-        .addAll(lblType, cbType, lblAmount, tfAmount, lblComment, tfComment, btnRemovePair);
+        .addAll(
+            lblType,
+            cbType,
+            lblAmount,
+            tfAmount,
+            lblComment,
+            tfComment,
+            lblOnlyMove,
+            cbOnlyMove,
+            btnRemovePair);
     GridPane.setColumnIndex(cbType, 1);
     GridPane.setRowIndex(lblAmount, 1);
     GridPane.setColumnIndex(tfAmount, 1);
@@ -95,8 +108,11 @@ public class CorrectionDialog extends Stage {
     GridPane.setRowIndex(lblComment, 2);
     GridPane.setColumnIndex(tfComment, 1);
     GridPane.setRowIndex(tfComment, 2);
+    GridPane.setRowIndex(lblOnlyMove, 3);
+    GridPane.setColumnIndex(cbOnlyMove, 1);
+    GridPane.setRowIndex(cbOnlyMove, 3);
     GridPane.setColumnIndex(btnRemovePair, 3);
-    GridPane.setRowSpan(btnRemovePair, 3);
+    GridPane.setRowSpan(btnRemovePair, 4);
     tblTransactions = new TableView<>();
     tblTransactions.setPrefWidth(1000);
     tblTransactions.setPrefHeight(300);
@@ -127,6 +143,7 @@ public class CorrectionDialog extends Stage {
     cbType.setValue(correction.getType());
     tfAmount.setText(String.valueOf(correction.getAmount()));
     tfComment.setText(correction.getComment());
+    cbOnlyMove.setSelected(correction.getOnlyMove());
   }
 
   private void prepareTable() {
@@ -197,6 +214,7 @@ public class CorrectionDialog extends Stage {
     correction.setAmount(newAmount);
     correction.setType(cbType.getValue());
     correction.setComment(tfComment.getText());
+    correction.setOnlyMove(cbOnlyMove.isSelected());
 
     if (correction.getPairedTransactionId() != 0) {
       parentDailyBalance

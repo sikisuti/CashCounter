@@ -7,6 +7,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -25,13 +26,13 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import lombok.Getter;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
@@ -157,18 +158,21 @@ public final class DailyBalanceControl extends VBox {
   }
 
   private void loadUI() {
-    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
+
     this.setMinHeight(40);
     this.setOnMouseEntered(this::mouseEntered);
     this.setOnMouseExited(this::mouseExited);
     this.setSpacing(0);
 
     var txtDate = new Label();
-    txtDate.setPrefWidth(100);
+    txtDate.setPrefWidth(65);
     txtDate.disableProperty().bind(dailyBalance.predictedProperty());
     txtDate.setText(dailyBalance.getDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
     var txtBalance = new Label();
-    txtBalance.setPrefWidth(100);
+    txtBalance.setPrefWidth(80);
+    txtBalance.setAlignment(Pos.CENTER_RIGHT);
     txtBalance.disableProperty().bind(dailyBalance.predictedProperty());
     txtBalance.textProperty().bindBidirectional(dailyBalance.balanceProperty(), currencyFormat);
     txtBalance.setOnMouseClicked(this::setBalanceManually);
@@ -190,7 +194,8 @@ public final class DailyBalanceControl extends VBox {
                 },
                 dailyBalance.balanceSetManuallyProperty()));
     var txtDailySpend = new Label();
-    txtDailySpend.setPrefWidth(100);
+    txtDailySpend.setPrefWidth(70);
+    txtDailySpend.setAlignment(Pos.CENTER_RIGHT);
     txtDailySpend.textProperty().bind(dailyBalance.unpairedDailySpentBinding);
     btnAdd = new Button("+");
     btnAdd.onActionProperty().set(this::openAddCorrectionDialog);
@@ -238,10 +243,13 @@ public final class DailyBalanceControl extends VBox {
   }
 
   private void setBalanceManually(MouseEvent event) {
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
+
     if (event.getClickCount() == 2) {
       var dialog =
           new TextInputDialog(
-              new DecimalFormat("#,###,###' Ft'").format(dailyBalance.getBalance()));
+                  currencyFormat.format(dailyBalance.getBalance()));
       dialog.setHeaderText(dailyBalance.getDate().format(DateTimeFormatter.ISO_DATE));
       dialog.setContentText("Nap végi egyenleg:");
       dialog.initOwner(this.getScene().getWindow());

@@ -3,7 +3,7 @@ package org.siki.cashcounter.view.statistics;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +52,9 @@ public class StatisticsCellModel {
   }
 
   public String getDetails() {
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
+
     var details = new StringBuilder();
     if (!corrections.isEmpty()) {
       var groupedCorrection =
@@ -64,7 +67,7 @@ public class StatisticsCellModel {
                   .append(
                       String.format(
                           "%15s  %s",
-                          new DecimalFormat("#,###,###' Ft'")
+                              currencyFormat
                               .format(
                                   groupedCorrections.stream()
                                       .mapToInt(Correction::getAmount)

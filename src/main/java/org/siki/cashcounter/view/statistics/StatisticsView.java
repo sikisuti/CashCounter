@@ -16,7 +16,6 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.siki.cashcounter.ConfigurationManager;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Map.Entry;
@@ -115,13 +114,16 @@ public class StatisticsView extends GridPane {
 
   private void addStatisticsCell(
       Entry<String, StatisticsCellModel> categoryEntry, LocalDate date, int colCnt, int rowNo) {
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
+
     StatisticsCellModel actStatisticModel = categoryEntry.getValue();
     var cell = new GridPane();
     Integer value;
     Label lblValue;
 
     value = categoryEntry.getValue().getAmount();
-    lblValue = new Label(new DecimalFormat("#,###,###' Ft'").format(value));
+    lblValue = new Label(currencyFormat.format(value));
     setCellStyle(cell, lblValue, date);
     addToolTip(categoryEntry, lblValue);
     cell.getChildren().add(lblValue);

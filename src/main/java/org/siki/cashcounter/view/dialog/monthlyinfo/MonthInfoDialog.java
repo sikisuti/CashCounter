@@ -19,13 +19,13 @@ import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.DataManager;
 
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class MonthInfoDialog extends Stage {
-  private static final DecimalFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+  private static final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
   private static final String FX_ALIGNMENT_CENTER_RIGHT = "-fx-alignment: CENTER-RIGHT;";
   private final MonthlyBalance monthlyBalance;
   private final DataManager dataManager;
@@ -33,6 +33,7 @@ public class MonthInfoDialog extends Stage {
   public MonthInfoDialog(MonthlyBalance monthlyBalance, DataManager dataManager) {
     this.monthlyBalance = monthlyBalance;
     this.dataManager = dataManager;
+    currencyFormat.setMaximumFractionDigits(0);
     loadUI();
   }
 

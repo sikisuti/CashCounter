@@ -21,7 +21,7 @@ import org.siki.cashcounter.model.converter.CorrectionListToObservableConverter;
 import org.siki.cashcounter.model.converter.TransactionListToObservableConverter;
 import org.siki.cashcounter.repository.DataManager;
 
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -328,15 +328,15 @@ public final class DailyBalance {
     }
 
     private void createNotPairedDailySpentBinding(DailyBalance dailyBalance) {
+      var currencyFormat = NumberFormat.getCurrencyInstance();
+      currencyFormat.setMaximumFractionDigits(0);
+
       dailyBalance.unpairedDailySpentBinding =
           Bindings.createStringBinding(
-              () -> {
-                var decimalFormat = new DecimalFormat("#,###,###' Ft'");
-                return dailyBalance.getPredicted()
-                    ? decimalFormat.format(
-                        dailyBalance.dataManager.getDayAverage(dailyBalance.getDate()))
-                    : decimalFormat.format(dailyBalance.getUnpairedDailySpent());
-              },
+              () -> dailyBalance.getPredicted()
+                  ? currencyFormat.format(
+                      dailyBalance.dataManager.getDayAverage(dailyBalance.getDate()))
+                  : currencyFormat.format(dailyBalance.getUnpairedDailySpent()),
               dailyBalance.transactions,
               dailyBalance.corrections);
     }

@@ -16,7 +16,6 @@ import javafx.scene.shape.Circle;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.service.DataForViewService;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class TransactionListView extends GridPane {
@@ -37,7 +36,8 @@ public class TransactionListView extends GridPane {
   }
 
   private void buildLayout() {
-    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
 
     this.getChildren().clear();
     int rowCnt = -1;

@@ -27,7 +27,6 @@ import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.service.CategoryService;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import static javafx.scene.layout.Priority.NEVER;
@@ -131,7 +130,8 @@ public class CorrectionControl extends GridPane {
   }
 
   private void loadUI() {
-    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
 
     this.setMinWidth(100);
     this.setMaxWidth(100);

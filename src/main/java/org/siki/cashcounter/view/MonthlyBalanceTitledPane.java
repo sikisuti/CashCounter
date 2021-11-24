@@ -17,11 +17,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import lombok.Getter;
 import org.siki.cashcounter.model.MonthlyBalance;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 
@@ -35,9 +33,6 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   private final GridPane content = new GridPane();
 
   public MonthlyBalanceTitledPane(MonthlyBalance monthlyBalance, ViewFactory viewFactory) {
-    //    super(
-    //        monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")),
-    //        new GridPane());
     this.setContent(content);
     this.monthlyBalance = monthlyBalance;
     this.viewFactory = viewFactory;
@@ -48,7 +43,9 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void loadUI() {
-    NumberFormat currencyFormat = new DecimalFormat("#,###,###' Ft'");
+    var currencyFormat = NumberFormat.getCurrencyInstance();
+    currencyFormat.setMaximumFractionDigits(0);
+
     GridPane.setColumnIndex(vbDailyBalances, 0);
     content.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
     Bindings.bindContent(vbDailyBalances.getChildren(), dailyBalanceControls);
@@ -66,7 +63,6 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             });
 
     var infoButton = new Button("i");
-    //    infoButton.setShape(new Circle(5));
     infoButton.setStyle(
         "-fx-background-color: #bbbbff; "
             + "-fx-background-radius: 5em; "
@@ -92,10 +88,8 @@ public class MonthlyBalanceTitledPane extends TitledPane {
     startBalance
         .textProperty()
         .bindBidirectional(
-                monthlyBalance.getDailyBalances().stream()
-                        .findFirst()
-                        .orElseThrow()
-                        .balanceProperty(), currencyFormat);
+            monthlyBalance.getDailyBalances().stream().findFirst().orElseThrow().balanceProperty(),
+            currencyFormat);
     var header = new HBox(infoButton, title, startBalance);
     header.setSpacing(5);
     this.setGraphic(header);

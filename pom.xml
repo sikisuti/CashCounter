@@ -31,6 +31,9 @@
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <mockito-junit-jupiter.version>3.10.0</mockito-junit-jupiter.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <apache-poi.version>4.1.0</apache-poi.version>
+        <assertj-core.version>3.22.0</assertj-core.version>
+
     </properties>
 
     <dependencies>
@@ -101,6 +104,19 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito-junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${apache-poi.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -34,26 +34,20 @@ import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.PredictedCorrection;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.AccountTransactionService;
-import org.siki.cashcounter.service.DailyBalanceService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.service.PredictionService;
+import org.siki.cashcounter.util.FilePicker;
 import org.siki.cashcounter.util.StopWatch;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -63,7 +57,6 @@ public class MainScene extends Scene {
   @Autowired private final ViewFactory viewFactory;
   @Autowired private final DataForViewService dataForViewService;
   @Autowired private final AccountTransactionService transactionService;
-  @Autowired private final DailyBalanceService dailyBalanceService;
   @Autowired private final DataManager dataManager;
   @Autowired private final CashFlowChart cashFlowChart;
   @Autowired private final PredictionService predictionService;
@@ -80,7 +73,6 @@ public class MainScene extends Scene {
       ViewFactory viewFactory,
       DataForViewService dataForViewService,
       AccountTransactionService transactionService,
-      DailyBalanceService dailyBalanceService,
       DataManager dataManager,
       CashFlowChart cashFlowChart,
       PredictionService predictionService) {
@@ -90,7 +82,6 @@ public class MainScene extends Scene {
     this.viewFactory = viewFactory;
     this.dataForViewService = dataForViewService;
     this.transactionService = transactionService;
-    this.dailyBalanceService = dailyBalanceService;
     this.dataManager = dataManager;
     this.predictionService = predictionService;
 
@@ -190,7 +181,7 @@ public class MainScene extends Scene {
     saveMenuItem.setOnAction(this::doSave);
 
     var importMenuItem = new MenuItem("Importálás");
-    importMenuItem.setOnAction(this::doImport);
+    importMenuItem.setOnAction(this::importFromFile);
 
     var categoriesMenuItem = new MenuItem("Kategóriák");
     categoriesMenuItem.setOnAction(this::showCategories);
@@ -213,75 +204,70 @@ public class MainScene extends Scene {
     }
   }
 
-  private void doImport(ActionEvent actionEvent) {
-    var fileChooser = new FileChooser();
-    fileChooser.setTitle("Válaszd ki a fájlt");
-    fileChooser
-        .getExtensionFilters()
-        .addAll(
-            new FileChooser.ExtensionFilter("csv files", "*.csv"),
-            new FileChooser.ExtensionFilter("Minden fájl", "*.*"));
-    var selectedFile = fileChooser.showOpenDialog(this.getWindow());
-    if (selectedFile != null) {
-      try (var br =
-          new BufferedReader(
-              new InputStreamReader(new FileInputStream(selectedFile), StandardCharsets.UTF_8))) {
-        String line;
-        List<AccountTransaction> newTransactions = new ArrayList<>();
-
-        while ((line = br.readLine()) != null) {
-          transactionService.createObservableTransactionsFromCSV(line, newTransactions);
-        }
-
-        newTransactions.sort(Comparator.comparing(AccountTransaction::getDate));
-        TreeMap<LocalDate, List<AccountTransaction>> groupped =
-            newTransactions.stream()
-                .collect(
-                    Collectors.groupingBy(
-                        AccountTransaction::getDate, TreeMap::new, Collectors.toList()));
-
-        int counter = 0;
-        for (Map.Entry<LocalDate, List<AccountTransaction>> entry : groupped.entrySet()) {
-          var db =
-              monthlyBalanceTitledPanes.stream()
-                  .filter(
-                      mb ->
-                          mb.getMonthlyBalance()
-                              .getYearMonth()
-                              .equals(YearMonth.from(entry.getKey())))
-                  .findFirst()
-                  .orElseThrow()
-                  .getMonthlyBalance()
-                  .getDailyBalances()
-                  .stream()
-                  .filter(dbc -> dbc.getDate().isEqual(entry.getKey()))
-                  .findFirst()
-                  .orElseThrow();
-          counter += transactionService.storeObservableTransactions(entry.getValue(), db);
-          dataManager.getAllDailyBalances().stream()
-              .filter(
-                  daily ->
-                      daily.getDate().isBefore(entry.getKey().plusDays(1)) && daily.getPredicted())
-              .forEach(
-                  daily -> {
-                    daily.setPredicted(false);
-                  });
-        }
-
-        var alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Üzenet");
-        alert.setHeaderText("Importálás kész");
-        alert.setContentText(counter + " új tranzakció importálva");
-        alert.showAndWait();
-        validate();
-      } catch (Exception e) {
-        log.error("", e);
-        ExceptionDialog.get(e).showAndWait();
-      }
-    }
+  private void importFromFile(ActionEvent actionEvent) {
+    selectFileToImport()
+        .ifPresent(
+            f -> {
+              doImport(f);
+              validate();
+            });
   }
 
-  private void showCategories(ActionEvent actionEvent) {}
+  private Optional<File> selectFileToImport() {
+    return FilePicker.builder(this.getWindow())
+        .title("Válaszd ki a fájlt")
+        .extensionFilter("excel", new String[] {"*.xlsx"})
+        .extensionFilter("csv files", new String[] {"*.csv"})
+        .extensionFilter("Minden fájl", new String[] {"*.*"})
+        .build()
+        .showDialog();
+  }
+
+  private void doImport(File file) {
+    int counter = 0;
+    var newTransactions = transactionService.importTransactionsFrom(file);
+
+    var monthlyGrouppedTransactions =
+        newTransactions.stream().collect(Collectors.groupingBy(t -> YearMonth.from(t.getDate())));
+
+    for (var entry : monthlyGrouppedTransactions.entrySet()) {
+      counter +=
+          monthlyBalanceTitledPanes.stream()
+              .filter(mb -> mb.getMonthlyBalance().getYearMonth() == entry.getKey())
+              .findFirst()
+              .map(mb -> mb.addTransactions(entry.getValue()))
+              .orElseThrow();
+    }
+
+    removePredictedFlags(newTransactions);
+    showImportResult(counter);
+  }
+
+  private void removePredictedFlags(List<AccountTransaction> newTransactions) {
+    var lastTransactionDate =
+        newTransactions.stream()
+            .map(AccountTransaction::getDate)
+            .max(LocalDate::compareTo)
+            .orElseThrow();
+
+    dataManager.getAllDailyBalances().stream()
+        .filter(
+            daily ->
+                daily.getDate().isBefore(lastTransactionDate.plusDays(1)) && daily.getPredicted())
+        .forEach(daily -> daily.setPredicted(false));
+  }
+
+  private void showImportResult(int counter) {
+    var alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle("Üzenet");
+    alert.setHeaderText("Importálás kész");
+    alert.setContentText(counter + " új tranzakció importálva");
+    alert.showAndWait();
+  }
+
+  private void showCategories(ActionEvent actionEvent) {
+    // To be implemented
+  }
 
   private void loadPredictedCorrections(ActionEvent event) {
     var fileChooser = new FileChooser();
@@ -311,7 +297,9 @@ public class MainScene extends Scene {
     }
   }
 
-  private void scrollChart(ScrollEvent scrollEvent) {}
+  private void scrollChart(ScrollEvent scrollEvent) {
+    // To be implemented
+  }
 
   private void refreshChart(Event event) {
     if (((Tab) (event.getSource())).isSelected()) {

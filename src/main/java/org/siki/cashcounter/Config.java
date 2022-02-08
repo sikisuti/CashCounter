@@ -36,7 +36,6 @@ public class Config {
       ViewFactory viewFactory,
       DataForViewService dataForViewService,
       AccountTransactionService accountTransactionService,
-      DailyBalanceService dailyBalanceService,
       DataManager dataManager,
       PredictionService predictionService) {
     return new MainScene(
@@ -44,7 +43,6 @@ public class Config {
         viewFactory,
         dataForViewService,
         accountTransactionService,
-        dailyBalanceService,
         dataManager,
         cashFlowChart,
         predictionService);

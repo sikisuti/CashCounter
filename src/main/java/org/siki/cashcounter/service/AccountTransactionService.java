@@ -1,62 +1,140 @@
 package org.siki.cashcounter.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.view.dialog.ExceptionDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.ACCOUNT_NUMBER;
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.AMOUNT;
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.COMMENT_1;
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.COMMENT_2;
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.DATE;
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.OWNER;
-import static org.siki.cashcounter.service.AccountTransactionService.CSVColumn.TYPE;
+import static java.util.Optional.ofNullable;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.ACCOUNT_NUMBER;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.AMOUNT;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.COMMENT;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.DATE;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.OWNER;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.TYPE;
 
 @RequiredArgsConstructor
+@Slf4j
 public class AccountTransactionService {
   @Autowired private final CategoryService categoryService;
   @Autowired private final DataManager dataManager;
   private Long lastTransactionId;
+  private final DataFormatter dataFormatter = new DataFormatter();
 
-  public void createObservableTransactionsFromCSV(
-      String csvLine, List<AccountTransaction> newTransactions) {
-    csvLine = csvLine.replace("\"", "");
-    String[] elements = csvLine.split(";");
+  public List<AccountTransaction> importTransactionsFrom(File file) {
+    final List<AccountTransaction> newTransactions;
+    if (file.getName().endsWith(".csv")) {
+      newTransactions = importTransactionsFromCSV(file);
+    } else if (file.getName().endsWith(".xlsx")) {
+      newTransactions = importTransactionsFromXlsx(file);
+    } else {
+      newTransactions = new ArrayList<>();
+    }
 
-    if (elements.length > 12 && !elements[DATE.getNumber()].isEmpty()) {
-      var newTransaction = new AccountTransaction();
-      newTransaction.setId(getNextTransactionId());
-      newTransaction.setAmount(Integer.parseInt(elements[AMOUNT.getNumber()]));
-      newTransaction.setDate(
-          LocalDate.parse(elements[DATE.getNumber()], DateTimeFormatter.ofPattern("yyyyMMdd")));
-      newTransaction.setAccountNumber(elements[ACCOUNT_NUMBER.getNumber()]);
-      newTransaction.setOwner(elements[OWNER.getNumber()]);
-      newTransaction.setComment(elements[COMMENT_1.getNumber()] + elements[COMMENT_2.getNumber()]);
-      newTransaction.setType(elements[TYPE.getNumber()]);
+    return newTransactions;
+  }
 
-      categoryService.setCategory(newTransaction);
-      newTransactions.add(newTransaction);
+  private List<AccountTransaction> importTransactionsFromXlsx(File file) {
+    try (var inputStream = new FileInputStream(file)) {
+      var workbook = new XSSFWorkbook(inputStream);
+      var sheet = workbook.getSheetAt(0);
+      return parseXlsxSheet(sheet);
+    } catch (Exception e) {
+      log.error("", e);
+      ExceptionDialog.get(e).showAndWait();
+      return List.of();
     }
   }
 
-  public int storeObservableTransactions(
-      List<AccountTransaction> transactions, DailyBalance dailyBalance) {
-    var counter = 0;
-    for (var transaction : transactions) {
-      if (dailyBalance.getTransactions().stream().noneMatch(t -> t.similar(transaction))) {
-        dailyBalance.addTransaction(transaction);
-        dailyBalance.setReviewed(false);
-        counter++;
+  private List<AccountTransaction> parseXlsxSheet(XSSFSheet sheet) {
+    var newTransactions = new ArrayList<AccountTransaction>();
+    for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+      var row = sheet.getRow(rowIndex);
+      try {
+        var transaction = parseXlsxRow(row);
+        newTransactions.add(transaction);
+      } catch (Exception e) {
+        log.info("Error in xlsx file in row: {}", rowIndex, e);
       }
     }
 
-    return counter;
+    return newTransactions;
+  }
+
+  private AccountTransaction parseXlsxRow(XSSFRow row) {
+    var transaction = new AccountTransaction();
+    transaction.setId(getNextTransactionId());
+    ofNullable(row.getCell(DATE.getNumber()))
+        .ifPresent(
+            cell -> transaction.setDate(LocalDate.parse(dataFormatter.formatCellValue(cell))));
+    ofNullable(row.getCell(TYPE.getNumber()))
+        .ifPresent(cell -> transaction.setType(dataFormatter.formatCellValue(cell)));
+    ofNullable(row.getCell(OWNER.getNumber()))
+        .ifPresent(cell -> transaction.setOwner(dataFormatter.formatCellValue(cell)));
+    ofNullable(row.getCell(ACCOUNT_NUMBER.getNumber()))
+        .ifPresent(cell -> transaction.setAccountNumber(dataFormatter.formatCellValue(cell)));
+    ofNullable(row.getCell(COMMENT.getNumber()))
+        .ifPresent(cell -> transaction.setComment(dataFormatter.formatCellValue(cell)));
+    ofNullable(row.getCell(AMOUNT.getNumber()))
+        .ifPresent(cell -> transaction.setAmount((int) Math.round(cell.getNumericCellValue())));
+
+    categoryService.setCategory(transaction);
+    return transaction;
+  }
+
+  private List<AccountTransaction> importTransactionsFromCSV(File selectedFile) {
+    var newTransactions = new ArrayList<AccountTransaction>();
+
+    try (var fis = new FileInputStream(selectedFile);
+        var isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+        var br = new BufferedReader(isr)) {
+      String line;
+
+      while ((line = br.readLine()) != null) {
+
+        line = line.replace("\"", "");
+        String[] elements = line.split(";");
+
+        if (elements.length > 12 && !elements[CSVColumn.DATE.getNumber()].isEmpty()) {
+          var newTransaction = new AccountTransaction();
+          newTransaction.setId(getNextTransactionId());
+          newTransaction.setAmount(Integer.parseInt(elements[CSVColumn.AMOUNT.getNumber()]));
+          newTransaction.setDate(
+              LocalDate.parse(
+                  elements[CSVColumn.DATE.getNumber()], DateTimeFormatter.ofPattern("yyyyMMdd")));
+          newTransaction.setAccountNumber(elements[CSVColumn.ACCOUNT_NUMBER.getNumber()]);
+          newTransaction.setOwner(elements[CSVColumn.OWNER.getNumber()]);
+          newTransaction.setComment(
+              elements[CSVColumn.COMMENT_1.getNumber()]
+                  + elements[CSVColumn.COMMENT_2.getNumber()]);
+          newTransaction.setType(elements[CSVColumn.TYPE.getNumber()]);
+
+          categoryService.setCategory(newTransaction);
+          newTransactions.add(newTransaction);
+        }
+      }
+    } catch (Exception e) {
+      log.error("", e);
+      ExceptionDialog.get(e).showAndWait();
+    }
+
+    return newTransactions;
   }
 
   private Long getNextTransactionId() {
@@ -85,6 +163,25 @@ public class AccountTransactionService {
     private final int number;
 
     CSVColumn(int number) {
+      this.number = number;
+    }
+
+    private int getNumber() {
+      return number;
+    }
+  }
+
+  enum XlsxColumn {
+    AMOUNT(10),
+    DATE(1),
+    ACCOUNT_NUMBER(5),
+    OWNER(4),
+    COMMENT(7),
+    TYPE(2);
+
+    private final int number;
+
+    XlsxColumn(int number) {
       this.number = number;
     }
 

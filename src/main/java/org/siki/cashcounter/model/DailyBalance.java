@@ -23,6 +23,7 @@ import org.siki.cashcounter.repository.DataManager;
 
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -180,6 +181,19 @@ public final class DailyBalance {
   public void addTransaction(AccountTransaction transaction) {
     transactions.add(transaction);
     setBalance(balance.get() + transaction.getAmount());
+  }
+
+  public int addTransactions(List<AccountTransaction> transactionsToAdd) {
+    var counter = 0;
+    for (var transaction : transactionsToAdd) {
+      if (transactions.stream().noneMatch(t -> t.similar(transaction))) {
+        addTransaction(transaction);
+        setReviewed(false);
+        counter++;
+      }
+    }
+
+    return counter;
   }
 
   @JsonIgnore

@@ -18,10 +18,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import lombok.Getter;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.MonthlyBalance;
 
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
   @Getter private final MonthlyBalance monthlyBalance;
@@ -40,6 +43,23 @@ public class MonthlyBalanceTitledPane extends TitledPane {
     dailyBalanceControls = FXCollections.observableArrayList();
 
     loadUI();
+  }
+
+  public int addTransactions(List<AccountTransaction> transactions) {
+    var dailyGroupedTransactions =
+        transactions.stream().collect(Collectors.groupingBy(AccountTransaction::getDate));
+
+    int counter = 0;
+    for (var entry : dailyGroupedTransactions.entrySet()) {
+      counter +=
+          monthlyBalance.getDailyBalances().stream()
+              .filter(db -> db.getDate().isEqual(entry.getKey()))
+              .findFirst()
+              .orElseThrow()
+              .addTransactions(entry.getValue());
+    }
+
+    return counter;
   }
 
   private void loadUI() {

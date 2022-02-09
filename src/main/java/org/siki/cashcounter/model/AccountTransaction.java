@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,6 +26,7 @@ public final class AccountTransaction {
   private long id;
   private String type;
   @JsonIgnore private LocalDate date;
+  private LocalDateTime transactionDateTime;
   private int amount;
   private String accountNumber;
   private String owner;
@@ -71,6 +73,7 @@ public final class AccountTransaction {
     this.setId(clonable.getId());
     this.setType(clonable.getType());
     this.setDate(clonable.getDate());
+    this.setTransactionDateTime(clonable.getTransactionDateTime());
     this.setAmount(clonable.getAmount());
     this.setAccountNumber(clonable.getAccountNumber());
     this.setOwner(clonable.getOwner());

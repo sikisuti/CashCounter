@@ -24,10 +24,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
@@ -167,7 +167,10 @@ public class DataManager {
         Files.createDirectory(Paths.get(backupPath));
       }
 
-      Files.copy(Paths.get(dataPath), Paths.get(backupPath + "/data_" + lastModifiedDate + ".jsn"));
+      Files.copy(
+          Paths.get(dataPath),
+          Paths.get(backupPath + "/data_" + lastModifiedDate + ".jsn"),
+          REPLACE_EXISTING);
     }
   }
 

@@ -17,21 +17,24 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.ACCOUNT_NUMBER;
 import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.AMOUNT;
 import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.COMMENT;
 import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.DATE;
 import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.OWNER;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.PARTNER_ACCOUNT_NUMBER;
+import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.TRANSACTION_DATE_TIME;
 import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.TYPE;
 
 @RequiredArgsConstructor
 @Slf4j
 public class AccountTransactionService {
+  public static final String ACCOUNT_NUMBER = "1177353504210012";
   @Autowired private final CategoryService categoryService;
   @Autowired private final DataManager dataManager;
   private Long lastTransactionId;
@@ -67,10 +70,16 @@ public class AccountTransactionService {
     for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
       var row = sheet.getRow(rowIndex);
       try {
-        var transaction = parseXlsxRow(row);
-        newTransactions.add(transaction);
+        var accountNumber =
+            ofNullable(row.getCell(XlsxColumn.ACCOUNT_NUMBER.getNumber()))
+                .map(dataFormatter::formatCellValue)
+                .orElse(null);
+        if (ACCOUNT_NUMBER.equals(accountNumber)) {
+          var transaction = parseXlsxRow(row);
+          newTransactions.add(transaction);
+        }
       } catch (Exception e) {
-        log.info("Error in xlsx file in row: {}", rowIndex, e);
+        log.info("Error in xlsx file in row: {}", rowIndex);
       }
     }
 
@@ -80,6 +89,13 @@ public class AccountTransactionService {
   private AccountTransaction parseXlsxRow(XSSFRow row) {
     var transaction = new AccountTransaction();
     transaction.setId(getNextTransactionId());
+    ofNullable(row.getCell(TRANSACTION_DATE_TIME.getNumber()))
+        .ifPresent(
+            cell ->
+                transaction.setTransactionDateTime(
+                    LocalDateTime.parse(
+                        dataFormatter.formatCellValue(cell),
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
     ofNullable(row.getCell(DATE.getNumber()))
         .ifPresent(
             cell -> transaction.setDate(LocalDate.parse(dataFormatter.formatCellValue(cell))));
@@ -87,8 +103,11 @@ public class AccountTransactionService {
         .ifPresent(cell -> transaction.setType(dataFormatter.formatCellValue(cell)));
     ofNullable(row.getCell(OWNER.getNumber()))
         .ifPresent(cell -> transaction.setOwner(dataFormatter.formatCellValue(cell)));
-    ofNullable(row.getCell(ACCOUNT_NUMBER.getNumber()))
-        .ifPresent(cell -> transaction.setAccountNumber(dataFormatter.formatCellValue(cell)));
+    ofNullable(row.getCell(PARTNER_ACCOUNT_NUMBER.getNumber()))
+        .ifPresent(
+            cell ->
+                transaction.setAccountNumber(
+                    dataFormatter.formatCellValue(cell).replaceAll("0{8}$", "")));
     ofNullable(row.getCell(COMMENT.getNumber()))
         .ifPresent(cell -> transaction.setComment(dataFormatter.formatCellValue(cell)));
     ofNullable(row.getCell(AMOUNT.getNumber()))
@@ -172,12 +191,14 @@ public class AccountTransactionService {
   }
 
   enum XlsxColumn {
-    AMOUNT(10),
+    TRANSACTION_DATE_TIME(0),
     DATE(1),
-    ACCOUNT_NUMBER(5),
+    TYPE(2),
     OWNER(4),
+    PARTNER_ACCOUNT_NUMBER(5),
     COMMENT(7),
-    TYPE(2);
+    ACCOUNT_NUMBER(9),
+    AMOUNT(10);
 
     private final int number;
 

@@ -233,7 +233,7 @@ public class MainScene extends Scene {
     for (var entry : monthlyGrouppedTransactions.entrySet()) {
       counter +=
           monthlyBalanceTitledPanes.stream()
-              .filter(mb -> mb.getMonthlyBalance().getYearMonth() == entry.getKey())
+              .filter(mb -> mb.getMonthlyBalance().getYearMonth().equals(entry.getKey()))
               .findFirst()
               .map(mb -> mb.addTransactions(entry.getValue()))
               .orElseThrow();

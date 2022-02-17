@@ -8,24 +8,9 @@ import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +52,7 @@ public class MainScene extends Scene {
   private final VBox dailyBalancesPH = new VBox();
   private final VBox vbCashFlow = new VBox();
   private final VBox vbStatistics = new VBox();
+  private final VBox vbStatisticsTable = new VBox();
 
   public MainScene(
       ConfigurationManager configurationManager,
@@ -118,7 +104,8 @@ public class MainScene extends Scene {
   }
 
   private Node getTabPane() {
-    return new TabPane(getCorrectionsTab(), getCashFlowTab(), getStatisticsTab());
+    return new TabPane(
+        getCorrectionsTab(), getCashFlowTab(), getStatisticsTab(), getStatisticsTableTab());
   }
 
   private Tab getCorrectionsTab() {
@@ -173,6 +160,14 @@ public class MainScene extends Scene {
     var statisticsTab = new Tab("Statisztikák", new ScrollPane(vbStatistics));
     statisticsTab.setClosable(false);
     statisticsTab.setOnSelectionChanged(this::refreshStatistics);
+    return statisticsTab;
+  }
+
+  private Tab getStatisticsTableTab() {
+    vbStatisticsTable.setAlignment(Pos.CENTER);
+    var statisticsTab = new Tab("Statisztikák", vbStatisticsTable);
+    statisticsTab.setClosable(false);
+    statisticsTab.setOnSelectionChanged(this::refreshStatisticsTable);
     return statisticsTab;
   }
 
@@ -311,6 +306,13 @@ public class MainScene extends Scene {
     if (((Tab) (event.getSource())).isSelected()) {
       vbStatistics.getChildren().clear();
       vbStatistics.getChildren().add(viewFactory.createStatisticsView());
+    }
+  }
+
+  private void refreshStatisticsTable(Event event) {
+    if (((Tab) (event.getSource())).isSelected()) {
+      vbStatisticsTable.getChildren().clear();
+      vbStatisticsTable.getChildren().add(viewFactory.createStatisticsTableView());
     }
   }
 }

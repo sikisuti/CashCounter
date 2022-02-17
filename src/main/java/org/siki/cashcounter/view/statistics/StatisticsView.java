@@ -4,14 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.siki.cashcounter.ConfigurationManager;
@@ -31,9 +24,8 @@ public class StatisticsView extends GridPane {
 
     var colCnt = 0;
 
-    for (Entry<LocalDate, StatisticsMonthModel> monthEntry :
-        statisticsProvider.getStatistics().entrySet()) {
-      LocalDate date = monthEntry.getKey();
+    for (var monthEntry : statisticsProvider.getStatistics().entrySet()) {
+      var date = monthEntry.getKey();
       if (date.plusYears(1).isBefore(LocalDate.now().withDayOfMonth(1))) {
         continue;
       }

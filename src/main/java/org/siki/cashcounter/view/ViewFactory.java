@@ -1,6 +1,7 @@
 package org.siki.cashcounter.view;
 
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 import lombok.AllArgsConstructor;
 import org.siki.cashcounter.ConfigurationManager;
@@ -15,8 +16,7 @@ import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CategoriesDialog;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
 import org.siki.cashcounter.view.dialog.monthlyinfo.MonthInfoDialog;
-import org.siki.cashcounter.view.statistics.StatisticsProvider;
-import org.siki.cashcounter.view.statistics.StatisticsView;
+import org.siki.cashcounter.view.statistics.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.YearMonth;
@@ -66,6 +66,11 @@ public class ViewFactory {
   public GridPane createStatisticsView() {
     var statisticsProvider = new StatisticsProvider(dataManager, configurationManager);
     return new StatisticsView(configurationManager, statisticsProvider);
+  }
+
+  public TableView<CategoryRow> createStatisticsTableView() {
+    var statisticsProvider = new StatisticsTableProvider(dataManager, configurationManager);
+    return new StatisticsTableView(configurationManager, statisticsProvider);
   }
 
   public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {

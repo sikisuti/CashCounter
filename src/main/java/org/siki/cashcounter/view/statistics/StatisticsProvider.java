@@ -8,14 +8,8 @@ import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.repository.DataManager;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,7 +24,7 @@ public class StatisticsProvider {
   List<String> consideredCategories;
 
   public SortedMap<LocalDate, StatisticsMonthModel> getStatistics() {
-    List<DailyBalance> dailyBalances = dataManager.getAllDailyBalances();
+    var dailyBalances = dataManager.getAllDailyBalances();
     initializeModels();
     setEndBalances(dailyBalances);
 
@@ -52,7 +46,7 @@ public class StatisticsProvider {
   }
 
   private void initializeModels() {
-    LocalDate date = LocalDate.now().withDayOfMonth(1).minusYears(2).minusMonths(1);
+    var date = LocalDate.now().withDayOfMonth(1).minusYears(2).minusMonths(1);
     StatisticsMonthModel previousMonthModel = null;
 
     do {
@@ -64,12 +58,11 @@ public class StatisticsProvider {
   }
 
   private void setEndBalances(List<DailyBalance> dailyBalances) {
-    Map<LocalDate, List<DailyBalance>> dateGroupedDailyBalances =
+    var dateGroupedDailyBalances =
         dailyBalances.stream().collect(Collectors.groupingBy(db -> db.getDate().withDayOfMonth(1)));
-    for (Entry<LocalDate, List<DailyBalance>> monthDailyBalances :
-        dateGroupedDailyBalances.entrySet()) {
+    for (var monthDailyBalances : dateGroupedDailyBalances.entrySet()) {
       if (statisticsMonthModels.containsKey(monthDailyBalances.getKey())) {
-        int lastMonthBalance =
+        var lastMonthBalance =
             monthDailyBalances
                 .getValue()
                 .get(monthDailyBalances.getValue().size() - 1)
@@ -82,15 +75,14 @@ public class StatisticsProvider {
   private void getCorrections(List<DailyBalance> dailyBalances) {
     var allCorrections =
         dailyBalances.stream()
-            .map(DailyBalance::getCorrections)
-            .flatMap(Collection::stream)
+            .flatMap(db -> db.getCorrections().stream())
             .collect(Collectors.toList());
-    Map<LocalDate, List<Correction>> dateGroupedCorrections =
+    var dateGroupedCorrections =
         allCorrections.stream()
             .collect(
                 Collectors.groupingBy(c -> c.getParentDailyBalance().getDate().withDayOfMonth(1)));
 
-    Map<LocalDate, Map<String, List<Correction>>> dateAndTypeGroupedCorrections =
+    var dateAndTypeGroupedCorrections =
         dateGroupedCorrections.entrySet().stream()
             .collect(
                 Collectors.toMap(
@@ -98,10 +90,8 @@ public class StatisticsProvider {
                     e ->
                         e.getValue().stream().collect(Collectors.groupingBy(Correction::getType))));
 
-    for (Entry<LocalDate, Map<String, List<Correction>>> monthCorrectionEntry :
-        dateAndTypeGroupedCorrections.entrySet()) {
-      for (Entry<String, List<Correction>> typeCorrectionEntry :
-          monthCorrectionEntry.getValue().entrySet()) {
+    for (var monthCorrectionEntry : dateAndTypeGroupedCorrections.entrySet()) {
+      for (var typeCorrectionEntry : monthCorrectionEntry.getValue().entrySet()) {
         if (statisticsMonthModels.containsKey(monthCorrectionEntry.getKey())) {
           var cellModel = new StatisticsCellModel();
           cellModel.putAllCorrections(typeCorrectionEntry.getValue());
@@ -114,13 +104,12 @@ public class StatisticsProvider {
   }
 
   private void setGeneralSpent() {
-    for (Entry<LocalDate, StatisticsMonthModel> monthModelEntry :
-        statisticsMonthModels.entrySet()) {
+    for (var monthModelEntry : statisticsMonthModels.entrySet()) {
       if (monthModelEntry.getValue().getPreviousMonthModel() == null) {
         continue;
       }
 
-      int allCorrections =
+      var allCorrections =
           monthModelEntry.getValue().getCellModels().values().stream()
               .mapToInt(StatisticsCellModel::getAmount)
               .sum();
@@ -137,18 +126,17 @@ public class StatisticsProvider {
   }
 
   private void getConsideredTransactions(List<DailyBalance> dailyBalances) {
-    Stream<AccountTransaction> allTransactions =
+    var allTransactions =
         dailyBalances.stream()
-            .map(DailyBalance::getTransactions)
-            .flatMap(Collection::stream)
+            .flatMap(db -> db.getTransactions().stream())
             .filter(
                 t ->
                     consideredCategories.contains(t.getCategory())
                         && (!t.isPaired() || (t.isPaired() && t.getUnpairedAmount() != 0)));
-    Map<LocalDate, List<AccountTransaction>> dateGroupedTransactions =
+    var dateGroupedTransactions =
         allTransactions.collect(Collectors.groupingBy(t -> t.getDate().withDayOfMonth(1)));
 
-    Map<LocalDate, Map<String, List<AccountTransaction>>> dateAndTypeGroupedTransactions =
+    var dateAndTypeGroupedTransactions =
         dateGroupedTransactions.entrySet().stream()
             .collect(
                 Collectors.toMap(
@@ -157,10 +145,8 @@ public class StatisticsProvider {
                         e.getValue().stream()
                             .collect(Collectors.groupingBy(AccountTransaction::getCategory))));
 
-    for (Entry<LocalDate, Map<String, List<AccountTransaction>>> monthTransactionEntry :
-        dateAndTypeGroupedTransactions.entrySet()) {
-      for (Entry<String, List<AccountTransaction>> typeTransactionEntry :
-          monthTransactionEntry.getValue().entrySet()) {
+    for (var monthTransactionEntry : dateAndTypeGroupedTransactions.entrySet()) {
+      for (var typeTransactionEntry : monthTransactionEntry.getValue().entrySet()) {
         if (statisticsMonthModels.containsKey(monthTransactionEntry.getKey())) {
           var cellModel = new StatisticsCellModel();
           cellModel.putAllTransactions(typeTransactionEntry.getValue());

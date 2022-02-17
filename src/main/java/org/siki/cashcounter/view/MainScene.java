@@ -266,7 +266,7 @@ public class MainScene extends Scene {
   }
 
   private void showCategories(ActionEvent actionEvent) {
-    // To be implemented
+    viewFactory.getCategoriesDialog().showAndWait();
   }
 
   private void loadPredictedCorrections(ActionEvent event) {

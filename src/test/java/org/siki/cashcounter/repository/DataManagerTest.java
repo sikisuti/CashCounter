@@ -28,6 +28,7 @@ class DataManagerTest {
   @Test
   void testLoadData() throws Exception {
     when(configurationManager.getStringProperty("DataPath")).thenReturn("test-data.json");
+    when(configurationManager.getStringProperty("SavingStorePath")).thenReturn("savings.jsn");
     DataManager dataManager = new DataManager(configurationManager);
     log.info(
         objectMapper

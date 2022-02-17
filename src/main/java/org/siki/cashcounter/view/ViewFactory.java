@@ -12,6 +12,7 @@ import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DataForViewService;
+import org.siki.cashcounter.view.dialog.CategoriesDialog;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
 import org.siki.cashcounter.view.dialog.monthlyinfo.MonthInfoDialog;
 import org.siki.cashcounter.view.statistics.StatisticsProvider;
@@ -69,5 +70,9 @@ public class ViewFactory {
 
   public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {
     return new MonthInfoDialog(monthlyBalance, dataManager);
+  }
+
+  public CategoriesDialog getCategoriesDialog() {
+    return new CategoriesDialog(dataManager);
   }
 }

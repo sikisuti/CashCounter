@@ -6,7 +6,7 @@
 
     <groupId>org.siki</groupId>
     <artifactId>CashCounter</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -34,6 +34,7 @@
         <apache-poi.version>4.1.0</apache-poi.version>
         <assertj-core.version>3.22.0</assertj-core.version>
 
+        <commons-lang3.version>3.12.0</commons-lang3.version>
     </properties>
 
     <dependencies>
@@ -118,6 +119,12 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
     </dependencies>
 

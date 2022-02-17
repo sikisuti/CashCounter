@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
-import org.siki.cashcounter.model.CategoryMatchingRule;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.model.Saving;
@@ -23,7 +23,10 @@ import java.nio.file.attribute.FileTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
@@ -65,13 +68,11 @@ public class DataManager {
 
   private void loadSavings() {
     var savingsPath = configurationManager.getStringProperty("SavingStorePath");
-    var lineCnt = 0;
     try (var fileInputStream = new FileInputStream(savingsPath);
         var inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
         var br = new BufferedReader(inputStreamReader)) {
       String line;
       while ((line = br.readLine()) != null) {
-        lineCnt++;
         if (line.startsWith("#") || line.trim().isEmpty()) {
           continue;
         }
@@ -80,8 +81,7 @@ public class DataManager {
             .filter(
                 db ->
                     db.getDate().isAfter(saving.getFrom().minusDays(1))
-                        && db.getDate()
-                            .isBefore(ofNullable(saving.getTo()).orElse(LocalDate.MAX)))
+                        && db.getDate().isBefore(ofNullable(saving.getTo()).orElse(LocalDate.MAX)))
             .forEach(db -> db.addSaving(saving));
       }
     } catch (IOException e) {
@@ -89,8 +89,48 @@ public class DataManager {
     }
   }
 
-  public List<CategoryMatchingRule> getCategoryMatchingRules() {
+  public Map<String, List<String>> getCategoryMatchingRules() {
     return dataSource.categoryMatchingRules;
+  }
+
+  public void addCategoryMatchingRule(String pattern, String category) {
+    Optional.ofNullable(dataSource.categoryMatchingRules.get(category))
+        .ifPresentOrElse(
+            patterns -> patterns.add(pattern),
+            () -> dataSource.categoryMatchingRules.put(category, List.of(pattern)));
+
+    dataSource.monthlyBalances.stream()
+        .flatMap(
+            mb ->
+                mb.getDailyBalances().stream()
+                    .flatMap(
+                        db ->
+                            db.getTransactions().stream()
+                                .filter(AccountTransaction::hasNoCategory)))
+        .forEach(
+            t -> {
+              if (isCategoryMatch(t, pattern)) {
+                t.setCategory(category);
+              }
+            });
+  }
+
+  public long getNumberOfTransactionsBy(String category) {
+    return dataSource.monthlyBalances.stream()
+        .flatMap(
+            mb ->
+                mb.getDailyBalances().stream()
+                    .flatMap(
+                        db ->
+                            db.getTransactions().stream()
+                                .filter(t -> category.equals(t.getCategory()))))
+        .count();
+  }
+
+  public boolean isCategoryMatch(AccountTransaction transaction, String pattern) {
+    return transaction.getComment().toLowerCase().contains(pattern.toLowerCase())
+        || transaction.getType().toLowerCase().contains(pattern.toLowerCase())
+        || transaction.getOwner().toLowerCase().contains(pattern.toLowerCase());
   }
 
   public void save() throws IOException {
@@ -177,6 +217,6 @@ public class DataManager {
   @Data
   static class DataSource {
     private List<MonthlyBalance> monthlyBalances;
-    private List<CategoryMatchingRule> categoryMatchingRules;
+    private Map<String, List<String>> categoryMatchingRules = new HashMap<>();
   }
 }

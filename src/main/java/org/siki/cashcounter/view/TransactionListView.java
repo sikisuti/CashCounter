@@ -1,6 +1,5 @@
 package org.siki.cashcounter.view;
 
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -45,10 +44,10 @@ public class TransactionListView extends GridPane {
       rowCnt++;
       var lblType = new Label(t.getType());
       var lblAmount = new Label(currencyFormat.format(t.getAmount()));
-      var lblOwner = new Label(t.getOwner());
+      var lblOwner = new SelectableLabel(t.getOwner());
       var isPaired = new Circle(10, new Color(0, 0, 1, 1));
       isPaired.visibleProperty().bind(t.pairedProperty());
-      var lblComment = new Label(t.getComment());
+      var lblComment = new SelectableLabel(t.getComment());
 
       GridPane.setConstraints(lblType, 0, rowCnt);
       GridPane.setConstraints(lblAmount, 1, rowCnt);
@@ -68,18 +67,15 @@ public class TransactionListView extends GridPane {
   }
 
   private void addCategoryPicker(AccountTransaction transaction, int rowCnt) {
-    ComboBox cbCategory = null;
     //    if (transaction.getUnpairedAmount() != 0) {
-    cbCategory = new ComboBox();
+    var cbCategory = new ComboBox<String>();
     cbCategory.setEditable(true);
     cbCategory.setItems(dataForViewService.getAllCategories());
     cbCategory.valueProperty().bindBidirectional(transaction.categoryProperty());
     cbCategory.setPrefWidth(200);
     //       Unpaired amount not counted
     //      cbCategory.visibleProperty().bind(transaction.pairedProperty().not());
-    cbCategory
-        .valueProperty()
-        .addListener((ChangeListener<String>) (observable, oldValue, newValue) -> validate());
+    cbCategory.valueProperty().addListener((observable, oldValue, newValue) -> validate());
 
     GridPane.setConstraints(cbCategory, 6, rowCnt);
     this.getChildren().add(cbCategory);

@@ -108,6 +108,10 @@ public final class AccountTransaction {
     return getCategory() != null && !getCategory().isEmpty();
   }
 
+  public boolean hasNoCategory() {
+    return !isValid();
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null || this.getClass() != obj.getClass()) {

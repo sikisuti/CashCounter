@@ -32,7 +32,10 @@ public class StatisticsProvider {
     setGeneralSpent();
 
     consideredCategories =
-        Arrays.asList(configurationManager.getStringProperty("ConsideredCategories").split(","));
+        configurationManager
+            .getStringProperty("ConsideredCategories")
+            .map(cat -> Arrays.asList(cat.split(",")))
+            .orElse(List.of());
     getConsideredTransactions(dailyBalances);
     getRestTransactions(dailyBalances);
 

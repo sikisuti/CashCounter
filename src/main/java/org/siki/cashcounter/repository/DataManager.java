@@ -11,11 +11,7 @@ import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.model.Saving;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -54,7 +50,7 @@ public class DataManager {
   }
 
   private void loadDataFromFile() {
-    var dataPath = configurationManager.getStringProperty("DataPath");
+    var dataPath = configurationManager.getStringProperty("DataPath").orElseThrow();
     log.info("Loading data from " + dataPath);
     try (var inputStream = new FileInputStream(dataPath)) {
       dataSource = objectMapper.readValue(inputStream, DataSource.class);
@@ -67,7 +63,7 @@ public class DataManager {
   }
 
   private void loadSavings() {
-    var savingsPath = configurationManager.getStringProperty("SavingStorePath");
+    var savingsPath = configurationManager.getStringProperty("SavingStorePath").orElseThrow();
     try (var fileInputStream = new FileInputStream(savingsPath);
         var inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
         var br = new BufferedReader(inputStreamReader)) {
@@ -134,7 +130,7 @@ public class DataManager {
   }
 
   public void save() throws IOException {
-    var dataPath = configurationManager.getStringProperty("DataPath");
+    var dataPath = configurationManager.getStringProperty("DataPath").orElseThrow();
     backupIfRequired(dataPath);
 
     try (var outputStream = new FileOutputStream(dataPath)) {
@@ -202,7 +198,7 @@ public class DataManager {
     var lastModifiedDate =
         LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault()).toLocalDate();
     if (!lastModifiedDate.equals(LocalDate.now())) {
-      var backupPath = configurationManager.getStringProperty("BackupPath");
+      var backupPath = configurationManager.getStringProperty("BackupPath").orElseThrow();
       if (Files.notExists(Paths.get(backupPath))) {
         Files.createDirectory(Paths.get(backupPath));
       }

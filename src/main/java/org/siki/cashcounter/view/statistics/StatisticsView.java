@@ -82,14 +82,14 @@ public class StatisticsView extends GridPane {
       Entry<String, StatisticsCellModel> categoryEntry, LocalDate date, int colCnt) {
     String category = categoryEntry.getKey();
     try {
-      var rowNo = configurationManager.getIntegerProperty(category);
+      var rowNo = configurationManager.getIntegerProperty(category).orElseThrow();
 
       if (colCnt == 1) {
         addRowHeader(category, colCnt, rowNo);
       }
 
       addStatisticsCell(categoryEntry, date, colCnt, rowNo);
-    } catch (NumberFormatException e) {
+    } catch (Exception e) {
     }
   }
 
@@ -166,7 +166,8 @@ public class StatisticsView extends GridPane {
   private void setCellColoring(StatisticsCellModel actStatisticModel, GridPane cell) {
     double opacity;
     Color bgColor;
-    var diffBound = configurationManager.getDoubleProperty("DifferenceDecoratorBound");
+    var diffBound =
+        configurationManager.getDoubleProperty("DifferenceDecoratorBound").orElse(10000d);
 
     if (actStatisticModel.getAverage() != null
         && actStatisticModel.getPreviousStatisticsModel() != null

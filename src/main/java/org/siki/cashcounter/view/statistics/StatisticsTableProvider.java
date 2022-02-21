@@ -91,7 +91,7 @@ public class StatisticsTableProvider {
   private CategoryRow createCategoryRow(String categoryName, Map<YearMonth, Integer> valueMap) {
     var row = new CategoryRow();
     row.setCategoryName(categoryName);
-    valueMap.forEach(row::putCategoryValue);
+    valueMap.forEach(row::putCategoryCell);
 
     return row;
   }

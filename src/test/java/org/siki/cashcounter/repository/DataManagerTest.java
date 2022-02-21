@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.siki.cashcounter.ConfigurationManager;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -27,8 +29,10 @@ class DataManagerTest {
 
   @Test
   void testLoadData() throws Exception {
-    when(configurationManager.getStringProperty("DataPath")).thenReturn("test-data.json");
-    when(configurationManager.getStringProperty("SavingStorePath")).thenReturn("savings.jsn");
+    when(configurationManager.getStringProperty("DataPath"))
+        .thenReturn(Optional.of("test-data.json"));
+    when(configurationManager.getStringProperty("SavingStorePath"))
+        .thenReturn(Optional.of("savings.jsn"));
     DataManager dataManager = new DataManager(configurationManager);
     log.info(
         objectMapper

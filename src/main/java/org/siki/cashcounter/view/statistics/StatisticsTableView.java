@@ -1,30 +1,40 @@
 package org.siki.cashcounter.view.statistics;
 
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
-import org.siki.cashcounter.ConfigurationManager;
+import lombok.extern.slf4j.Slf4j;
+import org.siki.cashcounter.view.ViewFactory;
 
 import java.text.NumberFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import static org.siki.cashcounter.view.statistics.StatisticsTableProvider.STAT_END_OFFSET_MONTH;
 import static org.siki.cashcounter.view.statistics.StatisticsTableProvider.STAT_START_OFFSET_MONTH;
 
+@Slf4j
 public class StatisticsTableView extends TableView<CategoryRow> {
 
-  private final ConfigurationManager configurationManager;
+  private final ViewFactory viewFactory;
 
-  public StatisticsTableView(
-      ConfigurationManager configurationManager, StatisticsTableProvider statisticsProvider) {
+  public StatisticsTableView(ViewFactory viewFactory, StatisticsTableProvider statisticsProvider) {
     super();
-    this.configurationManager = configurationManager;
+    this.viewFactory = viewFactory;
+    //    setRowFactory(
+    //        categoryRowTableView ->
+    //            new TableRow<>() {
+    //              @Override
+    //              protected void updateItem(CategoryRow categoryRow, boolean empty) {
+    //                super.updateItem(categoryRow, empty);
+    //              }
+    //            });
+
     configureColumns();
     setItems(statisticsProvider.getStatistics());
   }
@@ -34,9 +44,42 @@ public class StatisticsTableView extends TableView<CategoryRow> {
     configureValueColumns();
   }
 
+  //  private void configureChartButtonColumn() {
+  //    var chartButtonCol = new TableColumn<CategoryRow, Void>();
+  //    chartButtonCol.setCellFactory(
+  //        categoryRowButtonTableColumn ->
+  //            new TableCell<>() {
+  //              @Override
+  //              protected void updateItem(Void value, boolean empty) {
+  //                super.updateItem(value, empty);
+  //                setGraphic(new Button("..."));
+  //              }
+  //            });
+  //    getColumns().add(chartButtonCol);
+  //  }
+
   private void configureCategoryNameColumn() {
-    var categoryNameCol = new TableColumn<CategoryRow, String>("Kategória");
-    categoryNameCol.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
+    var categoryNameCol = new TableColumn<CategoryRow, CategoryRow>();
+    categoryNameCol.setCellFactory(
+        categoryRowStringTableColumn ->
+            new TableCell<>() {
+              @Override
+              protected void updateItem(CategoryRow categoryRow, boolean empty) {
+                super.updateItem(categoryRow, empty);
+                if (!empty && categoryRow != null) {
+                  var button = new Button(categoryRow.getCategoryName());
+                  button.setOnAction(
+                      actionEvent ->
+                          viewFactory
+                              .createCategoryChartDialog()
+                              .show(categoryRow.getCategoryName()));
+                  setGraphic(button);
+                }
+              }
+            });
+    categoryNameCol.setCellValueFactory(
+        categoryRowStringCellDataFeatures ->
+            new SimpleObjectProperty<>(categoryRowStringCellDataFeatures.getValue()));
     getColumns().add(categoryNameCol);
   }
 
@@ -44,12 +87,12 @@ public class StatisticsTableView extends TableView<CategoryRow> {
     var currencyFormat = NumberFormat.getCurrencyInstance();
     currencyFormat.setMaximumFractionDigits(0);
     for (var yearMonth = YearMonth.now().plusMonths(STAT_START_OFFSET_MONTH);
-        yearMonth.isBefore(YearMonth.now().plusMonths(STAT_END_OFFSET_MONTH + 1));
+        yearMonth.isBefore(YearMonth.now().plusMonths(STAT_END_OFFSET_MONTH + 1L));
         yearMonth = yearMonth.plusMonths(1)) {
       var valueCol =
           new TableColumn<CategoryRow, Number>(
               yearMonth.format(DateTimeFormatter.ofPattern("yyyy.M.")));
-      valueCol.setCellValueFactory(monthlyValueFactory(yearMonth));
+      valueCol.setCellValueFactory(monthlyCellValueFactory(yearMonth));
       valueCol.setCellFactory(monthlyCellFactory(currencyFormat));
       getColumns().add(valueCol);
     }
@@ -66,17 +109,19 @@ public class StatisticsTableView extends TableView<CategoryRow> {
               setText(null);
             } else {
               setText(currencyFormat.format(value));
+              //              setStyle("-fx-background-color: yellow;");
             }
           }
         };
   }
 
   private Callback<TableColumn.CellDataFeatures<CategoryRow, Number>, ObservableValue<Number>>
-      monthlyValueFactory(YearMonth yearMonth) {
+      monthlyCellValueFactory(YearMonth yearMonth) {
     return categoryRowStringCellDataFeatures ->
-        Optional.ofNullable(
-                categoryRowStringCellDataFeatures.getValue().getCategoryValue(yearMonth))
-            .map(SimpleIntegerProperty::new)
+        categoryRowStringCellDataFeatures
+            .getValue()
+            .getCategoryCell(yearMonth)
+            .map(cell -> new SimpleIntegerProperty(cell.getAmount()))
             .orElse(null);
   }
 }

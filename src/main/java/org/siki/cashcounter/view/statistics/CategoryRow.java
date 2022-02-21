@@ -1,14 +1,18 @@
 package org.siki.cashcounter.view.statistics;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 public class CategoryRow {
-  private final SimpleStringProperty categoryName = new SimpleStringProperty();
-  private final Map<YearMonth, Integer> categoryValueMap = new LinkedHashMap<>();
+  private final StringProperty categoryName = new SimpleStringProperty();
+  private final Map<YearMonth, CategoryCell> categoryCellMap = new LinkedHashMap<>();
 
   public String getCategoryName() {
     return categoryName.get();
@@ -18,11 +22,11 @@ public class CategoryRow {
     this.categoryName.set(categoryName);
   }
 
-  public Integer getCategoryValue(YearMonth key) {
-    return categoryValueMap.get(key);
+  public void putCategoryCell(YearMonth yearMonth, int amount) {
+    categoryCellMap.put(yearMonth, CategoryCell.builder().amount(amount).build());
   }
 
-  public void putCategoryValue(YearMonth key, Integer value) {
-    categoryValueMap.put(key, value);
+  public Optional<CategoryCell> getCategoryCell(YearMonth yearMonth) {
+    return ofNullable(categoryCellMap.get(yearMonth));
   }
 }

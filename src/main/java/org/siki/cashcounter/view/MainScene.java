@@ -123,7 +123,7 @@ public class MainScene extends Scene {
   }
 
   private void loadCorrections() {
-    if (configurationManager.getBooleanProperty("LogPerformance"))
+    if (configurationManager.getBooleanProperty("LogPerformance").orElse(false))
       StopWatch.start("prepareDailyBalances");
     dailyBalancesPH.getChildren().clear();
     dataManager.getMonthlyBalances().stream()
@@ -131,7 +131,7 @@ public class MainScene extends Scene {
         .forEach(
             mb -> monthlyBalanceTitledPanes.add(viewFactory.createMonthlyBalanceTitledPane(mb)));
     validate();
-    if (configurationManager.getBooleanProperty("LogPerformance"))
+    if (configurationManager.getBooleanProperty("LogPerformance").orElse(false))
       StopWatch.stop("prepareDailyBalances");
   }
 

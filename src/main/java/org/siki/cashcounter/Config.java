@@ -1,13 +1,7 @@
 package org.siki.cashcounter;
 
 import org.siki.cashcounter.repository.DataManager;
-import org.siki.cashcounter.service.AccountTransactionService;
-import org.siki.cashcounter.service.CategoryService;
-import org.siki.cashcounter.service.ChartService;
-import org.siki.cashcounter.service.CorrectionService;
-import org.siki.cashcounter.service.DailyBalanceService;
-import org.siki.cashcounter.service.DataForViewService;
-import org.siki.cashcounter.service.PredictionService;
+import org.siki.cashcounter.service.*;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.ViewFactory;
 import org.siki.cashcounter.view.chart.CashFlowChart;
@@ -91,8 +85,9 @@ public class Config {
   }
 
   @Bean
-  public CategoryService getCategoryService(DataManager dataManager) {
-    return new CategoryService(dataManager);
+  public CategoryService getCategoryService(
+      DataManager dataManager, ConfigurationManager configurationManager) {
+    return new CategoryService(dataManager, configurationManager);
   }
 
   @Bean

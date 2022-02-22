@@ -19,11 +19,7 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
     super(new DateAxis(LocalDate.now().minusYears(2), LocalDate.now()), new NumberAxis());
     this.categoryService = categoryService;
 
-    setTitle("alskdflskjfl");
-
     getYAxis().setAutoRanging(false);
-    getYAxis().setUpperBound(1000000.0);
-    getYAxis().setTickUnit(100000);
     setCreateSymbols(false);
   }
 
@@ -36,7 +32,23 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
             .mapToDouble(d -> d.getYValue().intValue())
             .max()
             .orElse(100000);
-    getYAxis().setUpperBound(Math.ceil(max / 100000d) * 100000);
-    getYAxis().setLowerBound(0.0);
+    var min =
+        series.get(0).getData().stream().mapToDouble(d -> d.getYValue().intValue()).min().orElse(0);
+
+    double diff = max - min;
+    double unit;
+    if (diff < 10000) {
+      unit = 1000;
+    } else if (diff < 100000) {
+      unit = 10000;
+    } else {
+      unit = 100000;
+    }
+
+    getYAxis().setUpperBound(Math.ceil(max / unit) * unit);
+    getYAxis().setLowerBound(Math.floor(min / unit) * unit);
+    getYAxis().setTickUnit(unit);
+
+    setTitle(category);
   }
 }

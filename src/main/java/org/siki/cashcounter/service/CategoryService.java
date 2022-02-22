@@ -14,6 +14,7 @@ import org.siki.cashcounter.repository.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -53,31 +54,57 @@ public class CategoryService {
         new Series<>(
             category,
             IntStream.range(RANGE, 0)
-                .mapToObj(dayOffset -> getDayData(category, dayOffset))
+                .mapToObj(dayOffset -> getDayData(category, dayOffset, sum()))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList))));
   }
 
-  private Data<LocalDate, Number> getDayData(String category, int dayOffset) {
-    return new Data<>(LocalDate.now().plusDays(dayOffset), getDayAverage(category, dayOffset));
+  private Data<LocalDate, Number> getDayData(
+      String category, int dayOffset, ToDoubleFunction<IntStream> calculator) {
+    return new Data<>(
+        LocalDate.now().plusDays(dayOffset), getDayAverage(category, dayOffset, calculator));
   }
 
-  private double getDayAverage(String category, int dayOffset) {
-    var averageRange =
-        configurationManager.getIntegerProperty(category + " average range").orElse(7);
-    var offset = (long) Math.ceil(averageRange / 2d);
+  private double getDayAverage(
+      String category, int dayOffset, ToDoubleFunction<IntStream> calculator) {
+    long averageRange =
+        configurationManager.getIntegerProperty(category + " average range").orElse(30);
 
-    var data =
+    var dateRange =
         dataManager.getAllDailyBalances().stream()
             .filter(
                 db ->
-                    db.getDate().isAfter(LocalDate.now().plusDays(dayOffset - offset))
-                        && db.getDate().isBefore(LocalDate.now().plusDays(dayOffset + offset)))
+                    db.getDate().isAfter(LocalDate.now().plusDays(dayOffset - averageRange))
+                        && db.getDate().isBefore(LocalDate.now().plusDays(dayOffset)))
+            .collect(Collectors.toList());
+
+    var fromCorrections =
+        dateRange.stream()
             .flatMap(db -> db.getCorrections().stream())
             .filter(c -> category.equalsIgnoreCase(c.getType()))
-            .mapToInt(Correction::getAmount)
-            .average()
-            .orElse(0);
+            .mapToInt(Correction::getAmount);
 
-    return data;
+    var fromTransactions =
+        dateRange.stream()
+            .flatMap(db -> db.getTransactions().stream())
+            .filter(t -> category.equalsIgnoreCase(t.getCategory()))
+            .mapToInt(AccountTransaction::getUnpairedAmount);
+
+    var dayAmounts = IntStream.concat(fromCorrections, fromTransactions);
+
+    var temp =
+        dateRange.stream()
+            .collect(
+                Collectors.toMap(
+                    dailyBalance -> dailyBalance.getDate(),
+                    dailyBalance ->
+                        dailyBalance.getTransactions().stream()
+                            .mapToInt(t -> t.getUnpairedAmount())
+                            .average()));
+
+    return calculator.applyAsDouble(dayAmounts);
+  }
+
+  private ToDoubleFunction<IntStream> sum() {
+    return dayAmounts -> (double) dayAmounts.sum();
   }
 }

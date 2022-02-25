@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 
+import static org.siki.cashcounter.service.CategoryService.RANGE;
+
 public class CategoryChart extends LineChart<LocalDate, Number> {
   @Autowired CategoryService categoryService;
 
@@ -16,7 +18,7 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
   }
 
   public CategoryChart(CategoryService categoryService) {
-    super(new DateAxis(LocalDate.now().minusYears(2), LocalDate.now()), new NumberAxis());
+    super(new DateAxis(LocalDate.now().plusDays(RANGE), LocalDate.now()), new NumberAxis());
     this.categoryService = categoryService;
 
     getYAxis().setAutoRanging(false);
@@ -27,13 +29,16 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
     var series = categoryService.getCategoryChart(category);
     setData(series);
 
+    var mainSeries =
+        series.stream().filter(s -> s.getName().contains(category)).findFirst().orElseThrow();
+
     var max =
-        series.get(0).getData().stream()
+        mainSeries.getData().stream()
             .mapToDouble(d -> d.getYValue().intValue())
             .max()
             .orElse(100000);
     var min =
-        series.get(0).getData().stream().mapToDouble(d -> d.getYValue().intValue()).min().orElse(0);
+        mainSeries.getData().stream().mapToDouble(d -> d.getYValue().intValue()).min().orElse(0);
 
     double diff = max - min;
     double unit;
@@ -45,8 +50,8 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
       unit = 100000;
     }
 
-    getYAxis().setUpperBound(Math.ceil(max / unit) * unit);
-    getYAxis().setLowerBound(Math.floor(min / unit) * unit);
+    getYAxis().setUpperBound(max > 0 ? Math.ceil(max / unit) * unit : 0);
+    getYAxis().setLowerBound(min < 0 ? Math.floor(min / unit) * unit : 0);
     getYAxis().setTickUnit(unit);
 
     setTitle(category);

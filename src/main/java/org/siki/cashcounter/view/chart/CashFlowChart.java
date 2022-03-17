@@ -14,6 +14,7 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
   @Autowired ChartService chartService;
 
   private Double maxUpperBound;
+  private Double minLowerBound;
   private Double yDistance;
 
   Data<LocalDate, Integer> nowLine;
@@ -55,6 +56,7 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
             .orElse(0);
 
     maxUpperBound = Math.ceil(max / 100000d) * 100000;
+    minLowerBound = Math.floor(min / 100000d) * 100000;
     double lowerBound = Math.floor((min - 350000) / 100000d) * 100000;
     double upperBound = lowerBound + 3000000;
     yDistance = upperBound - lowerBound;
@@ -69,8 +71,8 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
     double max = getYAxis().getUpperBound();
     if (amount < 0) {
       min += amount;
-      if (min < 0) {
-        min = 0;
+      if (min < minLowerBound) {
+        min = minLowerBound;
       }
 
       max = min + yDistance;

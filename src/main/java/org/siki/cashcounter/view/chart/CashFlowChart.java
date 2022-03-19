@@ -56,7 +56,7 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
             .orElse(0);
 
     maxUpperBound = Math.ceil(max / 100000d) * 100000;
-    minLowerBound = Math.floor(min / 100000d) * 100000;
+    minLowerBound = Math.floor((min - 100000) / 100000d) * 100000;
     double lowerBound = Math.floor((min - 350000) / 100000d) * 100000;
     double upperBound = lowerBound + 3000000;
     yDistance = upperBound - lowerBound;
@@ -71,8 +71,10 @@ public class CashFlowChart extends LineChart<LocalDate, Number> {
     double max = getYAxis().getUpperBound();
     if (amount < 0) {
       min += amount;
-      if (min < minLowerBound) {
+      if (minLowerBound < 0 && min < minLowerBound) {
         min = minLowerBound;
+      } else if (minLowerBound >= 0 && min < 0) {
+        min = 0;
       }
 
       max = min + yDistance;

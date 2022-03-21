@@ -8,18 +8,16 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import lombok.Getter;
 import org.siki.cashcounter.model.AccountTransaction;
+import org.siki.cashcounter.model.Correction;
+import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
+import org.siki.cashcounter.repository.DataManager;
 
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
@@ -29,17 +27,24 @@ import java.util.stream.Collectors;
 public class MonthlyBalanceTitledPane extends TitledPane {
   @Getter private final MonthlyBalance monthlyBalance;
   private final ViewFactory viewFactory;
+  private final DataManager dataManager;
 
   @Getter private final ObservableList<DailyBalanceControl> dailyBalanceControls;
 
   private final VBox vbDailyBalances = new VBox();
   private final GridPane content = new GridPane();
+  private final Label predictionDifference = new Label();
 
-  public MonthlyBalanceTitledPane(MonthlyBalance monthlyBalance, ViewFactory viewFactory) {
+  private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+
+  public MonthlyBalanceTitledPane(
+      MonthlyBalance monthlyBalance, DataManager dataManager, ViewFactory viewFactory) {
     this.setContent(content);
     this.monthlyBalance = monthlyBalance;
+    this.dataManager = dataManager;
     this.viewFactory = viewFactory;
 
+    currencyFormat.setMaximumFractionDigits(0);
     dailyBalanceControls = FXCollections.observableArrayList();
 
     loadUI();
@@ -63,9 +68,6 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void loadUI() {
-    var currencyFormat = NumberFormat.getCurrencyInstance();
-    currencyFormat.setMaximumFractionDigits(0);
-
     GridPane.setColumnIndex(vbDailyBalances, 0);
     content.getChildren().addAll(vbDailyBalances /*, gpStatisticsBg*/);
     Bindings.bindContent(vbDailyBalances.getChildren(), dailyBalanceControls);
@@ -110,9 +112,59 @@ public class MonthlyBalanceTitledPane extends TitledPane {
         .bindBidirectional(
             monthlyBalance.getDailyBalances().stream().findFirst().orElseThrow().balanceProperty(),
             currencyFormat);
-    var header = new HBox(infoButton, title, startBalance);
+    predictionDifference
+        .onMouseClickedProperty()
+        .addListener((observableValue, eventHandler, t1) -> updatePredictionDifference());
+    updatePredictionDifference();
+    var filler = new Region();
+    HBox.setHgrow(filler, Priority.ALWAYS);
+    var header = new HBox(infoButton, title, startBalance, filler, predictionDifference);
     header.setSpacing(5);
+    header.setPrefWidth(500);
     this.setGraphic(header);
+  }
+
+  private void updatePredictionDifference() {
+    var predictions =
+        monthlyBalance.getPredictions().stream().mapToInt(Correction::getAmount).sum();
+    var corrections =
+        monthlyBalance.getDailyBalances().stream()
+            .flatMap(db -> db.getCorrections().stream())
+            .filter(c -> !c.getOnlyMove())
+            .mapToInt(Correction::getAmount)
+            .sum();
+    var predictedUncovered =
+        monthlyBalance.getDailyBalances().stream()
+            .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
+            .sum();
+    var actualUncovered =
+        monthlyBalance.getDailyBalances().stream()
+                .filter(DailyBalance::getPredicted)
+                .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
+                .sum()
+            + monthlyBalance.getDailyBalances().stream()
+                .filter(db -> !db.getPredicted())
+                .mapToInt(DailyBalance::getUnpairedDailySpent)
+                .sum();
+    predictions += predictedUncovered;
+    corrections += actualUncovered;
+
+    var diff = corrections - predictions;
+    predictionDifference.setText(currencyFormat.format(diff));
+    if (diff > 50000) {
+      predictionDifference.setTextFill(Color.GREEN);
+    } else if (diff < -50000) {
+      predictionDifference.setTextFill(Color.RED);
+    } else {
+      predictionDifference.setTextFill(Color.BLACK);
+    }
+
+    if (Math.abs(diff) > 100000) {
+      predictionDifference.setFont(
+          Font.font("Verdana", FontWeight.BOLD, predictionDifference.getFont().getSize()));
+    } else {
+      predictionDifference.setFont(Font.font("Verdana"));
+    }
   }
 
   public void validate() {

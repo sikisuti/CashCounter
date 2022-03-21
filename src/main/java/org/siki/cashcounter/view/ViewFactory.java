@@ -31,7 +31,7 @@ public class ViewFactory {
   @Autowired private final ConfigurationManager configurationManager;
 
   public MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(MonthlyBalance monthlyBalance) {
-    var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(monthlyBalance, this);
+    var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(monthlyBalance, dataManager, this);
     monthlyBalanceTitledPane.expandedProperty().set(false);
     if (YearMonth.now().equals(monthlyBalance.getYearMonth())) {
       monthlyBalanceTitledPane.expandedProperty().set(true);

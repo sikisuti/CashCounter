@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import org.siki.cashcounter.model.Correction;
-import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.PredictedCorrection;
 import org.siki.cashcounter.repository.DataManager;
 
@@ -62,22 +61,29 @@ public class PredictionService {
   public void clearPredictedCorrections() {
     dataManager.getMonthlyBalances().stream()
         .flatMap(mb -> mb.getDailyBalances().stream())
-        .filter(db -> db.getPredicted() && db.getDate().isAfter(LocalDate.now().plusMonths(1)))
+        .filter(
+            db ->
+                db.getPredicted()
+                    && db.getDate()
+                        .isAfter(LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)))
         .forEach(db -> db.getCorrections().clear());
     dailyBalanceService.getOrCreateDailyBalance(
         LocalDate.now().plusYears(1).withDayOfMonth(LocalDate.now().plusYears(1).lengthOfMonth()));
   }
 
   public void fillPredictedCorrections(List<PredictedCorrection> predictedCorrections) {
-    List<DailyBalance> futureDailyBalances =
+    var futureDailyBalances =
         dataManager.getMonthlyBalances().stream()
             .flatMap(mb -> mb.getDailyBalances().stream())
-            .filter(db -> db.getDate().isAfter(LocalDate.now().plusMonths(1)))
+            .filter(
+                db ->
+                    db.getDate()
+                        .isAfter(LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)))
             .collect(Collectors.toList());
 
     predictedCorrections.forEach(
         pc -> {
-          List<DailyBalance> dbSchedList =
+          var dbSchedList =
               futureDailyBalances.stream()
                   .filter(
                       db ->
@@ -145,38 +151,40 @@ public class PredictionService {
   }
 
   public void storePredictions(List<PredictedCorrection> predictedCorrections) {
-    var months = dataManager.getMonthlyBalances();
-    months.forEach(
-        mb -> {
-          mb.clearPredictions();
+    dataManager.getMonthlyBalances().stream()
+        .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1)))
+        .forEach(
+            mb -> {
+              mb.clearPredictions();
 
-          for (var prediction : predictedCorrections) {
-            if (prediction.getMonth() == null
-                || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
-              if (prediction.getDayOfWeek() != null) {
-                for (var i = 0;
-                    i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
-                    i++) {
-                  mb.addPrediction(
-                      prediction.getCategory(),
-                      prediction.getSubCategory(),
-                      prediction.getAmount());
-                }
-              } else {
-                var date =
-                    mb.getYearMonth()
-                        .atDay(ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
-                if (date.isAfter(prediction.getStartDate())
-                    && date.isBefore(prediction.getEndDate())) {
-                  mb.addPrediction(
-                      prediction.getCategory(),
-                      prediction.getSubCategory(),
-                      prediction.getAmount());
+              for (var prediction : predictedCorrections) {
+                if (prediction.getMonth() == null
+                    || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
+                  if (prediction.getDayOfWeek() != null) {
+                    for (var i = 0;
+                        i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
+                        i++) {
+                      mb.addPrediction(
+                          prediction.getCategory(),
+                          prediction.getSubCategory(),
+                          prediction.getAmount());
+                    }
+                  } else {
+                    var date =
+                        mb.getYearMonth()
+                            .atDay(
+                                ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
+                    if (date.isAfter(prediction.getStartDate())
+                        && date.isBefore(prediction.getEndDate())) {
+                      mb.addPrediction(
+                          prediction.getCategory(),
+                          prediction.getSubCategory(),
+                          prediction.getAmount());
+                    }
+                  }
                 }
               }
-            }
-          }
-        });
+            });
   }
 
   public static int countDayOccurenceInMonth(DayOfWeek dow, YearMonth month) {

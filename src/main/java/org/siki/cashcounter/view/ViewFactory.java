@@ -16,6 +16,7 @@ import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.dialog.CategoriesDialog;
 import org.siki.cashcounter.view.dialog.CategoryChartDialog;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
+import org.siki.cashcounter.view.dialog.MonthlyPredictionsDialog;
 import org.siki.cashcounter.view.dialog.monthlyinfo.MonthInfoDialog;
 import org.siki.cashcounter.view.statistics.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,10 @@ public class ViewFactory {
 
   public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {
     return new MonthInfoDialog(monthlyBalance, dataManager);
+  }
+
+  public MonthlyPredictionsDialog getMonthlyPredictionsDialog(MonthlyBalance monthlyBalance) {
+    return new MonthlyPredictionsDialog(monthlyBalance);
   }
 
   public CategoriesDialog getCategoriesDialog() {

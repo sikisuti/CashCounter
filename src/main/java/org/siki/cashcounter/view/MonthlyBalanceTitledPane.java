@@ -20,9 +20,12 @@ import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.DataManager;
 
 import java.text.NumberFormat;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
   @Getter private final MonthlyBalance monthlyBalance;
@@ -84,6 +87,30 @@ public class MonthlyBalanceTitledPane extends TitledPane {
               }
             });
 
+    var header = new HBox();
+
+    if (monthlyBalance.getYearMonth().isBefore(YearMonth.now().plusMonths(2))) {
+      var predictionButton = new Button("p");
+      predictionButton.setStyle(
+          "-fx-background-color: #ffffbb; "
+              + "-fx-background-radius: 5em; "
+              + "-fx-min-width: 15px; "
+              + "-fx-min-height: 15px; "
+              + "-fx-max-width: 15px; "
+              + "-fx-max-height: 15px; "
+              + "-fx-background-insets: 0px; "
+              + "-fx-padding: 0px;"
+              + "-fx-margin: 5,5,5,5");
+      predictionButton.setOnAction(
+          event -> {
+            var monthlyPredictionsDialog = viewFactory.getMonthlyPredictionsDialog(monthlyBalance);
+            monthlyPredictionsDialog.initOwner(this.getScene().getWindow());
+            monthlyPredictionsDialog.showAndWait();
+            updatePredictionDifference();
+          });
+      header.getChildren().add(predictionButton);
+    }
+
     var infoButton = new Button("i");
     infoButton.setStyle(
         "-fx-background-color: #bbbbff; "
@@ -101,9 +128,13 @@ public class MonthlyBalanceTitledPane extends TitledPane {
           infoDialog.initOwner(this.getScene().getWindow());
           infoDialog.showAndWait();
         });
+    header.getChildren().add(infoButton);
+
     var title =
         new Label(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
     title.setPrefWidth(100);
+    header.getChildren().add(title);
+
     var startBalance = new Label();
     startBalance.setPrefWidth(100);
     startBalance.setAlignment(Pos.CENTER_RIGHT);
@@ -112,13 +143,22 @@ public class MonthlyBalanceTitledPane extends TitledPane {
         .bindBidirectional(
             monthlyBalance.getDailyBalances().stream().findFirst().orElseThrow().balanceProperty(),
             currencyFormat);
-    predictionDifference
-        .onMouseClickedProperty()
-        .addListener((observableValue, eventHandler, t1) -> updatePredictionDifference());
-    updatePredictionDifference();
+    header.getChildren().add(startBalance);
+
     var filler = new Region();
     HBox.setHgrow(filler, Priority.ALWAYS);
-    var header = new HBox(infoButton, title, startBalance, filler, predictionDifference);
+    header.getChildren().add(filler);
+
+    var lastDailyBalance =
+        monthlyBalance.getDailyBalances().stream().reduce((first, second) -> second).orElse(null);
+    ofNullable(lastDailyBalance)
+        .ifPresent(
+            ldb ->
+                ldb.balanceProperty()
+                    .addListener((observableValue, number, t1) -> updatePredictionDifference()));
+    updatePredictionDifference();
+    header.getChildren().add(predictionDifference);
+
     header.setSpacing(5);
     header.setPrefWidth(500);
     this.setGraphic(header);
@@ -139,11 +179,11 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             .sum();
     var actualUncovered =
         monthlyBalance.getDailyBalances().stream()
-                .filter(DailyBalance::getPredicted)
+                .filter(db -> !db.getReviewed())
                 .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
                 .sum()
             + monthlyBalance.getDailyBalances().stream()
-                .filter(db -> !db.getPredicted())
+                .filter(DailyBalance::getReviewed)
                 .mapToInt(DailyBalance::getUnpairedDailySpent)
                 .sum();
     predictions += predictedUncovered;

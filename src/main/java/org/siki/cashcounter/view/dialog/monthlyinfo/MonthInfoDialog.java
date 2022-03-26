@@ -239,11 +239,11 @@ public class MonthInfoDialog extends Stage {
             .sum();
     var actualUncovered =
         monthlyBalance.getDailyBalances().stream()
-                .filter(DailyBalance::getPredicted)
+                .filter(db -> !db.getReviewed())
                 .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
                 .sum()
             + monthlyBalance.getDailyBalances().stream()
-                .filter(db -> !db.getPredicted())
+                .filter(DailyBalance::getReviewed)
                 .mapToInt(DailyBalance::getUnpairedDailySpent)
                 .sum();
     var unCoveredRow =

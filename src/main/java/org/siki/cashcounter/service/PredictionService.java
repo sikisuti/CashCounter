@@ -3,14 +3,12 @@ package org.siki.cashcounter.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.PredictedCorrection;
 import org.siki.cashcounter.repository.DataManager;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -25,12 +23,25 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 import static java.util.Optional.ofNullable;
 
 @AllArgsConstructor
+@Slf4j
 public class PredictionService {
   private final DataManager dataManager;
   private final DailyBalanceService dailyBalanceService;
   private final CorrectionService correctionService;
 
-  public List<PredictedCorrection> loadPredictedCorrections(String path) throws IOException {
+  public void replacePredictedCorrections(File sourceFile) {
+    List<PredictedCorrection> pcList;
+    try {
+      pcList = loadPredictedCorrections(sourceFile.getAbsolutePath());
+      clearPredictedCorrections();
+      fillPredictedCorrections(pcList);
+      storePredictions(pcList);
+    } catch (IOException ex) {
+      log.error("", ex);
+    }
+  }
+
+  private List<PredictedCorrection> loadPredictedCorrections(String path) throws IOException {
     List<PredictedCorrection> pcList = new ArrayList<>();
     var lineCnt = 0;
 
@@ -58,7 +69,7 @@ public class PredictionService {
     return pcList;
   }
 
-  public void clearPredictedCorrections() {
+  private void clearPredictedCorrections() {
     dataManager.getMonthlyBalances().stream()
         .flatMap(mb -> mb.getDailyBalances().stream())
         .filter(
@@ -71,7 +82,7 @@ public class PredictionService {
         LocalDate.now().plusYears(1).withDayOfMonth(LocalDate.now().plusYears(1).lengthOfMonth()));
   }
 
-  public void fillPredictedCorrections(List<PredictedCorrection> predictedCorrections) {
+  private void fillPredictedCorrections(List<PredictedCorrection> predictedCorrections) {
     var futureDailyBalances =
         dataManager.getMonthlyBalances().stream()
             .flatMap(mb -> mb.getDailyBalances().stream())
@@ -150,7 +161,7 @@ public class PredictionService {
         });
   }
 
-  public void storePredictions(List<PredictedCorrection> predictedCorrections) {
+  private void storePredictions(List<PredictedCorrection> predictedCorrections) {
     dataManager.getMonthlyBalances().stream()
         .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1)))
         .forEach(

@@ -1,8 +1,8 @@
-package org.siki.cashcounter;
+package org.siki.cashcounter.configuration;
 
+import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.*;
-import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.ViewFactory;
 import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.springframework.context.annotation.Bean;
@@ -24,25 +24,6 @@ public class Config {
   }
 
   @Bean
-  public MainScene getMainScene(
-      CashFlowChart cashFlowChart,
-      ConfigurationManager configurationManager,
-      ViewFactory viewFactory,
-      DataForViewService dataForViewService,
-      AccountTransactionService accountTransactionService,
-      DataManager dataManager,
-      PredictionService predictionService) {
-    return new MainScene(
-        configurationManager,
-        viewFactory,
-        dataForViewService,
-        accountTransactionService,
-        dataManager,
-        cashFlowChart,
-        predictionService);
-  }
-
-  @Bean
   public DataManager getDataManager(ConfigurationManager configurationManager) {
     return new DataManager(configurationManager);
   }
@@ -58,7 +39,7 @@ public class Config {
   }
 
   @Bean
-  public ViewFactory getControlFactory(
+  public ViewFactory getViewFactory(
       DataForViewService dataForViewService,
       CategoryService categoryService,
       CorrectionService correctionService,
@@ -66,12 +47,6 @@ public class Config {
       ConfigurationManager configurationManager) {
     return new ViewFactory(
         dataForViewService, categoryService, correctionService, dataManager, configurationManager);
-  }
-
-  @Bean
-  public AccountTransactionService getTransactionService(
-      DataManager dataManager, CategoryService categoryService) {
-    return new AccountTransactionService(categoryService, dataManager);
   }
 
   @Bean
@@ -88,13 +63,5 @@ public class Config {
   public CategoryService getCategoryService(
       DataManager dataManager, ConfigurationManager configurationManager) {
     return new CategoryService(dataManager, configurationManager);
-  }
-
-  @Bean
-  public PredictionService getPredictionService(
-      DataManager dataManager,
-      DailyBalanceService dailyBalanceService,
-      CorrectionService correctionService) {
-    return new PredictionService(dataManager, dailyBalanceService, correctionService);
   }
 }

@@ -18,8 +18,8 @@ public class CashCounter extends Application {
   }
 
   @Override
-  public void start(Stage stage) throws Exception {
-    var context = new AnnotationConfigApplicationContext(Config.class);
+  public void start(Stage stage) {
+    var context = new AnnotationConfigApplicationContext("org.siki.cashcounter.configuration");
     var mainScene = context.getBean(MainScene.class);
     stage.setScene(mainScene);
     stage.show();

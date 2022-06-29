@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view;
+package org.siki.cashcounter.view.dailycorrections;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -13,17 +13,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import lombok.Getter;
-import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.view.ViewFactory;
 
 import java.text.NumberFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -51,23 +49,6 @@ public class MonthlyBalanceTitledPane extends TitledPane {
     dailyBalanceControls = FXCollections.observableArrayList();
 
     loadUI();
-  }
-
-  public int addTransactions(List<AccountTransaction> transactions) {
-    var dailyGroupedTransactions =
-        transactions.stream().collect(Collectors.groupingBy(AccountTransaction::getDate));
-
-    int counter = 0;
-    for (var entry : dailyGroupedTransactions.entrySet()) {
-      counter +=
-          monthlyBalance.getDailyBalances().stream()
-              .filter(db -> db.getDate().isEqual(entry.getKey()))
-              .findFirst()
-              .orElseThrow()
-              .addTransactions(entry.getValue());
-    }
-
-    return counter;
   }
 
   private void loadUI() {

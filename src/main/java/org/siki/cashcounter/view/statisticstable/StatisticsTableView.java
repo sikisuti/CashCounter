@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view.statistics;
+package org.siki.cashcounter.view.statisticstable;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -9,18 +9,19 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
+import org.siki.cashcounter.view.Refreshable;
 import org.siki.cashcounter.view.ViewFactory;
 
 import java.text.NumberFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
-import static org.siki.cashcounter.view.statistics.StatisticsTableProvider.STAT_END_OFFSET_MONTH;
-import static org.siki.cashcounter.view.statistics.StatisticsTableProvider.STAT_START_OFFSET_MONTH;
+import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.STAT_END_OFFSET_MONTH;
+import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.STAT_START_OFFSET_MONTH;
 
+@SuppressWarnings("java:S110")
 @Slf4j
-public class StatisticsTableView extends TableView<CategoryRow> {
-
+public class StatisticsTableView extends TableView<CategoryRow> implements Refreshable {
   private final ViewFactory viewFactory;
 
   public StatisticsTableView(ViewFactory viewFactory, StatisticsTableProvider statisticsProvider) {
@@ -124,4 +125,7 @@ public class StatisticsTableView extends TableView<CategoryRow> {
             .map(cell -> new SimpleIntegerProperty(cell.getAmount()))
             .orElse(null);
   }
+
+  @Override
+  public void refresh() {}
 }

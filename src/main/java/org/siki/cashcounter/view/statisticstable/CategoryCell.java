@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view.statistics;
+package org.siki.cashcounter.view.statisticstable;
 
 import lombok.Builder;
 import lombok.Value;

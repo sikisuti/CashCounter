@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view.statistics;
+package org.siki.cashcounter.view.statisticstable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

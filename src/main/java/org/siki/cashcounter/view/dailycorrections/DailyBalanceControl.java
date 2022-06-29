@@ -1,4 +1,4 @@
-package org.siki.cashcounter.view;
+package org.siki.cashcounter.view.dailycorrections;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
@@ -9,29 +9,18 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import lombok.Getter;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
+import org.siki.cashcounter.view.ViewFactory;
 
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
@@ -298,12 +287,12 @@ public final class DailyBalanceControl extends VBox {
     btnAdd.setVisible(false);
   }
 
-  void validate() {
+  public void validate() {
     this.isValid();
     this.parent.validate();
   }
 
-  void isValid() {
+  public void isValid() {
     boolean isValid = dailyBalance.getTransactions().stream().allMatch(AccountTransaction::isValid);
 
     if (!isValid) {

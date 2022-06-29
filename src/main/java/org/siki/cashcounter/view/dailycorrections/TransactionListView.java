@@ -1,19 +1,15 @@
-package org.siki.cashcounter.view;
+package org.siki.cashcounter.view.dailycorrections;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.service.DataForViewService;
+import org.siki.cashcounter.view.SelectableLabel;
 
 import java.text.NumberFormat;
 

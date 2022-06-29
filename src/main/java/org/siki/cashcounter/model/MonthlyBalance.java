@@ -6,6 +6,7 @@ import lombok.Data;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class MonthlyBalance {
@@ -30,6 +31,24 @@ public class MonthlyBalance {
     predictedCorrection.setComment(comment);
     predictedCorrection.setAmount(amount);
     predictions.add(predictedCorrection);
+  }
+
+  @JsonIgnore
+  public int addTransactions(List<AccountTransaction> transactions) {
+    var dailyGroupedTransactions =
+        transactions.stream().collect(Collectors.groupingBy(AccountTransaction::getDate));
+
+    int counter = 0;
+    for (var entry : dailyGroupedTransactions.entrySet()) {
+      counter +=
+          dailyBalances.stream()
+              .filter(db -> db.getDate().isEqual(entry.getKey()))
+              .findFirst()
+              .orElseThrow()
+              .addTransactions(entry.getValue());
+    }
+
+    return counter;
   }
 
   @JsonIgnore

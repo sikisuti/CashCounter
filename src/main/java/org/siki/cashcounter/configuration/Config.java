@@ -2,9 +2,11 @@ package org.siki.cashcounter.configuration;
 
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
-import org.siki.cashcounter.service.*;
+import org.siki.cashcounter.service.CategoryService;
+import org.siki.cashcounter.service.CorrectionService;
+import org.siki.cashcounter.service.DailyBalanceService;
+import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.view.ViewFactory;
-import org.siki.cashcounter.view.chart.CashFlowChart;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,17 +14,6 @@ import java.io.IOException;
 
 @Configuration
 public class Config {
-
-  @Bean
-  public ChartService getChartService(DataManager dataManager) {
-    return new ChartService(dataManager);
-  }
-
-  @Bean
-  public CashFlowChart getCashFlowChart(ChartService chartService) {
-    return new CashFlowChart(chartService);
-  }
-
   @Bean
   public DataManager getDataManager(ConfigurationManager configurationManager) {
     return new DataManager(configurationManager);

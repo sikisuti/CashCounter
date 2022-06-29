@@ -8,12 +8,14 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.siki.cashcounter.ConfigurationManager;
+import org.siki.cashcounter.view.Refreshable;
 
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Map.Entry;
 
-public class StatisticsView extends GridPane {
+@SuppressWarnings("java:S110")
+public class StatisticsView extends GridPane implements Refreshable {
   private static final String HEADER_STYLE = "-fx-font-weight: bold;";
 
   private final ConfigurationManager configurationManager;
@@ -201,4 +203,7 @@ public class StatisticsView extends GridPane {
           new Background(new BackgroundFill(bgColor, CornerRadii.EMPTY, Insets.EMPTY)));
     }
   }
+
+  @Override
+  public void refresh() {}
 }

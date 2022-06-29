@@ -1,10 +1,11 @@
-package org.siki.cashcounter.view.chart;
+package org.siki.cashcounter.view.cashflow;
 
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Line;
 import org.siki.cashcounter.service.ChartService;
+import org.siki.cashcounter.view.chart.DateAxis;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;

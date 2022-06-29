@@ -20,6 +20,7 @@ public class CashCounter extends Application {
   @Override
   public void start(Stage stage) {
     var context = new AnnotationConfigApplicationContext("org.siki.cashcounter.configuration");
+    // TODO: separate data load from constructor in DataManager
     context.getBean(DataManager.class);
     var mainScene = context.getBean(MainScene.class);
     stage.setScene(mainScene);

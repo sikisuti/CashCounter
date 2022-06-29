@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 public class StatisticsMonthModel {
   private final Map<String, StatisticsCellModel> statisticsCellModels = new HashMap<>();
-  private Integer monthEndBalance;
+  private int monthEndBalance;
   private StatisticsMonthModel previousMonthModel;
 
   public StatisticsMonthModel(StatisticsMonthModel previousMonthModel) {
@@ -31,7 +31,7 @@ public class StatisticsMonthModel {
     this.monthEndBalance = endBalance;
   }
 
-  public Integer getEndBalance() {
+  public int getEndBalance() {
     return monthEndBalance;
   }
 

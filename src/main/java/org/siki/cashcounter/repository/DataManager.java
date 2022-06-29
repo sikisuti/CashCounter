@@ -22,11 +22,12 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
@@ -41,12 +42,17 @@ public class DataManager {
     this.configurationManager = configurationManager;
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+    // TODO: separate data load from constructor
+    loadData();
+  }
+
+  public void loadData() {
     loadDataFromFile();
     loadSavings();
   }
 
   public List<MonthlyBalance> getMonthlyBalances() {
-    return dataSource.monthlyBalances;
+    return ofNullable(dataSource).map(ds -> ds.monthlyBalances).orElse(emptyList());
   }
 
   private void loadDataFromFile() {
@@ -86,11 +92,11 @@ public class DataManager {
   }
 
   public Map<String, List<String>> getCategoryMatchingRules() {
-    return dataSource.categoryMatchingRules;
+    return ofNullable(dataSource).map(ds -> ds.categoryMatchingRules).orElse(emptyMap());
   }
 
   public void addCategoryMatchingRule(String pattern, String category) {
-    Optional.ofNullable(dataSource.categoryMatchingRules.get(category))
+    ofNullable(dataSource.categoryMatchingRules.get(category))
         .ifPresentOrElse(
             patterns -> patterns.add(pattern),
             () -> dataSource.categoryMatchingRules.put(category, List.of(pattern)));
@@ -139,9 +145,13 @@ public class DataManager {
   }
 
   public List<DailyBalance> getAllDailyBalances() {
-    return dataSource.monthlyBalances.stream()
-        .flatMap(mb -> mb.getDailyBalances().stream())
-        .collect(Collectors.toList());
+    return ofNullable(dataSource)
+        .map(
+            ds ->
+                ds.monthlyBalances.stream()
+                    .flatMap(mb -> mb.getDailyBalances().stream())
+                    .collect(Collectors.toList()))
+        .orElse(emptyList());
   }
 
   private void wireDependencies() {

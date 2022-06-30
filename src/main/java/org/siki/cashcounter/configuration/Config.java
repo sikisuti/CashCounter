@@ -1,7 +1,9 @@
 package org.siki.cashcounter.configuration;
 
+import org.mapstruct.factory.Mappers;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.repository.converter.DataSourceMapper;
 import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.service.DailyBalanceService;
@@ -16,7 +18,7 @@ import java.io.IOException;
 public class Config {
   @Bean
   public DataManager getDataManager(ConfigurationManager configurationManager) {
-    return new DataManager(configurationManager);
+    return new DataManager(configurationManager, Mappers.getMapper(DataSourceMapper.class));
   }
 
   @Bean

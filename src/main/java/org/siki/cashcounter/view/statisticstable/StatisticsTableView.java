@@ -23,20 +23,18 @@ import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.
 @Slf4j
 public class StatisticsTableView extends TableView<CategoryRow> implements Refreshable {
   private final ViewFactory viewFactory;
+  private final StatisticsTableProvider statisticsProvider;
 
   public StatisticsTableView(ViewFactory viewFactory, StatisticsTableProvider statisticsProvider) {
     super();
     this.viewFactory = viewFactory;
-    //    setRowFactory(
-    //        categoryRowTableView ->
-    //            new TableRow<>() {
-    //              @Override
-    //              protected void updateItem(CategoryRow categoryRow, boolean empty) {
-    //                super.updateItem(categoryRow, empty);
-    //              }
-    //            });
+    this.statisticsProvider = statisticsProvider;
 
     configureColumns();
+  }
+
+  @Override
+  public void refresh() {
     setItems(statisticsProvider.getStatistics());
   }
 
@@ -44,20 +42,6 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
     configureCategoryNameColumn();
     configureValueColumns();
   }
-
-  //  private void configureChartButtonColumn() {
-  //    var chartButtonCol = new TableColumn<CategoryRow, Void>();
-  //    chartButtonCol.setCellFactory(
-  //        categoryRowButtonTableColumn ->
-  //            new TableCell<>() {
-  //              @Override
-  //              protected void updateItem(Void value, boolean empty) {
-  //                super.updateItem(value, empty);
-  //                setGraphic(new Button("..."));
-  //              }
-  //            });
-  //    getColumns().add(chartButtonCol);
-  //  }
 
   private void configureCategoryNameColumn() {
     var categoryNameCol = new TableColumn<CategoryRow, CategoryRow>();
@@ -125,7 +109,4 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
             .map(cell -> new SimpleIntegerProperty(cell.getAmount()))
             .orElse(null);
   }
-
-  @Override
-  public void refresh() {}
 }

@@ -1,5 +1,6 @@
 package org.siki.cashcounter.view.dailycorrections;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,7 +36,9 @@ public class DailyCorrectionsView extends GridPane {
     this.getRowConstraints().add(rowConstraints);
     this.getChildren().add(new ScrollPane(dailyBalancesPH));
 
-    loadCorrections();
+    dataManager
+        .getMonthlyBalances()
+        .addListener((InvalidationListener) observable -> loadCorrections());
   }
 
   private void loadCorrections() {

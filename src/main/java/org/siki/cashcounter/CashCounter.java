@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.util.StopWatch;
 import org.siki.cashcounter.view.MainScene;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -19,9 +20,10 @@ public class CashCounter extends Application {
 
   @Override
   public void start(Stage stage) {
+    StopWatch.start("container");
     var context = new AnnotationConfigApplicationContext("org.siki.cashcounter.configuration");
-    // TODO: separate data load from constructor in DataManager
-    context.getBean(DataManager.class);
+    StopWatch.stop("container");
+    StopWatch.start("view");
     var mainScene = context.getBean(MainScene.class);
     stage.setScene(mainScene);
     stage.show();
@@ -36,5 +38,9 @@ public class CashCounter extends Application {
             Platform.exit();
           }
         });
+    StopWatch.stop("view");
+    StopWatch.start("data");
+    context.getBean(DataManager.class).loadData();
+    StopWatch.stop("data");
   }
 }

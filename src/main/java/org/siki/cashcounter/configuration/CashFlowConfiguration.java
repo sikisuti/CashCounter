@@ -16,12 +16,12 @@ public class CashFlowConfiguration {
   }
 
   @Bean
-  public ChartService getChartService(DataManager dataManager) {
-    return new ChartService(dataManager);
+  public CashFlowChart getCashFlowChart(ChartService chartService) {
+    return new CashFlowChart(chartService);
   }
 
   @Bean
-  public CashFlowChart getCashFlowChart(ChartService chartService) {
-    return new CashFlowChart(chartService);
+  public ChartService getChartService(DataManager dataManager) {
+    return new ChartService(dataManager);
   }
 }

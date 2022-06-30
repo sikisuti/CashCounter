@@ -1,15 +1,17 @@
 package org.siki.cashcounter.repository;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.Data;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.model.Saving;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.siki.cashcounter.repository.converter.DataSourceMapper;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +21,6 @@ import java.nio.file.attribute.FileTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,17 +34,18 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public class DataManager {
 
-  @Autowired private final ConfigurationManager configurationManager;
+  private final ConfigurationManager configurationManager;
+  private final DataSourceMapper dataSourceMapper;
 
-  private DataSource dataSource;
+  private DataSource dataSource = new DataSource();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public DataManager(ConfigurationManager configurationManager) {
+  public DataManager(ConfigurationManager configurationManager, DataSourceMapper dataSourceMapper) {
     this.configurationManager = configurationManager;
+    this.dataSourceMapper = dataSourceMapper;
+
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-    // TODO: separate data load from constructor
-    loadData();
   }
 
   public void loadData() {
@@ -51,21 +53,24 @@ public class DataManager {
     loadSavings();
   }
 
-  public List<MonthlyBalance> getMonthlyBalances() {
-    return ofNullable(dataSource).map(ds -> ds.monthlyBalances).orElse(emptyList());
+  @JsonIgnore
+  public ObservableList<MonthlyBalance> getMonthlyBalances() {
+    return ofNullable(dataSource)
+        .map(DataSource::getMonthlyBalances)
+        .orElse(FXCollections.observableArrayList());
   }
 
   private void loadDataFromFile() {
     var dataPath = configurationManager.getStringProperty("DataPath").orElseThrow();
     log.info("Loading data from " + dataPath);
     try (var inputStream = new FileInputStream(dataPath)) {
-      dataSource = objectMapper.readValue(inputStream, DataSource.class);
-      log.info(dataSource.monthlyBalances.size() + " months loaded");
+      var dataSourceRaw = objectMapper.readValue(inputStream, DataSourceRaw.class);
+      wireDependencies(dataSourceRaw);
+      dataSourceMapper.fromRaw(dataSourceRaw, dataSource);
+      log.info(dataSource.getMonthlyBalances().size() + " months loaded");
     } catch (IOException e) {
       log.error("Unable to load data file " + dataPath, e);
     }
-
-    wireDependencies();
   }
 
   private void loadSavings() {
@@ -92,16 +97,16 @@ public class DataManager {
   }
 
   public Map<String, List<String>> getCategoryMatchingRules() {
-    return ofNullable(dataSource).map(ds -> ds.categoryMatchingRules).orElse(emptyMap());
+    return ofNullable(dataSource).map(DataSource::getCategoryMatchingRules).orElse(emptyMap());
   }
 
   public void addCategoryMatchingRule(String pattern, String category) {
-    ofNullable(dataSource.categoryMatchingRules.get(category))
+    ofNullable(dataSource.getCategoryMatchingRules().get(category))
         .ifPresentOrElse(
             patterns -> patterns.add(pattern),
-            () -> dataSource.categoryMatchingRules.put(category, List.of(pattern)));
+            () -> dataSource.getCategoryMatchingRules().put(category, List.of(pattern)));
 
-    dataSource.monthlyBalances.stream()
+    dataSource.getMonthlyBalances().stream()
         .flatMap(
             mb ->
                 mb.getDailyBalances().stream()
@@ -118,7 +123,7 @@ public class DataManager {
   }
 
   public long getNumberOfTransactionsBy(String category) {
-    return dataSource.monthlyBalances.stream()
+    return dataSource.getMonthlyBalances().stream()
         .flatMap(
             mb ->
                 mb.getDailyBalances().stream()
@@ -139,8 +144,9 @@ public class DataManager {
     var dataPath = configurationManager.getStringProperty("DataPath").orElseThrow();
     backupIfRequired(dataPath);
 
+    var rawData = dataSourceMapper.toRaw(dataSource);
     try (var outputStream = new FileOutputStream(dataPath)) {
-      objectMapper.writeValue(outputStream, dataSource);
+      objectMapper.writeValue(outputStream, rawData);
     }
   }
 
@@ -148,14 +154,17 @@ public class DataManager {
     return ofNullable(dataSource)
         .map(
             ds ->
-                ds.monthlyBalances.stream()
+                ds.getMonthlyBalances().stream()
                     .flatMap(mb -> mb.getDailyBalances().stream())
                     .collect(Collectors.toList()))
         .orElse(emptyList());
   }
 
-  private void wireDependencies() {
-    var allDailyBalances = getAllDailyBalances();
+  private void wireDependencies(DataSourceRaw dataSourceRaw) {
+    var allDailyBalances =
+        dataSourceRaw.getMonthlyBalances().stream()
+            .flatMap(mb -> mb.getDailyBalances().stream())
+            .collect(Collectors.toList());
     allDailyBalances.get(0).setDataManager(this);
     for (var i = 1; i < allDailyBalances.size(); i++) {
       var actDailyBalance = allDailyBalances.get(i);
@@ -218,11 +227,5 @@ public class DataManager {
           Paths.get(backupPath + "/data_" + lastModifiedDate + ".jsn"),
           REPLACE_EXISTING);
     }
-  }
-
-  @Data
-  static class DataSource {
-    private List<MonthlyBalance> monthlyBalances;
-    private Map<String, List<String>> categoryMatchingRules = new HashMap<>();
   }
 }

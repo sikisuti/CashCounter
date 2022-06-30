@@ -19,13 +19,18 @@ public class StatisticsView extends GridPane implements Refreshable {
   private static final String HEADER_STYLE = "-fx-font-weight: bold;";
 
   private final ConfigurationManager configurationManager;
+  private final StatisticsProvider statisticsProvider;
 
   public StatisticsView(
       ConfigurationManager configurationManager, StatisticsProvider statisticsProvider) {
     this.configurationManager = configurationManager;
+    this.statisticsProvider = statisticsProvider;
+  }
 
+  @Override
+  public void refresh() {
+    this.getChildren().clear();
     var colCnt = 0;
-
     for (var monthEntry : statisticsProvider.getStatistics().entrySet()) {
       var date = monthEntry.getKey();
       if (date.plusYears(1).isBefore(LocalDate.now().withDayOfMonth(1))) {
@@ -203,7 +208,4 @@ public class StatisticsView extends GridPane implements Refreshable {
           new Background(new BackgroundFill(bgColor, CornerRadii.EMPTY, Insets.EMPTY)));
     }
   }
-
-  @Override
-  public void refresh() {}
 }

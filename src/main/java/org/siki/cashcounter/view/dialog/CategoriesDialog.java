@@ -29,7 +29,19 @@ public class CategoriesDialog extends Stage {
 
   public CategoriesDialog(DataManager dataManager) {
     this.dataManager = dataManager;
-    loadUI();
+  }
+
+  @Override
+  public void showAndWait() {
+    if (isNotInitiated()) {
+      loadUI();
+    }
+
+    super.showAndWait();
+  }
+
+  private boolean isNotInitiated() {
+    return getScene() == null;
   }
 
   private void loadUI() {

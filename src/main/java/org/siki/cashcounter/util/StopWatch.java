@@ -5,14 +5,12 @@
  */
 package org.siki.cashcounter.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 
+@Slf4j
 public class StopWatch {
-  private static final Logger LOGGER = LoggerFactory.getLogger(StopWatch.class);
-
   private static final HashMap<String, Long> ROUNDS = new HashMap<>();
 
   private StopWatch() {}
@@ -27,6 +25,6 @@ public class StopWatch {
     long stop = System.currentTimeMillis();
     long start = ROUNDS.get(name);
     ROUNDS.remove(name);
-    LOGGER.debug("{} time: {}s", name, (stop - start) / 1000d);
+    log.info("{} time: {}s", name, (stop - start) / 1000d);
   }
 }

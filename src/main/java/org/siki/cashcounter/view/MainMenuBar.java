@@ -7,9 +7,10 @@ import javafx.scene.control.MenuItem;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.repository.DataManager;
-import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.service.PredictionService;
+import org.siki.cashcounter.service.TaskExecutorService;
+import org.siki.cashcounter.task.TaskFactory;
 import org.siki.cashcounter.view.dialog.AlertFactory;
 import org.siki.cashcounter.view.dialog.CategoriesDialog;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
@@ -27,27 +28,30 @@ public class MainMenuBar extends MenuBar {
 
   private final PredictionService predictionService;
   private final CategoriesDialog categoriesDialog;
-  private final AccountTransactionService transactionService;
   private final DataManager dataManager;
   private final DataForViewService dataForViewService;
   private final FileChooserFactory fileChooserFactory;
   private final AlertFactory alertFactory;
+  private final TaskExecutorService taskExecutorService;
+  private final TaskFactory taskFactory;
 
   public MainMenuBar(
       PredictionService predictionService,
       CategoriesDialog categoriesDialog,
-      AccountTransactionService transactionService,
       DataManager dataManager,
       DataForViewService dataForViewService,
       FileChooserFactory fileChooserFactory,
-      AlertFactory alertFactory) {
+      AlertFactory alertFactory,
+      TaskExecutorService taskExecutorService,
+      TaskFactory taskFactory) {
     this.predictionService = predictionService;
     this.categoriesDialog = categoriesDialog;
-    this.transactionService = transactionService;
     this.dataManager = dataManager;
     this.dataForViewService = dataForViewService;
     this.fileChooserFactory = fileChooserFactory;
     this.alertFactory = alertFactory;
+    this.taskExecutorService = taskExecutorService;
+    this.taskFactory = taskFactory;
 
     this.getMenus().addAll(fileMenu(), dataMenu(), correctionsMenu());
   }
@@ -107,10 +111,13 @@ public class MainMenuBar extends MenuBar {
   }
 
   private void doImport(File file) {
-    var newTransactions = transactionService.importTransactionsFrom(file);
-    var noOfAddedTransactions = addTransactions(newTransactions);
-    removePredictedFlags(newTransactions);
-    alertFactory.forImportResult(noOfAddedTransactions);
+    taskExecutorService.runTask(
+        taskFactory.importTransactionsTask(file),
+        newTransactions -> {
+          var noOfAddedTransactions = addTransactions(newTransactions);
+          removePredictedFlags(newTransactions);
+          alertFactory.forImportResult(noOfAddedTransactions);
+        });
   }
 
   private int addTransactions(List<AccountTransaction> newTransactions) {

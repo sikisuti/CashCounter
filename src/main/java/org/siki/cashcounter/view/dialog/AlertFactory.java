@@ -18,4 +18,12 @@ public class AlertFactory {
     alert.setContentText(noOfImportedTransactions + " új tranzakció importálva");
     alert.showAndWait();
   }
+
+  public void forTaskExecutionError(String message) {
+    var alert = new Alert(Alert.AlertType.ERROR);
+    alert.setTitle("Hiba");
+    alert.setHeaderText(null);
+    alert.setContentText(message);
+    alert.showAndWait();
+  }
 }

@@ -3,9 +3,11 @@ package org.siki.cashcounter.configuration;
 import javafx.scene.Node;
 import javafx.stage.Window;
 import org.siki.cashcounter.repository.DataManager;
-import org.siki.cashcounter.service.AccountTransactionService;
 import org.siki.cashcounter.service.DataForViewService;
 import org.siki.cashcounter.service.PredictionService;
+import org.siki.cashcounter.service.TaskExecutorService;
+import org.siki.cashcounter.task.TaskFactory;
+import org.siki.cashcounter.view.BusyVeil;
 import org.siki.cashcounter.view.MainMenuBar;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.MainTabPaneContent;
@@ -20,8 +22,8 @@ import java.util.LinkedHashMap;
 @Configuration
 public class MainViewConfiguration {
   @Bean
-  public MainScene mainScene(Node mainMenu, Node mainContent) {
-    return new MainScene(mainMenu, mainContent);
+  public MainScene mainScene(Node mainMenu, Node mainContent, BusyVeil busyVeil) {
+    return new MainScene(mainMenu, mainContent, busyVeil);
   }
 
   @Bean
@@ -33,19 +35,21 @@ public class MainViewConfiguration {
   public Node mainMenu(
       PredictionService predictionService,
       CategoriesDialog categoriesDialog,
-      AccountTransactionService transactionService,
       DataManager dataManager,
       DataForViewService dataForViewService,
       FileChooserFactory fileChooserFactory,
-      AlertFactory alertFactory) {
+      AlertFactory alertFactory,
+      TaskExecutorService taskExecutorService,
+      TaskFactory taskFactory) {
     return new MainMenuBar(
         predictionService,
         categoriesDialog,
-        transactionService,
         dataManager,
         dataForViewService,
         fileChooserFactory,
-        alertFactory);
+        alertFactory,
+        taskExecutorService,
+        taskFactory);
   }
 
   @Bean
@@ -57,5 +61,10 @@ public class MainViewConfiguration {
     tabs.put("Statisztikák", statisticsView);
     tabs.put("Statisztikák2", statisticsTableView);
     return new MainTabPaneContent(tabs);
+  }
+
+  @Bean
+  public BusyVeil busyVeil(TaskExecutorService taskExecutorService) {
+    return new BusyVeil(taskExecutorService);
   }
 }

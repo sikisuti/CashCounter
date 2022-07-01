@@ -1,6 +1,6 @@
-package org.siki.cashcounter.service;
+package org.siki.cashcounter.task;
 
-import lombok.RequiredArgsConstructor;
+import javafx.concurrent.Task;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -8,14 +8,11 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,29 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.AMOUNT;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.COMMENT;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.DATE;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.OWNER;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.PARTNER_ACCOUNT_NUMBER;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.TRANSACTION_DATE_TIME;
-import static org.siki.cashcounter.service.AccountTransactionService.XlsxColumn.TYPE;
+import static org.siki.cashcounter.task.ImportTransactionsTask.XlsxColumn.*;
 
-@RequiredArgsConstructor
 @Slf4j
-public class AccountTransactionService {
+public class ImportTransactionsTask extends Task<List<AccountTransaction>> {
   public static final String ACCOUNT_NUMBER = "1177353504210012";
-  @Autowired private final CategoryService categoryService;
-  @Autowired private final DataManager dataManager;
+  private final CategoryService categoryService;
+  private final DataManager dataManager;
   private Long lastTransactionId;
   private final DataFormatter dataFormatter = new DataFormatter();
+  private final File transactionsFile;
 
-  public List<AccountTransaction> importTransactionsFrom(File file) {
+  public ImportTransactionsTask(
+      File transactionsFile, CategoryService categoryService, DataManager dataManager) {
+    this.transactionsFile = transactionsFile;
+    this.categoryService = categoryService;
+    this.dataManager = dataManager;
+  }
+
+  @Override
+  protected List<AccountTransaction> call() {
     final List<AccountTransaction> newTransactions;
-    if (file.getName().endsWith(".csv")) {
-      newTransactions = importTransactionsFromCSV(file);
-    } else if (file.getName().endsWith(".xlsx")) {
-      newTransactions = importTransactionsFromXlsx(file);
+    if (transactionsFile.getName().endsWith(".xlsx")) {
+      newTransactions = importTransactionsFromXlsx(transactionsFile);
     } else {
       newTransactions = new ArrayList<>();
     }
@@ -117,45 +114,6 @@ public class AccountTransactionService {
     return transaction;
   }
 
-  private List<AccountTransaction> importTransactionsFromCSV(File selectedFile) {
-    var newTransactions = new ArrayList<AccountTransaction>();
-
-    try (var fis = new FileInputStream(selectedFile);
-        var isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-        var br = new BufferedReader(isr)) {
-      String line;
-
-      while ((line = br.readLine()) != null) {
-
-        line = line.replace("\"", "");
-        String[] elements = line.split(";");
-
-        if (elements.length > 12 && !elements[CSVColumn.DATE.getNumber()].isEmpty()) {
-          var newTransaction = new AccountTransaction();
-          newTransaction.setId(getNextTransactionId());
-          newTransaction.setAmount(Integer.parseInt(elements[CSVColumn.AMOUNT.getNumber()]));
-          newTransaction.setDate(
-              LocalDate.parse(
-                  elements[CSVColumn.DATE.getNumber()], DateTimeFormatter.ofPattern("yyyyMMdd")));
-          newTransaction.setAccountNumber(elements[CSVColumn.ACCOUNT_NUMBER.getNumber()]);
-          newTransaction.setOwner(elements[CSVColumn.OWNER.getNumber()]);
-          newTransaction.setComment(
-              elements[CSVColumn.COMMENT_1.getNumber()]
-                  + elements[CSVColumn.COMMENT_2.getNumber()]);
-          newTransaction.setType(elements[CSVColumn.TYPE.getNumber()]);
-
-          categoryService.setCategory(newTransaction);
-          newTransactions.add(newTransaction);
-        }
-      }
-    } catch (Exception e) {
-      log.error("", e);
-      ExceptionDialog.get(e).showAndWait();
-    }
-
-    return newTransactions;
-  }
-
   private Long getNextTransactionId() {
     if (lastTransactionId == null) {
       lastTransactionId =
@@ -168,26 +126,6 @@ public class AccountTransactionService {
     }
 
     return ++lastTransactionId;
-  }
-
-  enum CSVColumn {
-    AMOUNT(2),
-    DATE(4),
-    ACCOUNT_NUMBER(7),
-    OWNER(8),
-    COMMENT_1(9),
-    COMMENT_2(10),
-    TYPE(12);
-
-    private final int number;
-
-    CSVColumn(int number) {
-      this.number = number;
-    }
-
-    private int getNumber() {
-      return number;
-    }
   }
 
   enum XlsxColumn {

@@ -6,7 +6,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.repository.DataManager;
-import org.siki.cashcounter.util.StopWatch;
+import org.siki.cashcounter.service.TaskExecutorService;
+import org.siki.cashcounter.task.TaskFactory;
 import org.siki.cashcounter.view.MainScene;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -20,10 +21,7 @@ public class CashCounter extends Application {
 
   @Override
   public void start(Stage stage) {
-    StopWatch.start("container");
     var context = new AnnotationConfigApplicationContext("org.siki.cashcounter.configuration");
-    StopWatch.stop("container");
-    StopWatch.start("view");
     var mainScene = context.getBean(MainScene.class);
     stage.setScene(mainScene);
     stage.show();
@@ -38,9 +36,13 @@ public class CashCounter extends Application {
             Platform.exit();
           }
         });
-    StopWatch.stop("view");
-    StopWatch.start("data");
-    context.getBean(DataManager.class).loadData();
-    StopWatch.stop("data");
+    loadData(context);
+  }
+
+  private void loadData(AnnotationConfigApplicationContext context) {
+    var taskExecutorService = context.getBean(TaskExecutorService.class);
+    var taskFactory = context.getBean(TaskFactory.class);
+    var dataManager = context.getBean(DataManager.class);
+    taskExecutorService.runTask(taskFactory.loadDataTask(), dataManager::loadData);
   }
 }

@@ -29,7 +29,6 @@ import static java.util.Optional.ofNullable;
 
 @Slf4j
 public class DataManager {
-
   private final ConfigurationManager configurationManager;
   private final DataSourceMapper dataSourceMapper;
 
@@ -115,41 +114,6 @@ public class DataManager {
     return dataSource.getMonthlyBalances().stream()
         .flatMap(mb -> mb.getDailyBalances().stream())
         .collect(Collectors.toList());
-  }
-
-  public int getDayAverage(LocalDate date) {
-    var allDailyBalances = getAllDailyBalances();
-    var averageSum = 0;
-    // Consider the last 6 months
-    for (int i = -6; i < 0; i++) {
-      var weeklyAverage = 0;
-
-      // Check if data exists in the past
-      if (allDailyBalances.get(0).getDate().compareTo(date.plusMonths(i).minusDays(4)) <= 0) {
-        int index = -1;
-        // Search the day in the past
-        while (!allDailyBalances.get(++index).getDate().equals(date.plusMonths(i)))
-          ;
-        var correctionSum = 0;
-
-        // Summarize the corredtions of the week
-        for (int j = -3; j <= 3; j++) {
-          correctionSum += allDailyBalances.get(index + j).getTotalCorrections();
-        }
-
-        weeklyAverage =
-            Math.round(
-                (allDailyBalances.get(index + 3).getBalance()
-                        - correctionSum
-                        - allDailyBalances.get(index - 4).getBalance())
-                    / 7f);
-      } else {
-        throw new RuntimeException("Not enough past data");
-      }
-      averageSum += weeklyAverage;
-    }
-
-    return Math.round(averageSum / 6f);
   }
 
   private void backupIfRequired(String dataPath) throws IOException {

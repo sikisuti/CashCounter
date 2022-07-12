@@ -11,13 +11,8 @@ import java.util.stream.Collectors;
 @Data
 public class MonthlyBalance {
   private YearMonth yearMonth;
-  private List<DailyBalance> dailyBalances;
-  private List<Correction> predictions;
-
-  public MonthlyBalance() {
-    this.dailyBalances = new ArrayList<>();
-    this.predictions = new ArrayList<>();
-  }
+  private List<DailyBalance> dailyBalances = new ArrayList<>();
+  private List<Correction> predictions = new ArrayList<>();
 
   @JsonIgnore
   public void clearPredictions() {

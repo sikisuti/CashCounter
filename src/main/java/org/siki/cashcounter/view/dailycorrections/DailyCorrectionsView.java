@@ -1,8 +1,8 @@
 package org.siki.cashcounter.view.dailycorrections;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
@@ -11,6 +11,7 @@ import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.ViewFactory;
 
 import java.time.YearMonth;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S110")
 public class DailyCorrectionsView extends GridPane {
@@ -38,19 +39,30 @@ public class DailyCorrectionsView extends GridPane {
 
     dataManager
         .getMonthlyBalances()
-        .addListener((InvalidationListener) observable -> loadCorrections());
-  }
-
-  private void loadCorrections() {
-    dailyBalancesPH.getChildren().clear();
-    dataManager.getMonthlyBalances().stream()
-        .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().minusYears(1)))
-        .forEach(mb -> monthlyBalanceTitledPanes.add(createMonthlyBalanceTitledPane(mb)));
+        .addListener(
+            (ListChangeListener<MonthlyBalance>)
+                change -> {
+                  while (change.next()) {
+                    if (change.wasAdded()) {
+                      change.getAddedSubList().stream()
+                          .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().minusYears(1)))
+                          .forEach(
+                              mb ->
+                                  monthlyBalanceTitledPanes.add(
+                                      createMonthlyBalanceTitledPane(mb)));
+                    } else if (change.wasRemoved()) {
+                      var toRemove =
+                          monthlyBalanceTitledPanes.stream()
+                              .filter(tp -> change.getRemoved().contains(tp.getMonthlyBalance()))
+                              .collect(Collectors.toList());
+                      monthlyBalanceTitledPanes.removeAll(toRemove);
+                    }
+                  }
+                });
   }
 
   private MonthlyBalanceTitledPane createMonthlyBalanceTitledPane(MonthlyBalance monthlyBalance) {
-    var monthlyBalanceTitledPane =
-        new MonthlyBalanceTitledPane(monthlyBalance, dataManager, viewFactory);
+    var monthlyBalanceTitledPane = new MonthlyBalanceTitledPane(monthlyBalance, viewFactory);
     monthlyBalanceTitledPane.expandedProperty().set(false);
     if (YearMonth.now().equals(monthlyBalance.getYearMonth())) {
       monthlyBalanceTitledPane.expandedProperty().set(true);

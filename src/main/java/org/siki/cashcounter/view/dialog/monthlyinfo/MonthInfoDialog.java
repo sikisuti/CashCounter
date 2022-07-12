@@ -21,6 +21,8 @@ import org.siki.cashcounter.repository.DataManager;
 
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -233,24 +235,28 @@ public class MonthInfoDialog extends Stage {
       dataItem.setAmount(correctionGroup.getValue().stream().mapToInt(Correction::getAmount).sum());
     }
 
-    var predictedUncovered =
+    var dayAverageMap = new HashMap<DailyBalance, Integer>();
+    monthlyBalance
+        .getDailyBalances()
+        .forEach(db -> dayAverageMap.put(db, db.dayAverageBinding.get()));
+
+    var uncoveredPredictionsForFullMonth =
+        dayAverageMap.values().stream().mapToInt(Integer::intValue).sum();
+    var uncoveredSpentForPast =
         monthlyBalance.getDailyBalances().stream()
-            .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
+            .filter(DailyBalance::getReviewed)
+            .mapToInt(DailyBalance::getUnpairedDailySpent)
             .sum();
-    var actualUncovered =
-        monthlyBalance.getDailyBalances().stream()
-                .filter(db -> !db.getReviewed())
-                .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
-                .sum()
-            + monthlyBalance.getDailyBalances().stream()
-                .filter(DailyBalance::getReviewed)
-                .mapToInt(DailyBalance::getUnpairedDailySpent)
-                .sum();
+    var uncoveredSpentForFuture =
+        dayAverageMap.entrySet().stream()
+            .filter(entry -> !entry.getKey().getReviewed())
+            .mapToInt(Map.Entry::getValue)
+            .sum();
     var unCoveredRow =
         CompareRow.builder()
             .type("Általános")
-            .predictedAmount(predictedUncovered)
-            .amount(actualUncovered)
+            .predictedAmount(uncoveredPredictionsForFullMonth)
+            .amount(uncoveredSpentForPast + uncoveredSpentForFuture)
             .build();
     data.add(unCoveredRow);
 

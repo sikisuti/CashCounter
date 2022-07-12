@@ -121,6 +121,7 @@ public final class DailyBalanceControl extends VBox {
             Correction data = (Correction) db.getContent(CorrectionControl.CORRECTION_DATA_FORMAT);
             data.setParentDailyBalance(dailyBalance);
             dailyBalance.addCorrection(data);
+            dailyBalance.updateBalance();
             success = true;
           }
           /* let the source know whether the string was successfully

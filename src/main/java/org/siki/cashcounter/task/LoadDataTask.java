@@ -27,7 +27,7 @@ public class LoadDataTask extends Task<DataSourceRaw> {
   private final ObjectMapper objectMapper;
 
   @Override
-  protected DataSourceRaw call() throws Exception {
+  public DataSourceRaw call() throws Exception {
     var dataSourceRaw = loadDataFromFile();
     loadSavingsFromFile(dataSourceRaw);
     return dataSourceRaw;

@@ -5,10 +5,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.model.Correction;
+import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.model.PredictedCorrection;
 import org.siki.cashcounter.repository.DataManager;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -30,18 +34,60 @@ public class PredictionService {
   private final CorrectionService correctionService;
 
   public void replacePredictedCorrections(File sourceFile) {
-    List<PredictedCorrection> pcList;
-    try {
-      pcList = loadPredictedCorrections(sourceFile.getAbsolutePath());
-      clearPredictedCorrections();
-      fillPredictedCorrections(pcList);
-      storePredictions(pcList);
-    } catch (IOException ex) {
-      log.error("", ex);
-    }
+    var futureMonthlyBalances = clearFutureMonthlyBalances();
+    addPredictions(sourceFile, futureMonthlyBalances);
+    bindDailyBalances(futureMonthlyBalances);
+
+    dataManager.getMonthlyBalances().addAll(futureMonthlyBalances);
+    futureMonthlyBalances.get(0).getDailyBalances().get(0).updateBalance();
   }
 
-  private List<PredictedCorrection> loadPredictedCorrections(String path) throws IOException {
+  private List<MonthlyBalance> clearFutureMonthlyBalances() {
+    removeFutureMonthlyBalances();
+    return dailyBalanceService.createMissingMonthlyBalancesUntil(YearMonth.now().plusYears(1));
+  }
+
+  private void removeFutureMonthlyBalances() {
+    var monthlyBalancesToRemove =
+        dataManager.getMonthlyBalances().stream()
+            .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1)))
+            .collect(Collectors.toList());
+    dataManager.getMonthlyBalances().removeAll(monthlyBalancesToRemove);
+  }
+
+  private void addPredictions(File sourceFile, List<MonthlyBalance> futureMonthlyBalances) {
+    List<PredictedCorrection> pcList;
+    pcList = loadPredictedCorrections(sourceFile.getAbsolutePath());
+    fillPredictedCorrections(futureMonthlyBalances, pcList);
+    storePredictions(futureMonthlyBalances, pcList);
+  }
+
+  private void bindDailyBalances(List<MonthlyBalance> futureMonthlyBalances) {
+    var dailyBalances =
+        futureMonthlyBalances.stream()
+            .flatMap(mb -> mb.getDailyBalances().stream())
+            .collect(Collectors.toList());
+    for (int i = 1; i < dailyBalances.size(); i++) {
+      var actDailyBalance = dailyBalances.get(i);
+      var previousDailyBalance = dailyBalances.get(i - 1);
+
+      //      actDailyBalance.setPrevDailyBalance(previousDailyBalance);
+      previousDailyBalance
+          .balanceProperty()
+          .addListener(observable -> actDailyBalance.updateBalance());
+      //      new DailyBalance.PostConstruct().convert(actDailyBalance);
+    }
+
+    var lastDailyBalance = dailyBalanceService.getLastDailyBalance();
+    var firstNextDailyBalance = dailyBalances.get(0);
+    //    firstNextDailyBalance.setPrevDailyBalance(lastDailyBalance);
+    lastDailyBalance
+        .balanceProperty()
+        .addListener(observable -> firstNextDailyBalance.updateBalance());
+    //    new DailyBalance.PostConstruct().convert(firstNextDailyBalance);
+  }
+
+  private List<PredictedCorrection> loadPredictedCorrections(String path) {
     List<PredictedCorrection> pcList = new ArrayList<>();
     var lineCnt = 0;
 
@@ -60,8 +106,6 @@ public class PredictionService {
         objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
         pcList.add(objectMapper.readValue(line, PredictedCorrection.class));
       }
-    } catch (IOException e) {
-      throw e;
     } catch (Exception e) {
       throw new RuntimeException("Error reading line: " + lineCnt, e);
     }
@@ -69,33 +113,13 @@ public class PredictionService {
     return pcList;
   }
 
-  private void clearPredictedCorrections() {
-    dataManager.getMonthlyBalances().stream()
-        .flatMap(mb -> mb.getDailyBalances().stream())
-        .filter(
-            db ->
-                db.getPredicted()
-                    && db.getDate()
-                        .isAfter(LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)))
-        .forEach(db -> db.getCorrections().clear());
-    dailyBalanceService.getOrCreateDailyBalance(
-        LocalDate.now().plusYears(1).withDayOfMonth(LocalDate.now().plusYears(1).lengthOfMonth()));
-  }
-
-  private void fillPredictedCorrections(List<PredictedCorrection> predictedCorrections) {
-    var futureDailyBalances =
-        dataManager.getMonthlyBalances().stream()
-            .flatMap(mb -> mb.getDailyBalances().stream())
-            .filter(
-                db ->
-                    db.getDate()
-                        .isAfter(LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)))
-            .collect(Collectors.toList());
-
+  private void fillPredictedCorrections(
+      List<MonthlyBalance> futureMonthlyBalances, List<PredictedCorrection> predictedCorrections) {
     predictedCorrections.forEach(
         pc -> {
           var dbSchedList =
-              futureDailyBalances.stream()
+              futureMonthlyBalances.stream()
+                  .flatMap(mb -> mb.getDailyBalances().stream())
                   .filter(
                       db ->
                           db.getDate().isAfter(pc.getStartDate())
@@ -161,41 +185,37 @@ public class PredictionService {
         });
   }
 
-  private void storePredictions(List<PredictedCorrection> predictedCorrections) {
-    dataManager.getMonthlyBalances().stream()
-        .filter(mb -> mb.getYearMonth().isAfter(YearMonth.now().plusMonths(1)))
-        .forEach(
-            mb -> {
-              mb.clearPredictions();
-
-              for (var prediction : predictedCorrections) {
-                if (prediction.getMonth() == null
-                    || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
-                  if (prediction.getDayOfWeek() != null) {
-                    for (var i = 0;
-                        i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
-                        i++) {
-                      mb.addPrediction(
-                          prediction.getCategory(),
-                          prediction.getSubCategory(),
-                          prediction.getAmount());
-                    }
-                  } else {
-                    var date =
-                        mb.getYearMonth()
-                            .atDay(
-                                ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
-                    if (date.isAfter(prediction.getStartDate())
-                        && date.isBefore(prediction.getEndDate())) {
-                      mb.addPrediction(
-                          prediction.getCategory(),
-                          prediction.getSubCategory(),
-                          prediction.getAmount());
-                    }
-                  }
+  private void storePredictions(
+      List<MonthlyBalance> futureMonthlyBalances, List<PredictedCorrection> predictedCorrections) {
+    futureMonthlyBalances.forEach(
+        mb -> {
+          for (var prediction : predictedCorrections) {
+            if (prediction.getMonth() == null
+                || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
+              if (prediction.getDayOfWeek() != null) {
+                for (var i = 0;
+                    i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
+                    i++) {
+                  mb.addPrediction(
+                      prediction.getCategory(),
+                      prediction.getSubCategory(),
+                      prediction.getAmount());
+                }
+              } else {
+                var date =
+                    mb.getYearMonth()
+                        .atDay(ofNullable(prediction.getDay()).orElse(prediction.getMonthDay()));
+                if (date.isAfter(prediction.getStartDate())
+                    && date.isBefore(prediction.getEndDate())) {
+                  mb.addPrediction(
+                      prediction.getCategory(),
+                      prediction.getSubCategory(),
+                      prediction.getAmount());
                 }
               }
-            });
+            }
+          }
+        });
   }
 
   public static int countDayOccurenceInMonth(DayOfWeek dow, YearMonth month) {

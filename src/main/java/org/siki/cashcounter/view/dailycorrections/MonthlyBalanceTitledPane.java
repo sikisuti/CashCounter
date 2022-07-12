@@ -16,33 +16,32 @@ import lombok.Getter;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
-import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.ViewFactory;
 
 import java.text.NumberFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
   @Getter private final MonthlyBalance monthlyBalance;
   private final ViewFactory viewFactory;
-  private final DataManager dataManager;
 
   @Getter private final ObservableList<DailyBalanceControl> dailyBalanceControls;
 
   private final VBox vbDailyBalances = new VBox();
   private final GridPane content = new GridPane();
   private final Label predictionDifference = new Label();
+  private final Label startBalance = new Label();
 
   private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 
-  public MonthlyBalanceTitledPane(
-      MonthlyBalance monthlyBalance, DataManager dataManager, ViewFactory viewFactory) {
+  public MonthlyBalanceTitledPane(MonthlyBalance monthlyBalance, ViewFactory viewFactory) {
     this.setContent(content);
     this.monthlyBalance = monthlyBalance;
-    this.dataManager = dataManager;
     this.viewFactory = viewFactory;
 
     currencyFormat.setMaximumFractionDigits(0);
@@ -116,7 +115,6 @@ public class MonthlyBalanceTitledPane extends TitledPane {
     title.setPrefWidth(100);
     header.getChildren().add(title);
 
-    var startBalance = new Label();
     startBalance.setPrefWidth(100);
     startBalance.setAlignment(Pos.CENTER_RIGHT);
     startBalance
@@ -146,31 +144,35 @@ public class MonthlyBalanceTitledPane extends TitledPane {
   }
 
   private void updatePredictionDifference() {
-    var predictions =
+    var dayAverageMap = new HashMap<DailyBalance, Integer>();
+    monthlyBalance
+        .getDailyBalances()
+        .forEach(db -> dayAverageMap.put(db, db.dayAverageBinding.get()));
+
+    var coveredPredictionsForFullMonth =
         monthlyBalance.getPredictions().stream().mapToInt(Correction::getAmount).sum();
-    var corrections =
+    var uncoveredPredictionsForFullMonth =
+        dayAverageMap.values().stream().mapToInt(Integer::intValue).sum();
+    var coverCorrectionsForFullMonth =
         monthlyBalance.getDailyBalances().stream()
             .flatMap(db -> db.getCorrections().stream())
             .filter(c -> !c.getOnlyMove())
             .mapToInt(Correction::getAmount)
             .sum();
-    var predictedUncovered =
+    var uncoveredSpentForPast =
         monthlyBalance.getDailyBalances().stream()
-            .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
+            .filter(DailyBalance::getReviewed)
+            .mapToInt(DailyBalance::getUnpairedDailySpent)
             .sum();
-    var actualUncovered =
-        monthlyBalance.getDailyBalances().stream()
-                .filter(db -> !db.getReviewed())
-                .mapToInt(db -> dataManager.getDayAverage(db.getDate()))
-                .sum()
-            + monthlyBalance.getDailyBalances().stream()
-                .filter(DailyBalance::getReviewed)
-                .mapToInt(DailyBalance::getUnpairedDailySpent)
-                .sum();
-    predictions += predictedUncovered;
-    corrections += actualUncovered;
+    var uncoveredSpentForFuture =
+        dayAverageMap.entrySet().stream()
+            .filter(entry -> !entry.getKey().getReviewed())
+            .mapToInt(Map.Entry::getValue)
+            .sum();
+    var predicted = coveredPredictionsForFullMonth + uncoveredPredictionsForFullMonth;
+    var spent = coverCorrectionsForFullMonth + uncoveredSpentForPast + uncoveredSpentForFuture;
 
-    var diff = corrections - predictions;
+    var diff = spent - predicted;
     predictionDifference.setText(currencyFormat.format(diff));
     if (diff > 50000) {
       predictionDifference.setTextFill(Color.GREEN);

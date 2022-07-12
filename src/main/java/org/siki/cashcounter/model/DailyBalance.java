@@ -7,12 +7,7 @@ import com.fasterxml.jackson.databind.util.StdConverter;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
@@ -23,6 +18,7 @@ import org.siki.cashcounter.repository.DataManager;
 
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +34,7 @@ public final class DailyBalance {
   private final BooleanProperty predicted;
   private final BooleanProperty reviewed;
   @JsonIgnore public StringBinding unpairedDailySpentBinding;
+  @JsonIgnore public IntegerBinding dayAverageBinding;
   @JsonIgnore public IntegerBinding balanceWithSaving;
   @JsonIgnore public IntegerBinding dailySavings;
 
@@ -160,7 +157,6 @@ public final class DailyBalance {
     }
 
     unpairedDailySpentBinding.invalidate();
-    updateBalance();
   }
 
   public void removeCorrection(Correction correction) {
@@ -205,7 +201,7 @@ public final class DailyBalance {
     if (!getBalanceSetManually()) {
       int newBalance = prevDailyBalance.getBalance() + getAllDailySpent();
       if (isNotReviewed()) {
-        newBalance += dataManager.getDayAverage(getDate());
+        newBalance += dayAverageBinding.get();
       }
 
       setBalance(newBalance);
@@ -308,6 +304,7 @@ public final class DailyBalance {
     @Override
     public DailyBalance convert(DailyBalance dailyBalance) {
       addPairedCorrectionsToTransactions(dailyBalance);
+      createDayAverageBinding(dailyBalance);
       createNotPairedDailySpentBinding(dailyBalance);
       createBalanceWithSavingBinding(dailyBalance);
       dailyBalance.dailySavings =
@@ -320,16 +317,6 @@ public final class DailyBalance {
           (observable, oldValue, newValue) -> dailyBalance.updateBalance());
 
       return dailyBalance;
-    }
-
-    private void createBalanceWithSavingBinding(DailyBalance dailyBalance) {
-      dailyBalance.balanceWithSaving =
-          Bindings.createIntegerBinding(
-              () ->
-                  dailyBalance.getBalance()
-                      + dailyBalance.savings.stream().mapToInt(Saving::getAmount).sum(),
-              dailyBalance.balance,
-              dailyBalance.savings);
     }
 
     private void addPairedCorrectionsToTransactions(DailyBalance dailyBalance) {
@@ -347,12 +334,57 @@ public final class DailyBalance {
 
       dailyBalance.unpairedDailySpentBinding =
           Bindings.createStringBinding(
-              () -> dailyBalance.getPredicted()
-                  ? currencyFormat.format(
-                      dailyBalance.dataManager.getDayAverage(dailyBalance.getDate()))
-                  : currencyFormat.format(dailyBalance.getUnpairedDailySpent()),
+              () ->
+                  dailyBalance.getPredicted()
+                      ? currencyFormat.format(dailyBalance.dayAverageBinding.get())
+                      : currencyFormat.format(dailyBalance.getUnpairedDailySpent()),
               dailyBalance.transactions,
               dailyBalance.corrections);
+    }
+
+    private void createBalanceWithSavingBinding(DailyBalance dailyBalance) {
+      dailyBalance.balanceWithSaving =
+          Bindings.createIntegerBinding(
+              () ->
+                  dailyBalance.getBalance()
+                      + dailyBalance.savings.stream().mapToInt(Saving::getAmount).sum(),
+              dailyBalance.balance,
+              dailyBalance.savings);
+    }
+
+    private void createDayAverageBinding(DailyBalance dailyBalance) {
+      dailyBalance.dayAverageBinding =
+          Bindings.createIntegerBinding(
+              () -> {
+                var allDailyBalances = dailyBalance.dataManager.getAllDailyBalances();
+
+                var weekAverages = new ArrayList<Integer>();
+                var monthDelta = 0;
+                while (weekAverages.size() < 6) {
+                  int finalMonthDelta = ++monthDelta;
+                  var actDate = dailyBalance.getDate().minusMonths(finalMonthDelta);
+                  var weekDays =
+                      allDailyBalances.stream()
+                          .filter(
+                              db ->
+                                  db.getDate().isAfter(actDate.minusDays(4))
+                                      && db.getDate().isBefore(actDate.plusDays(4)))
+                          .collect(Collectors.toList());
+                  if (weekDays.get(weekDays.size() - 1).getReviewed()) {
+                    var weekAverage =
+                        (int)
+                            Math.round(
+                                weekDays.stream()
+                                    .mapToInt(DailyBalance::getUnpairedDailySpent)
+                                    .average()
+                                    .orElseThrow());
+                    weekAverages.add(weekAverage);
+                  }
+                }
+
+                return (int)
+                    Math.round(weekAverages.stream().mapToInt(w -> w).average().orElseThrow());
+              });
     }
   }
 }

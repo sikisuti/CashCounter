@@ -6,54 +6,28 @@ import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class DailyBalanceService {
   @Autowired private final DataManager dataManager;
 
-  public DailyBalance findDailyBalanceByDate(LocalDate date) {
-    return dataManager.getMonthlyBalances().stream()
-        .flatMap(mb -> mb.getDailyBalances().stream())
-        .filter(d -> d.dateProperty().get().isEqual(date))
-        .findFirst()
-        .orElseThrow();
-  }
+  public List<MonthlyBalance> createMissingMonthlyBalancesUntil(YearMonth yearMonth) {
+    var lastMonthlyBalance =
+        dataManager.getMonthlyBalances().stream()
+            .max(Comparator.comparing(MonthlyBalance::getYearMonth))
+            .orElseThrow();
+    var newMonthlyBalances = new ArrayList<MonthlyBalance>();
+    while (lastMonthlyBalance.getYearMonth().isBefore(yearMonth)) {
+      var createdMonthlyBalance = createMonthlyBalance(lastMonthlyBalance);
+      newMonthlyBalances.add(createdMonthlyBalance);
+      lastMonthlyBalance = createdMonthlyBalance;
+    }
 
-  public DailyBalance getOrCreateDailyBalance(LocalDate date) {
-    return dataManager.getMonthlyBalances().stream()
-        .flatMap(mb -> mb.getDailyBalances().stream())
-        .filter(d -> d.getDate().equals(date))
-        .findFirst()
-        .orElseGet(
-            () -> {
-              var lastDailyBalance = getLastDailyBalance();
-              //          var newDb = new DailyBalance();
-              DailyBalance newDb = null;
-              // fill the possible date gaps
-              while (!lastDailyBalance.getDate().equals(date)) {
-                newDb = new DailyBalance();
-                newDb.setPrevDailyBalance(lastDailyBalance);
-                newDb.setDataManager(dataManager);
-                newDb.setPrevDailyBalance(getLastDailyBalance());
-                newDb.setDate(getLastDailyBalance().getDate().plusDays(1));
-                newDb.updateBalance();
-                DailyBalance finalNewDb = newDb;
-                lastDailyBalance
-                    .balanceProperty()
-                    .addListener((observable, oldValue, newValue) -> finalNewDb.updateBalance());
-                newDb.setPredicted(Boolean.TRUE);
-                newDb.setReviewed(Boolean.FALSE);
-
-                new DailyBalance.PostConstruct().convert(newDb);
-
-                getOrCreateMonthlyBalance(newDb.getDate()).getDailyBalances().add(newDb);
-                lastDailyBalance = newDb;
-              }
-
-              return newDb;
-            });
+    return newMonthlyBalances;
   }
 
   public DailyBalance getLastDailyBalance() {
@@ -63,16 +37,38 @@ public class DailyBalanceService {
         .orElse(null);
   }
 
-  private MonthlyBalance getOrCreateMonthlyBalance(LocalDate date) {
-    return dataManager.getMonthlyBalances().stream()
-        .filter(mb -> mb.getYearMonth().equals(YearMonth.from(date)))
-        .findFirst()
-        .orElseGet(
-            () -> {
-              var newMonthlyBalance = new MonthlyBalance();
-              newMonthlyBalance.setYearMonth(YearMonth.from(date));
-              dataManager.getMonthlyBalances().add(newMonthlyBalance);
-              return newMonthlyBalance;
-            });
+  private MonthlyBalance createMonthlyBalance(MonthlyBalance previousMonthlyBalance) {
+    var newYearMonth = previousMonthlyBalance.getYearMonth().plusMonths(1);
+    var newMonthlyBalance = new MonthlyBalance();
+    newMonthlyBalance.setYearMonth(newYearMonth);
+    List<DailyBalance> dailyBalances = new ArrayList<>();
+    var lastDailyBalance =
+        previousMonthlyBalance
+            .getDailyBalances()
+            .get(previousMonthlyBalance.getDailyBalances().size() - 1);
+    while (lastDailyBalance.getDate().isBefore(newYearMonth.atEndOfMonth())) {
+      var dailyBalance = createDailyBalance(lastDailyBalance);
+      dailyBalances.add(dailyBalance);
+      lastDailyBalance = dailyBalance;
+    }
+
+    newMonthlyBalance.setDailyBalances(dailyBalances);
+
+    return newMonthlyBalance;
+  }
+
+  private DailyBalance createDailyBalance(DailyBalance previousDailyBalance) {
+    var newDb = new DailyBalance();
+    newDb.setPrevDailyBalance(previousDailyBalance);
+    newDb.setDataManager(dataManager);
+    newDb.setDate(previousDailyBalance.getDate().plusDays(1));
+    //    newDb.updateBalance();
+    //    previousDailyBalance.balanceProperty().addListener(observable -> newDb.updateBalance());
+    newDb.setPredicted(Boolean.TRUE);
+    newDb.setReviewed(Boolean.FALSE);
+
+    new DailyBalance.PostConstruct().convert(newDb);
+
+    return newDb;
   }
 }

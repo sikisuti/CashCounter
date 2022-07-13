@@ -67,12 +67,20 @@ public class Config {
   }
 
   @Bean
+  public SavingService savingService(
+      ConfigurationManager configurationManager, ObjectMapper objectMapper) {
+    return new SavingService(configurationManager, objectMapper);
+  }
+
+  @Bean
   public TaskFactory taskFactory(
       DataManager dataManager,
       ConfigurationManager configurationManager,
       ObjectMapper objectMapper,
-      CategoryService categoryService) {
-    return new TaskFactory(dataManager, configurationManager, objectMapper, categoryService);
+      CategoryService categoryService,
+      SavingService savingService) {
+    return new TaskFactory(
+        dataManager, configurationManager, objectMapper, categoryService, savingService);
   }
 
   @Bean

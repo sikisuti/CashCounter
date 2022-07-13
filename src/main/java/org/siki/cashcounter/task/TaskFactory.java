@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.service.CategoryService;
+import org.siki.cashcounter.service.SavingService;
 
 import java.io.File;
 
@@ -14,9 +15,10 @@ public class TaskFactory {
   private final ConfigurationManager configurationManager;
   private final ObjectMapper objectMapper;
   private final CategoryService categoryService;
+  private final SavingService savingService;
 
   public LoadDataTask loadDataTask() {
-    return new LoadDataTask(configurationManager, dataManager, objectMapper);
+    return new LoadDataTask(configurationManager, dataManager, objectMapper, savingService);
   }
 
   public ImportTransactionsTask importTransactionsTask(File transactionFile) {

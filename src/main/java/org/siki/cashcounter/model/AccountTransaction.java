@@ -144,7 +144,8 @@ public final class AccountTransaction {
       return false;
     }
 
-    return this.getType().replaceAll("\\s", "").equals(other.getType().replaceAll("\\s", ""))
+    return this.getTransactionDateTime().equals(other.getTransactionDateTime())
+        && this.getType().replaceAll("\\s", "").equals(other.getType().replaceAll("\\s", ""))
         && this.getAmount() == other.getAmount()
         && this.getAccountNumber().equals(other.getAccountNumber())
         && this.getOwner().replaceAll("\\s", "").equals(other.getOwner().replaceAll("\\s", ""))

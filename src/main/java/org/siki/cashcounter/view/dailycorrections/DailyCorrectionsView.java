@@ -1,5 +1,7 @@
 package org.siki.cashcounter.view.dailycorrections;
 
+import java.time.YearMonth;
+import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -9,9 +11,6 @@ import javafx.scene.layout.*;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.ViewFactory;
-
-import java.time.YearMonth;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S110")
 public class DailyCorrectionsView extends GridPane {
@@ -57,6 +56,13 @@ public class DailyCorrectionsView extends GridPane {
                               .collect(Collectors.toList());
                       monthlyBalanceTitledPanes.removeAll(toRemove);
                     }
+                  }
+
+                  for (var i = 1; i < monthlyBalanceTitledPanes.size(); i++) {
+                    var actMonthlyBalanceTP = monthlyBalanceTitledPanes.get(i);
+                    var prevMonthlyBalanceTP = monthlyBalanceTitledPanes.get(i - 1);
+                    actMonthlyBalanceTP.setPrevMonthlyBalanceTP(prevMonthlyBalanceTP);
+                    prevMonthlyBalanceTP.setNextMonthlyBalanceTP(actMonthlyBalanceTP);
                   }
                 });
   }

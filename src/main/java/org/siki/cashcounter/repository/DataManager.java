@@ -1,16 +1,12 @@
 package org.siki.cashcounter.repository;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Optional.ofNullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import javafx.collections.ObservableList;
-import lombok.extern.slf4j.Slf4j;
-import org.siki.cashcounter.ConfigurationManager;
-import org.siki.cashcounter.model.AccountTransaction;
-import org.siki.cashcounter.model.DailyBalance;
-import org.siki.cashcounter.model.MonthlyBalance;
-import org.siki.cashcounter.repository.converter.DataSourceMapper;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,10 +18,13 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.Optional.ofNullable;
+import javafx.collections.ObservableList;
+import lombok.extern.slf4j.Slf4j;
+import org.siki.cashcounter.ConfigurationManager;
+import org.siki.cashcounter.model.AccountTransaction;
+import org.siki.cashcounter.model.DailyBalance;
+import org.siki.cashcounter.model.MonthlyBalance;
+import org.siki.cashcounter.repository.converter.DataSourceMapper;
 
 @Slf4j
 public class DataManager {
@@ -45,6 +44,13 @@ public class DataManager {
 
   public void loadData(DataSourceRaw dataSourceRaw) {
     dataSourceMapper.fromRaw(dataSourceRaw, dataSource);
+
+    for (var i = 1; i < dataSource.getMonthlyBalances().size(); i++) {
+      var actMonthlyBalance = dataSource.getMonthlyBalances().get(i);
+      var prevMonthlyBalance = dataSource.getMonthlyBalances().get(i - 1);
+      actMonthlyBalance.setPreviousMonthlyBalance(prevMonthlyBalance);
+      prevMonthlyBalance.setNextMonthlyBalance(actMonthlyBalance);
+    }
   }
 
   @JsonIgnore

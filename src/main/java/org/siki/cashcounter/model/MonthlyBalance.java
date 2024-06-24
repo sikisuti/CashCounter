@@ -1,18 +1,19 @@
 package org.siki.cashcounter.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Data;
 
 @Data
 public class MonthlyBalance {
   private YearMonth yearMonth;
   private List<DailyBalance> dailyBalances = new ArrayList<>();
   private List<Correction> predictions = new ArrayList<>();
+  private MonthlyBalance previousMonthlyBalance;
+  private MonthlyBalance nextMonthlyBalance;
 
   @JsonIgnore
   public void clearPredictions() {

@@ -1,5 +1,12 @@
 package org.siki.cashcounter.view.dailycorrections;
 
+import static java.util.Optional.ofNullable;
+
+import java.text.NumberFormat;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,24 +20,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import lombok.Getter;
+import lombok.Setter;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.view.ViewFactory;
-
-import java.text.NumberFormat;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Optional.ofNullable;
 
 public class MonthlyBalanceTitledPane extends TitledPane {
   @Getter private final MonthlyBalance monthlyBalance;
   private final ViewFactory viewFactory;
 
   @Getter private final ObservableList<DailyBalanceControl> dailyBalanceControls;
+
+  @Setter private MonthlyBalanceTitledPane prevMonthlyBalanceTP;
+  @Setter private MonthlyBalanceTitledPane nextMonthlyBalanceTP;
 
   private final VBox vbDailyBalances = new VBox();
   private final GridPane content = new GridPane();
@@ -87,6 +90,8 @@ public class MonthlyBalanceTitledPane extends TitledPane {
             monthlyPredictionsDialog.initOwner(this.getScene().getWindow());
             monthlyPredictionsDialog.showAndWait();
             updatePredictionDifference();
+            prevMonthlyBalanceTP.updatePredictionDifference();
+            nextMonthlyBalanceTP.updatePredictionDifference();
           });
       header.getChildren().add(predictionButton);
     }

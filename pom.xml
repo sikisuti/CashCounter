@@ -6,37 +6,38 @@
 
     <groupId>org.siki</groupId>
     <artifactId>CashCounter</artifactId>
-    <version>2.6</version>
+    <version>2.7</version>
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-
+        <!--maven-->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
+        <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
+        <maven.assembly.plugin.version>3.7.1</maven.assembly.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <javafx.version>11</javafx.version>
-        <javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
-        <logback.version>1.2.3</logback.version>
-        <lombok.version>1.18.20</lombok.version>
-        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <!--core-->
         <main.class>org.siki.cashcounter.Launcher</main.class>
-        <org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
-        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
-        <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
-        <spring.context.version>5.3.7</spring.context.version>
-        <jackson-databind.version>${jackson-datatype-jsr310.version}</jackson-databind.version>
-        <junit-jupiter-api.version>5.7.2</junit-jupiter-api.version>
-        <mockito-core.version>${mockito-junit-jupiter.version}</mockito-core.version>
-        <jackson-datatype-jsr310.version>2.12.3</jackson-datatype-jsr310.version>
-        <slf4j-api.version>1.7.30</slf4j-api.version>
-        <mockito-junit-jupiter.version>3.10.0</mockito-junit-jupiter.version>
-        <mapstruct.version>1.4.2.Final</mapstruct.version>
-        <apache-poi.version>4.1.0</apache-poi.version>
-        <assertj-core.version>3.22.0</assertj-core.version>
+        <javafx.version>21.0.3</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+        <spring.context.version>6.1.10</spring.context.version>
 
-        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <!--util-->
+        <logback.version>1.5.6</logback.version>
+        <lombok.version>1.18.32</lombok.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <jackson-databind.version>2.17.1</jackson-databind.version>
+        <slf4j-api.version>2.0.13</slf4j-api.version>
+        <apache-poi.version>5.2.5</apache-poi.version>
+
+        <!--test-->
+        <junit-jupiter-api.version>5.10.2</junit-jupiter-api.version>
+        <mockito-core.version>5.12.0</mockito-core.version>
+        <mockito-junit-jupiter.version>5.12.0</mockito-junit-jupiter.version>
+        <assertj-core.version>3.26.0</assertj-core.version>
     </properties>
 
     <dependencies>
@@ -88,7 +89,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson-datatype-jsr310.version}</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
 
         <dependency>
@@ -121,12 +122,6 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
         </dependency>
 
         <dependency>

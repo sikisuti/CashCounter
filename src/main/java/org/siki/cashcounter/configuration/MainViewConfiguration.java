@@ -1,5 +1,6 @@
 package org.siki.cashcounter.configuration;
 
+import java.util.LinkedHashMap;
 import javafx.scene.Node;
 import javafx.stage.Window;
 import org.siki.cashcounter.repository.DataManager;
@@ -11,18 +12,21 @@ import org.siki.cashcounter.view.BusyVeil;
 import org.siki.cashcounter.view.MainMenuBar;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.MainTabPaneContent;
+import org.siki.cashcounter.view.cashflow.CashFlowView;
+import org.siki.cashcounter.view.dailycorrections.DailyCorrectionsView;
 import org.siki.cashcounter.view.dialog.AlertFactory;
 import org.siki.cashcounter.view.dialog.CategoriesDialog;
 import org.siki.cashcounter.view.dialog.FileChooserFactory;
+import org.siki.cashcounter.view.statistics.StatisticsView;
+import org.siki.cashcounter.view.statisticstable.StatisticsTableView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.LinkedHashMap;
 
 @Configuration
 public class MainViewConfiguration {
   @Bean
-  public MainScene mainScene(Node mainMenu, Node mainContent, BusyVeil busyVeil) {
+  public MainScene mainScene(
+      MainMenuBar mainMenu, MainTabPaneContent mainContent, BusyVeil busyVeil) {
     return new MainScene(mainMenu, mainContent, busyVeil);
   }
 
@@ -32,7 +36,7 @@ public class MainViewConfiguration {
   }
 
   @Bean
-  public Node mainMenu(
+  public MainMenuBar mainMenu(
       PredictionService predictionService,
       CategoriesDialog categoriesDialog,
       DataManager dataManager,
@@ -53,8 +57,11 @@ public class MainViewConfiguration {
   }
 
   @Bean
-  public Node mainContent(
-      Node dailyCorrectionsView, Node cashFlowView, Node statisticsView, Node statisticsTableView) {
+  public MainTabPaneContent mainContent(
+      DailyCorrectionsView dailyCorrectionsView,
+      CashFlowView cashFlowView,
+      StatisticsView statisticsView,
+      StatisticsTableView statisticsTableView) {
     var tabs = new LinkedHashMap<String, Node>();
     tabs.put("Korrekciók", dailyCorrectionsView);
     tabs.put("Flow chart", cashFlowView);

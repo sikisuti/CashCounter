@@ -1,6 +1,5 @@
 package org.siki.cashcounter.configuration;
 
-import javafx.scene.Node;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
 import org.siki.cashcounter.view.ViewFactory;
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class StatisticsConfiguration {
 
   @Bean
-  public Node statisticsView(
+  public StatisticsView statisticsView(
       StatisticsProvider statisticsProvider, ConfigurationManager configurationManager) {
     return new StatisticsView(configurationManager, statisticsProvider);
   }
@@ -27,7 +26,7 @@ public class StatisticsConfiguration {
   }
 
   @Bean
-  public Node statisticsTableView(
+  public StatisticsTableView statisticsTableView(
       StatisticsTableProvider statisticsTableProvider, ViewFactory viewFactory) {
     return new StatisticsTableView(viewFactory, statisticsTableProvider);
   }

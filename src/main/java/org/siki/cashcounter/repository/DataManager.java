@@ -22,6 +22,7 @@ import javafx.collections.ObservableList;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.AccountTransaction;
+import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.converter.DataSourceMapper;
@@ -119,6 +120,13 @@ public class DataManager {
   public List<DailyBalance> getAllDailyBalances() {
     return dataSource.getMonthlyBalances().stream()
         .flatMap(mb -> mb.getDailyBalances().stream())
+        .collect(Collectors.toList());
+  }
+
+  public List<Correction> getAllCorrections() {
+    return dataSource.getMonthlyBalances().stream()
+        .flatMap(mb -> mb.getDailyBalances().stream())
+        .flatMap(db -> db.getCorrections().stream())
         .collect(Collectors.toList());
   }
 

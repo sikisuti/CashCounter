@@ -1,5 +1,11 @@
 package org.siki.cashcounter.view.dialog.monthlyinfo;
 
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,13 +24,6 @@ import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
 import org.siki.cashcounter.repository.DataManager;
-
-import java.text.NumberFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 public class MonthInfoDialog extends Stage {
   private static final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
@@ -153,8 +152,10 @@ public class MonthInfoDialog extends Stage {
         .getSelectionModel()
         .selectedItemProperty()
         .addListener(
-            (observable, oldValue, newValue) ->
-                correctionDetailsTable.setItems(getCorrectionDetailsData(newValue.getType())));
+            (observable, oldValue, newValue) -> {
+              correctionDetailsTable.getItems().clear();
+              correctionDetailsTable.setItems(getCorrectionDetailsData(newValue.getType()));
+            });
 
     return correctionDetailsTable;
   }

@@ -1,18 +1,32 @@
 # Bér
 {"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":680000,"startDate":"2019-12-01","endDate":"2020-12-01"}
 {"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":700000,"startDate":"2020-12-01","endDate":"2021-07-01"}
-{"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":770000,"startDate":"2021-07-01"}
-{"category":"Siki bér","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":200000}
-{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":110000,"startDate":"2019-10-01"}
-{"category":"Gabó bér","subCategory":"Waldorf","day":3,"amount":50000,"startDate":"2020-10-01","endDate":"2021-08-01"}
-{"category":"Gabó bér","subCategory":"Waldorf","day":5,"amount":50000,"startDate":"2021-10-01","endDate":"2022-08-01"}
+{"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":770000,"startDate":"2021-07-01","endDate":"2022-01-01"}
+{"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":840000,"startDate":"2022-01-01","endDate":"2022-07-01"}
+{"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":920000,"startDate":"2022-07-01","endDate":"2023-01-01"}
+{"category":"Siki bér","subCategory":"Siki bér","day":10,"amount":990000,"startDate":"2023-01-01"}
+{"category":"Siki bónusz","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":200000,"startDate":"2019-12-01","endDate":"2019-12-31"}
+{"category":"Siki bónusz","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":200000,"startDate":"2020-12-01","endDate":"2020-12-31"}
+{"category":"Siki bónusz","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":600000,"startDate":"2022-12-01","endDate":"2022-12-31"}
+{"category":"Siki bónusz","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":720000,"startDate":"2023-12-01","endDate":"2023-12-31"}
+{"category":"Siki bónusz","subCategory":"Siki bónusz","month":12,"monthDay":10,"amount":500000,"startDate":"2024-12-01"}
+{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":110000,"startDate":"2019-10-01","endDate":"2022-02-01"}
+{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":130000,"startDate":"2022-02-01","endDate":"2023-02-01"}
+{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":160000,"startDate":"2023-02-01","endDate":"2023-10-01"}
+{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":180000,"startDate":"2023-10-01","endDate":"2024-02-01"}
+{"category":"Gabó bér","subCategory":"Klikk","day":3,"amount":215000,"startDate":"2024-02-01"}
+{"category":"Gabó bér","subCategory":"Waldorf","day":3,"amount":50000,"startDate":"2020-10-01","endDate":"2021-07-01"}
+{"category":"Gabó bér","subCategory":"Waldorf","day":5,"amount":80000,"startDate":"2021-10-01","endDate":"2022-07-01"}
+{"category":"Gabó bér","subCategory":"Waldorf","day":5,"amount":80000,"startDate":"2022-10-01","endDate":"2023-07-31"}
+{"category":"Gabó bér","subCategory":"Waldorf","day":5,"amount":130000,"startDate":"2023-10-01"}
 
 # Juttatás
 {"category":"Gabó bér","subCategory":"Családi pótlék","day":3,"amount":26600}
 
 # Hitel
-{"category":"Hitel","subCategory":"Siki Fundamenta","day":8,"amount":-38750,"startDate":"2018-11-01","endDate":"2029-09-01"}
-{"category":"Hitel","subCategory":"Gabó OTP","day":3,"amount":-24953}
+{"category":"Hitel","subCategory":"Siki Fundi 182391","day":8,"amount":-38750,"startDate":"2018-11-01","endDate":"2029-05-01"}
+{"category":"Hitel","subCategory":"Gabó OTP","day":3,"amount":-24953,"endDate":"2023-03-01"}
+{"category":"Hitel","subCategory":"Gabó OTP","day":3,"amount":-25982,"startDate":"2023-03-01"}
 {"category":"Hitel","subCategory":"Timótól hitelre","day":13,"amount":24953}
 {"category":"Hitel","subCategory":"Autó lízing","day":28,"amount":-61915,"startDate":"2021-08-01","endDate":"2026-09-01"}
 
@@ -23,68 +37,122 @@
 {"category":"Üzemanyag","subCategory":"Tankolás","day":28,"amount":-20000}
 
 # Kulcs rezsi
-{"category":"Kulcs rezsi","subCategory":"Kulcs biztosítás","day":8,"amount":-2306}
-{"category":"Kulcs rezsi","subCategory":"Kulcs villany","day":3,"amount":-8500}
-{"category":"Kulcs rezsi","subCategory":"Kulcs építményadó","month":2,"monthDay":7,"amount":-35000}
-{"category":"Kulcs rezsi","subCategory":"Kulcs víz","day":20,"amount":-10000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs biztosítás","month":"10","monthDay":15,"amount":-32000,"endDate":"2023-10-01"}
+{"category":"Kulcs rezsi","subCategory":"Kulcs biztosítás","month":"10","monthDay":15,"amount":-40000,"startDate":"2023-10-01"}
+{"category":"Kulcs rezsi","subCategory":"Kulcs villany","day":3,"amount":-8500,"endDate":"2023-08-01"}
+{"category":"Kulcs rezsi","subCategory":"Kulcs villany","day":3,"amount":-11000,"startDate":"2023-08-01"}
+{"category":"Kulcs rezsi","subCategory":"Kulcs építményadó","month":2,"monthDay":7,"amount":-20000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs víz","day":20,"amount":-10000,"endDate":"2023-08-01"}
+{"category":"Kulcs rezsi","subCategory":"Kulcs víz","day":20,"amount":-13000,"startDate":"2023-08-01"}
 {"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":2,"monthDay":7,"amount":-6000}
 {"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":5,"monthDay":7,"amount":-6000}
 {"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":8,"monthDay":7,"amount":-6000}
 {"category":"Kulcs rezsi","subCategory":"Kulcs kuka","month":11,"monthDay":7,"amount":-6000}
-{"category":"Kulcs rezsi","subCategory":"Kulcs Gáz","day":26,"amount":-18000}
+{"category":"Kulcs rezsi","subCategory":"Kulcs Gáz","day":19,"amount":-18000}
 {"category":"Kulcs rezsi","subCategory":"Tarr TV","day":3,"amount":-10000}
+{"category":"Kulcs rezsi","subCategory":"Riasztó SIM","day":5,"amount":-4000,"startDate":"2021-11-01"}
 
 # Ruha
-{"category":"Ruha","subCategory":"Ruha","dayOfWeek":2,"amount":-5000}
+{"category":"Ruházat","subCategory":"Ruha","dayOfWeek":2,"amount":-5000,"endDate":"2023-10-01"}
+{"category":"Ruházat","subCategory":"Ruha","dayOfWeek":2,"amount":-10000,"startDate":"2023-10-01"}
 
-# Gyógyszer
-{"category":"Gyógyszer","subCategory":"Gyógyszer","dayOfWeek":2,"amount":-6000}
+# Egészség
+{"category":"Egészség","subCategory":"Gyógyszer","dayOfWeek":2,"amount":-6000,"endDate":"2023-10-01"}
+{"category":"Egészség","subCategory":"Gyógyszer","dayOfWeek":2,"amount":-10000,"startDate":"2023-10-01"}
 
 # Autó
-{"category":"Autó","subCategory":"Kia előleg","month":7,"monthDay":5,"amount":-700000,"startDate":"2021-07-01","endDate":"2021-08-01"}
-{"category":"Autó","subCategory":"Kia vásárlás","month":7,"monthDay":5,"amount":-3538500,"startDate":"2021-07-01","endDate":"2021-08-01"}
 {"category":"Autó","subCategory":"Autó szervíz","day":5,"amount":-10000}
-{"category":"Autó","subCategory":"Kia Kötelező szervíz","month":7,"monthDay":5,"amount":-70000,"startDate":"2022-01-01"}
-{"category":"Autó","subCategory":"Mazda 3 KGFB","month":1,"monthDay":5,"amount":-25000}
-{"category":"Autó","subCategory":"Mazda 2 KGFB","month":1,"monthDay":5,"amount":-25000}
-{"category":"Autó","subCategory":"Kia KGFB","month":8,"monthDay":5,"amount":-32000}
-{"category":"Autó","subCategory":"Autópálya díj","month":1,"monthDay":5,"amount":-20000}
-{"category":"Autó","subCategory":"Mazda 3 Gépjárműadó","month":3,"monthDay":5,"amount":-9100}
+{"category":"Autó","subCategory":"Autópálya díj","month":1,"monthDay":5,"amount":-20000,"endDate":"2023-10-01"}
+{"category":"Autó","subCategory":"Autópálya díj","month":1,"monthDay":5,"amount":-30000,"startDate":"2023-10-01"}
+
+{"category":"Autó","subCategory":"Kia KGFB","month":7,"monthDay":15,"amount":-52000,"endDate":"2023-07-01"}
+{"category":"Autó","subCategory":"Kia KGFB","month":7,"monthDay":15,"amount":-90000,"startDate":"2023-07-01","endDate":"2024-07-01"}
+{"category":"Autó","subCategory":"Kia KGFB","month":7,"monthDay":15,"amount":-53000,"startDate":"2024-07-01"}
+{"category":"Autó","subCategory":"Kia Gépjárműadó","month":3,"monthDay":5,"amount":-41000}
+{"category":"Autó","subCategory":"Kia CASCO","month":7,"monthDay":15,"amount":-192000,"endDate":"2023-07-01"}
+{"category":"Autó","subCategory":"Kia CASCO","month":7,"monthDay":15,"amount":-240000,"startDate":"2023-07-01","endDate":"2024-07-01"}
+{"category":"Autó","subCategory":"Kia CASCO","month":7,"monthDay":15,"amount":-260000,"startDate":"2024-07-01"}
+{"category":"Autó","subCategory":"Kia Kötelező szervíz","month":7,"monthDay":5,"amount":-70000,"startDate":"2022-01-01","endDate":"2023-07-01"}
+{"category":"Autó","subCategory":"Kia Kötelező szervíz","month":7,"monthDay":5,"amount":-100000,"startDate":"2023-07-01"}
+{"category":"Autó","subCategory":"Kia gumicsere","month":10,"monthDay":15,"amount":-18000}
+{"category":"Autó","subCategory":"Kia gumicsere","month":4,"monthDay":15,"amount":-18000}
+
+{"category":"Autó","subCategory":"Mazda 2 KGFB","month":12,"monthDay":5,"amount":-25000}
 {"category":"Autó","subCategory":"Mazda 2 Gépjárműadó","month":3,"monthDay":5,"amount":-13000}
-{"category":"Autó","subCategory":"Kia Gépjárműadó","month":3,"monthDay":5,"amount":-13000}
-{"category":"Autó","subCategory":"Kia CASCO","month":8,"monthDay":5,"amount":-172000}
+{"category":"Autó","subCategory":"Mazda 2 Műszaki","month":11,"monthDay":15,"amount":-40000,"startDate":"2023-11-01","endDate":"2023-12-01"}
+{"category":"Autó","subCategory":"Mazda 2 Műszaki","month":11,"monthDay":15,"amount":-40000,"startDate":"2025-11-01","endDate":"2025-12-01"}
+{"category":"Autó","subCategory":"Mazda 2 gumicsere","month":10,"monthDay":15,"amount":-8000}
+{"category":"Autó","subCategory":"Mazda 2 gumicsere","month":4,"monthDay":15,"amount":-8000}
 
 # Megtakarítás
-{"category":"Megtakarítás","subCategory":"Vince Fundamenta","day":10,"amount":-20150}
-{"category":"Megtakarítás","subCategory":"Siki Fundamenta","day":8,"amount":-20150}
-{"category":"Megtakarítás","subCategory":"Anna Fundamenta","day":8,"amount":-20150}
-{"category":"Megtakarítás","subCategory":"Vince Fundi gyerekszámla","day":10,"amount":-20150}
-{"category":"Megtakarítás","subCategory":"Anna Fundi gyerekszámla","day":10,"amount":-20150}
-{"category":"Megtakarítás","subCategory":"Union","month":7,"monthDay":3,"amount":-250000,"startDate":"2021-07-01","endDate":"2022-07-01"}
-{"category":"Megtakarítás","subCategory":"Union","month":7,"monthDay":3,"amount":-270000,"startDate":"2022-07-01"}
+{"category":"Megtakarítás","subCategory":"Siki Fundi 8345846-100","day":8,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Anna Fundi 8345882-800","day":8,"amount":-20150}
+{"category":"Megtakarítás","subCategory":"Vince Fundi gy (lezárt)","day":10,"amount":-20150,"endDate":"2022-10-31"}
+{"category":"Megtakarítás","subCategory":"Vince Fundi gy 8514064-700","day":10,"amount":-20168}
+{"category":"Megtakarítás","subCategory":"Anna Fundi gy 8514026-400","day":10,"amount":-20168}
+{"category":"Megtakarítás","subCategory":"Vince Fundi gy 8570521-000","day":10,"amount":-30168}
+{"category":"Megtakarítás","subCategory":"Anna Fundi gy 8570525-300","day":10,"amount":-30168}
+{"category":"Megtakarítás","subCategory":"Union","month":7,"monthDay":5,"amount":-250000,"startDate":"2021-07-01","endDate":"2022-07-01"}
+{"category":"Megtakarítás","subCategory":"Union","month":6,"monthDay":20,"amount":-271295,"startDate":"2022-06-01","endDate":"2023-06-01"}
+{"category":"Megtakarítás","subCategory":"Union","month":6,"monthDay":20,"amount":-300000,"startDate":"2023-06-01","endDate":"2024-06-01"}
+{"category":"Megtakarítás","subCategory":"Union","month":6,"monthDay":20,"amount":-380000,"startDate":"2024-06-01"}
 
 # Szórakozás
 {"category":"Szórakozás","subCategory":"Szórakozás","day":25,"amount":-5000}
-{"category":"Szórakozás","subCategory":"Netflix, HBO","day":3,"amount":-5200}
+{"category":"Szórakozás","subCategory":"Netflix, HBO","day":3,"amount":-5200,"startDate":"2019-07-01","endDate":"2021-12-01"}
+{"category":"Szórakozás","subCategory":"Netflix, HBO","day":3,"amount":-5500,"startDate":"2021-12-01","endDate":"2022-01-01"}
+{"category":"Szórakozás","subCategory":"Netflix, HBO, Spotify","day":3,"amount":-8500,"startDate":"2022-01-01","endDate":"2023-07-01"}
+{"category":"Szórakozás","subCategory":"Netflix, HBO, Spotify","day":3,"amount":-11000,"startDate":"2023-07-01"}
+
+# Otthon
+{"category":"Otthon","subCategory":"Trágya","month":2,"monthDay":15,"amount":-120000}
 
 # Telefon
-{"category":"Telefon","subCategory":"Gabó telefon","day":5,"amount":-4000}
+{"category":"Telefon","subCategory":"Gabó telefon","day":5,"amount":-4000,"startDate":"2019-07-01","endDate":"2021-11-01"}
 
 # Egyéb
+{"category":"Egyéb","subCategory":"Egyéb","day":5,"amount":-50000}
 # Szülinapok
-{"category":"Ajándék","subCategory":"Vince szülinap","month":10,"monthDay":10,"amount":-20000}
+{"category":"Ajándék","subCategory":"Vince szülinap","month":9,"monthDay":10,"amount":-30000}
 {"category":"Ajándék","subCategory":"Anna szülinap","month":8,"monthDay":5,"amount":-20000}
 # Karácsony
-{"category":"Ajándék","subCategory":"Karácsony","month":12,"monthDay":10,"amount":-80000}
-# Gabó kontaktlencse
-{"category":"Gabó kontaktlencse","subCategory":"Gabó féléves kontaktlencse","month":6,"monthDay":28,"amount":-30000}
-{"category":"Gabó kontaktlencse","subCategory":"Gabó féléves kontaktlencse","month":12,"monthDay":28,"amount":-30000}
+{"category":"Ajándék","subCategory":"Karácsony","month":12,"monthDay":10,"amount":-150000}
 # Nyaralás
-{"category":"Szórakozás","subCategory":"Nyaralás","month":8,"monthDay":25,"amount":-200000}
-#Kert
-{"category":"Kert","subCategory":"Trágya","month":4,"monthDay":15,"amount":-50000}
+{"category":"Szórakozás","subCategory":"Kenese nyaralás","month":8,"monthDay":10,"amount":-120000,"endDate":"2022-09-01"}
+{"category":"Szórakozás","subCategory":"Nyaralás","month":4,"monthDay":29,"amount":-250000,"startDate":"2024-04-01","endDate":"2024-05-01"}
+{"category":"Szórakozás","subCategory":"Nyaralás","month":7,"monthDay":15,"amount":-100000,"startDate":"2024-01-01","endDate":"2025-05-01"}
+{"category":"Szórakozás","subCategory":"Nyaralás","month":7,"monthDay":15,"amount":-300000,"startDate":"2025-01-01"}
 
+# --------------------------------------------------------------------------------------------------------------------------
 
-{"category":"Egyéb","subCategory":"riasztó","month":11,"monthDay":15,"amount":-300000,"startDate":"2021-11-01","endDate":"2021-12-01"}
-{"category":"Autó","subCategory":"Kia téli gumi","month":11,"monthDay":15,"amount":-100000,"startDate":"2021-11-01","endDate":"2021-12-01"}
-{"category":"Egyéb","subCategory":"Klíma","month":2,"monthDay":15,"amount":-250000,"startDate":"2022-02-01","endDate":"2022-03-01"}
+{"category":"Egészség","subCategory":"Gabó féléves kontaktlencse","month":6,"monthDay":28,"amount":-30000,"endDate":"2023-11-01"}
+{"category":"Egészség","subCategory":"Gabó féléves kontaktlencse","month":12,"monthDay":28,"amount":-30000,"endDate":"2023-11-01"}
+
+# Melléképület
+{"category":"Otthon","subCategory":"Melléképület tető","month":7,"monthDay":25,"amount":-1500000,"startDate":"2022-07-01","endDate":"2022-08-01"}
+{"category":"Otthon","subCategory":"Fecó kölcsön","month":7,"monthDay":25,"amount":1652250,"startDate":"2022-07-01","endDate":"2022-08-01"}
+{"category":"Otthon","subCategory":"Fundi megtakarítás","month":12,"monthDay":15,"amount":2000000,"startDate":"2022-12-01","endDate":"2022-12-31"}
+
+# Konyha
+{"category":"Otthon","subCategory":"Konyhabútor","month":3,"monthDay":15,"amount":-300000,"startDate":"2022-03-01","endDate":"2022-04-01"}
+{"category":"Otthon","subCategory":"Sütő","month":3,"monthDay":15,"amount":-170000,"startDate":"2022-03-01","endDate":"2022-04-01"}
+{"category":"Otthon","subCategory":"Főzőlap","month":3,"monthDay":15,"amount":-110000,"startDate":"2022-03-01","endDate":"2022-04-01"}
+
+# Klíma
+{"category":"Otthon","subCategory":"Klíma","month":5,"monthDay":5,"amount":-320000,"startDate":"2022-05-01","endDate":"2022-06-01"}
+
+# Mazda nyári gumi
+{"category":"Autó","subCategory":"Mazda nyári gumi","month":4,"monthDay":15,"amount":-120000,"startDate":"2022-04-01","endDate":"2022-05-01"}
+
+# Autex cégrész
+{"category":"Egyéb","subCategory":"Autex osztalék","month":5,"monthDay":15,"amount":450000,"startDate":"2022-05-01","endDate":"2022-06-01"}
+{"category":"Egyéb","subCategory":"Autex cégrész","month":5,"monthDay":15,"amount":-300000,"startDate":"2022-05-01","endDate":"2022-06-01"}
+
+# Siklósi családi nyaralás
+{"category":"Szórakozás","subCategory":"Siklósi nyaralás","month":8,"monthDay":5,"amount":-70000,"startDate":"2022-08-01","endDate":"2022-09-01"}
+
+# Felújítás visszatérítés
+{"category":"Otthon","subCategory":"Felújítás visszatérítés","month":9,"monthDay":15,"amount":1376532,"startDate":"2022-09-01","endDate":"2022-09-30"}
+{"category":"Otthon","subCategory":"Fecó kölcsön visszafizetés","month":9,"monthDay":15,"amount":-1600000,"startDate":"2022-09-01","endDate":"2022-09-30"}
+
+{"category":"Ajándék","subCategory":"Danika esküvő","month":8,"monthDay":15,"amount":-150000,"startDate":"2024-08-01","endDate":"2024-09-01"}

@@ -1,5 +1,6 @@
 package org.siki.cashcounter.view;
 
+import java.time.YearMonth;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
@@ -27,8 +28,6 @@ import org.siki.cashcounter.view.statisticstable.CategoryRow;
 import org.siki.cashcounter.view.statisticstable.StatisticsTableProvider;
 import org.siki.cashcounter.view.statisticstable.StatisticsTableView;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.YearMonth;
 
 @AllArgsConstructor
 public class ViewFactory {

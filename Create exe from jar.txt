@@ -1,0 +1,22 @@
+https://www.youtube.com/watch?v=IoPXzopsmpE
+https://www.youtube.com/watch?v=51iMSVUOQNM&t=0s
+https://www.youtube.com/watch?v=k6m2a1OtfZ4&t=0s
+
+1. create executable jar (create a plain launcher class which invokes the application main method)
+2. create exe using launch4j
+    select the executable jar
+    configure the output file (.exe)
+    configure single instance (autex-webshopcm.exe)
+    JRE -> JRE Path: JRE
+3. create a folder JRE next to the exe file and copy the whole content of JDK there
+4. create installer using Inno Setup
+    create new script file using script wizard
+    application destination base folder: Program Files folder
+    application name: autex-webshopcm
+    uncheck allow user to change the application folder
+    select exe file
+    After finish -> "Would you like to compile the new script now?": No
+    Insert line under section [Files]
+        Source: "C:\Apps\autex-webshopcm\JRE\*"; DestDir: "C:\Program Files (x86)\autex-webshopcm\JRE"; Flags: recursesubdirs createallsubdirs
+        Source: "C:\Apps\autex-webshopcm\hun.properties"; DestDir: "C:\Program Files (x86)\autex-webshopcm"; Flags: recursesubdirs createallsubdirs
+        Source: "C:\Apps\autex-webshopcm\complex.properties"; DestDir: "C:\Program Files (x86)\autex-webshopcm"; Flags: recursesubdirs createallsubdirs

@@ -1,5 +1,10 @@
 package org.siki.cashcounter.view;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -15,12 +20,7 @@ import org.siki.cashcounter.view.dialog.AlertFactory;
 import org.siki.cashcounter.view.dialog.CategoriesDialog;
 import org.siki.cashcounter.view.dialog.ExceptionDialog;
 import org.siki.cashcounter.view.dialog.FileChooserFactory;
-
-import java.io.File;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.siki.cashcounter.view.search.SearchDialog;
 
 @SuppressWarnings("java:S110")
 @Slf4j
@@ -57,7 +57,7 @@ public class MainMenuBar extends MenuBar {
   }
 
   private Menu fileMenu() {
-    return new Menu("Fájl", null, saveMenuItem());
+    return new Menu("Fájl", null, searchMenuItem(), saveMenuItem());
   }
 
   private Menu dataMenu() {
@@ -72,6 +72,12 @@ public class MainMenuBar extends MenuBar {
     var saveMenuItem = new MenuItem("Mentés");
     saveMenuItem.setOnAction(this::doSave);
     return saveMenuItem;
+  }
+
+  private MenuItem searchMenuItem() {
+    var searchMenuItem = new MenuItem("Keresés");
+    searchMenuItem.setOnAction(this::doSearch);
+    return searchMenuItem;
   }
 
   private MenuItem importMenuItem() {
@@ -158,5 +164,10 @@ public class MainMenuBar extends MenuBar {
       log.error("", e);
       ExceptionDialog.get(e).showAndWait();
     }
+  }
+
+  private void doSearch(ActionEvent actionEvent) {
+    var searchDialog = new SearchDialog(dataManager);
+    searchDialog.showAndWait();
   }
 }

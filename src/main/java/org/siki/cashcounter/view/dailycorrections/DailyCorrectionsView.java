@@ -14,7 +14,6 @@ import org.siki.cashcounter.view.ViewFactory;
 
 @SuppressWarnings("java:S110")
 public class DailyCorrectionsView extends GridPane {
-  private final DataManager dataManager;
   private final ViewFactory viewFactory;
 
   public final ObservableList<MonthlyBalanceTitledPane> monthlyBalanceTitledPanes =
@@ -23,7 +22,6 @@ public class DailyCorrectionsView extends GridPane {
   public final VBox dailyBalancesPH = new VBox();
 
   public DailyCorrectionsView(DataManager dataManager, ViewFactory viewFactory) {
-    this.dataManager = dataManager;
     this.viewFactory = viewFactory;
 
     Bindings.bindContent(dailyBalancesPH.getChildren(), monthlyBalanceTitledPanes);

@@ -1,14 +1,10 @@
 package org.siki.cashcounter.service;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.util.Optional.ofNullable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.siki.cashcounter.model.Correction;
-import org.siki.cashcounter.model.MonthlyBalance;
-import org.siki.cashcounter.model.PredictedCorrection;
-import org.siki.cashcounter.repository.DataManager;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,9 +18,12 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static java.util.Optional.ofNullable;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.siki.cashcounter.model.Correction;
+import org.siki.cashcounter.model.MonthlyBalance;
+import org.siki.cashcounter.model.PredictedCorrection;
+import org.siki.cashcounter.repository.DataManager;
 
 @AllArgsConstructor
 @Slf4j
@@ -193,14 +192,15 @@ public class PredictionService {
             if (prediction.getMonth() == null
                 || prediction.getMonth().equals(mb.getYearMonth().getMonth())) {
               if (prediction.getDayOfWeek() != null) {
-                for (var i = 0;
-                    i < countDayOccurenceInMonth(prediction.getDayOfWeek(), mb.getYearMonth());
-                    i++) {
-                  mb.addPrediction(
-                      prediction.getCategory(),
-                      prediction.getSubCategory(),
-                      prediction.getAmount());
-                }
+                var count = mb.getDailyBalances().stream()
+                        .filter(db -> db.getDate().isEqual(prediction.getStartDate()) || db.getDate().isAfter(prediction.getStartDate()))
+                        .filter(db -> db.getDate().isBefore(prediction.getEndDate()))
+                        .filter(db -> db.getDate().getDayOfWeek().equals(prediction.getDayOfWeek()))
+                        .count();
+                mb.addPrediction(
+                        prediction.getCategory(),
+                        prediction.getSubCategory(),
+                        prediction.getAmount() * (int) count);
               } else {
                 var date =
                     mb.getYearMonth()

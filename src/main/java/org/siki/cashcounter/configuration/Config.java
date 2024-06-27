@@ -1,7 +1,10 @@
 package org.siki.cashcounter.configuration;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
 import org.mapstruct.factory.Mappers;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
@@ -12,10 +15,6 @@ import org.siki.cashcounter.view.ViewFactory;
 import org.siki.cashcounter.view.dialog.AlertFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.IOException;
-
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 @Configuration
 public class Config {
@@ -38,11 +37,8 @@ public class Config {
   public ViewFactory getViewFactory(
       DataForViewService dataForViewService,
       CategoryService categoryService,
-      CorrectionService correctionService,
-      DataManager dataManager,
-      ConfigurationManager configurationManager) {
-    return new ViewFactory(
-        dataForViewService, categoryService, correctionService, dataManager, configurationManager);
+      CorrectionService correctionService) {
+    return new ViewFactory(dataForViewService, categoryService, correctionService);
   }
 
   @Bean

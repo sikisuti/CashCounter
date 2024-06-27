@@ -1,5 +1,7 @@
 package org.siki.cashcounter.view.dialog;
 
+import static javafx.stage.StageStyle.DECORATED;
+
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleStringProperty;
@@ -16,7 +18,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.MonthlyBalance;
 
@@ -42,7 +43,7 @@ public class MonthlyPredictionsDialog extends Stage {
     root.setPadding(new Insets(20));
     this.setScene(new Scene(root));
 
-    this.initStyle(StageStyle.UTILITY);
+    this.initStyle(DECORATED);
     this.setTitle(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
   }
 

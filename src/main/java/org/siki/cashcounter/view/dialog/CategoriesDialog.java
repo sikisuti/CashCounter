@@ -1,5 +1,10 @@
 package org.siki.cashcounter.view.dialog;
 
+import static javafx.stage.StageStyle.DECORATED;
+
+import java.text.Collator;
+import java.util.Locale;
+import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -13,12 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.siki.cashcounter.repository.DataManager;
-
-import java.text.Collator;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class CategoriesDialog extends Stage {
   private final ListView<String> patternsView = new ListView<>();
@@ -48,7 +48,7 @@ public class CategoriesDialog extends Stage {
     var root = new VBox(listViews(), addView());
     setScene(new Scene(root));
 
-    this.initStyle(StageStyle.UTILITY);
+    this.initStyle(DECORATED);
   }
 
   private Node addView() {

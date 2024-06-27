@@ -1,7 +1,7 @@
 package org.siki.cashcounter.view.search;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
-import static javafx.stage.StageStyle.UTILITY;
+import static javafx.stage.StageStyle.DECORATED;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -18,7 +18,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.repository.DataManager;
@@ -46,8 +45,7 @@ public class SearchDialog extends Stage {
   private void loadUI() {
     this.setScene(new Scene(initContent()));
 
-    this.initModality(Modality.APPLICATION_MODAL);
-    this.initStyle(UTILITY);
+    this.initStyle(DECORATED);
     this.setTitle("Keresés");
   }
 

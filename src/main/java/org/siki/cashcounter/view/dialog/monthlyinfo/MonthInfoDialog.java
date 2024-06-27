@@ -1,5 +1,7 @@
 package org.siki.cashcounter.view.dialog.monthlyinfo;
 
+import static javafx.stage.StageStyle.DECORATED;
+
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -18,22 +20,18 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.model.MonthlyBalance;
-import org.siki.cashcounter.repository.DataManager;
 
 public class MonthInfoDialog extends Stage {
   private static final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
   private static final String FX_ALIGNMENT_CENTER_RIGHT = "-fx-alignment: CENTER-RIGHT;";
   private final MonthlyBalance monthlyBalance;
-  private final DataManager dataManager;
 
-  public MonthInfoDialog(MonthlyBalance monthlyBalance, DataManager dataManager) {
+  public MonthInfoDialog(MonthlyBalance monthlyBalance) {
     this.monthlyBalance = monthlyBalance;
-    this.dataManager = dataManager;
     currencyFormat.setMaximumFractionDigits(0);
     loadUI();
   }
@@ -41,7 +39,7 @@ public class MonthInfoDialog extends Stage {
   private void loadUI() {
     this.setScene(new Scene(initRootGrid()));
 
-    this.initStyle(StageStyle.UTILITY);
+    this.initStyle(DECORATED);
     this.setTitle(monthlyBalance.getYearMonth().format(DateTimeFormatter.ofPattern("yyyy.MMMM")));
   }
 

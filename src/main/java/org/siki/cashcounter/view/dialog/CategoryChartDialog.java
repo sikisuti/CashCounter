@@ -22,7 +22,7 @@ public class CategoryChartDialog extends Stage {
 
   private void loadUI() {
     setScene(new Scene(new StackPane(categoryChart)));
-    this.initStyle(StageStyle.UTILITY);
+    this.initStyle(StageStyle.DECORATED);
     setWidth(1300);
     setHeight(700);
   }

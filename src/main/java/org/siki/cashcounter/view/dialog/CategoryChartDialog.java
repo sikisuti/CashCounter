@@ -8,11 +8,9 @@ import org.siki.cashcounter.service.CategoryService;
 import org.siki.cashcounter.view.chart.CategoryChart;
 
 public class CategoryChartDialog extends Stage {
-  private final CategoryService categoryService;
   private final CategoryChart categoryChart;
 
   public CategoryChartDialog(CategoryService categoryService) {
-    this.categoryService = categoryService;
     categoryChart = new CategoryChart(categoryService);
     loadUI();
   }
@@ -25,5 +23,7 @@ public class CategoryChartDialog extends Stage {
   private void loadUI() {
     setScene(new Scene(new StackPane(categoryChart)));
     this.initStyle(StageStyle.UTILITY);
+    setWidth(1300);
+    setHeight(700);
   }
 }

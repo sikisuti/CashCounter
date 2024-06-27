@@ -1,5 +1,6 @@
 package org.siki.cashcounter;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -11,8 +12,6 @@ import org.siki.cashcounter.task.TaskFactory;
 import org.siki.cashcounter.view.MainScene;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.io.IOException;
-
 @Slf4j
 public class CashCounter extends Application {
   public static void main(String[] args) {
@@ -23,6 +22,7 @@ public class CashCounter extends Application {
   public void start(Stage stage) {
     var context = new AnnotationConfigApplicationContext("org.siki.cashcounter.configuration");
     var mainScene = context.getBean(MainScene.class);
+    stage.setMaximized(true);
     stage.setScene(mainScene);
     stage.show();
     stage.setOnCloseRequest(

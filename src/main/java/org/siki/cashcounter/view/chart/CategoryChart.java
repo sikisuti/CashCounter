@@ -1,13 +1,12 @@
 package org.siki.cashcounter.view.chart;
 
+import static org.siki.cashcounter.service.CategoryService.RANGE;
+
+import java.time.LocalDate;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import org.siki.cashcounter.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDate;
-
-import static org.siki.cashcounter.service.CategoryService.RANGE;
 
 public class CategoryChart extends LineChart<LocalDate, Number> {
   @Autowired CategoryService categoryService;
@@ -26,7 +25,7 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
   }
 
   public void refreshChart(String category) {
-    var series = categoryService.getCategoryChart(category);
+    var series = categoryService.getCategoryChartData(category);
     setData(series);
 
     var mainSeries =

@@ -37,8 +37,10 @@ public class Config {
   public ViewFactory getViewFactory(
       DataForViewService dataForViewService,
       CategoryService categoryService,
-      CorrectionService correctionService) {
-    return new ViewFactory(dataForViewService, categoryService, correctionService);
+      CorrectionService correctionService,
+      ConfigurationManager configurationManager) {
+    return new ViewFactory(
+        dataForViewService, categoryService, correctionService, configurationManager);
   }
 
   @Bean
@@ -52,9 +54,8 @@ public class Config {
   }
 
   @Bean
-  public CategoryService getCategoryService(
-      DataManager dataManager, ConfigurationManager configurationManager) {
-    return new CategoryService(dataManager, configurationManager);
+  public CategoryService getCategoryService(DataManager dataManager) {
+    return new CategoryService(dataManager);
   }
 
   @Bean

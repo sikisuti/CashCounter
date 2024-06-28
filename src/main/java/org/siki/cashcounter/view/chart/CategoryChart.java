@@ -6,10 +6,9 @@ import java.time.LocalDate;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import org.siki.cashcounter.service.CategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CategoryChart extends LineChart<LocalDate, Number> {
-  @Autowired CategoryService categoryService;
+  CategoryService categoryService;
 
   @Override
   public NumberAxis getYAxis() {
@@ -24,8 +23,8 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
     setCreateSymbols(false);
   }
 
-  public void refreshChart(String category) {
-    var series = categoryService.getCategoryChartData(category);
+  public void refreshChart(String category, int weekRange) {
+    var series = categoryService.getCategoryChartData(category, weekRange);
     setData(series);
 
     var mainSeries =

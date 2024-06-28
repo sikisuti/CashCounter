@@ -12,23 +12,16 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.model.DailyBalance;
 import org.siki.cashcounter.repository.DataManager;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @RequiredArgsConstructor
 public class CategoryService {
   public static final int RANGE = -730;
-  public static final int DEFAULT_AVERAGE_WEEK_RANGE = 4;
-  // average is calculated in weeks range (28 days) for the smoother chart and we need to correct
-  // the result to be closer to a month (30 days)
-  public static final double MONTH_CORRECTION = (30d / 28d);
 
-  @Autowired private final DataManager dataManager;
-  @Autowired private final ConfigurationManager configurationManager;
+  private final DataManager dataManager;
 
   private final StringProperty selectedCategory = new SimpleStringProperty();
 
@@ -54,18 +47,14 @@ public class CategoryService {
         .ifPresent(accountTransaction::setCategory);
   }
 
-  public ObservableList<Series<LocalDate, Number>> getCategoryChartData(String category) {
-    var averageWeekRange =
-        configurationManager
-            .getIntegerProperty(category + " average range")
-            .orElse(DEFAULT_AVERAGE_WEEK_RANGE);
+  public ObservableList<Series<LocalDate, Number>> getCategoryChartData(
+      String category, int weekRange) {
 
     var movingAverage =
         IntStream.range(-730, 0)
             .mapToObj(
                 offset ->
-                    getDayAverage(
-                        dataManager.getAllDailyBalances(), category, -offset, averageWeekRange))
+                    getDayAverage(dataManager.getAllDailyBalances(), category, -offset, weekRange))
             .toList();
 
     var averageData =
@@ -74,7 +63,7 @@ public class CategoryService {
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
     return FXCollections.observableArrayList(
-        new Series<>("%s (%d hetes átlag)".formatted(category, averageWeekRange), averageData));
+        new Series<>("%s (%d hetes átlag)".formatted(category, weekRange), averageData));
   }
 
   private Tuple getDayAverage(
@@ -101,10 +90,7 @@ public class CategoryService {
             .mapToInt(AccountTransaction::getUnpairedAmount)
             .sum();
 
-    var oneMonthAverage =
-        (int)
-            Math.round(
-                (fromCorrections + fromTransactions) / (avgWeekRange / (4 * MONTH_CORRECTION)));
+    var oneMonthAverage = (fromCorrections + fromTransactions) / (avgWeekRange / 4);
     return new Tuple(endDay, oneMonthAverage);
   }
 

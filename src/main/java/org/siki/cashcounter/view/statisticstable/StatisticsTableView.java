@@ -57,8 +57,8 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
                   button.setOnAction(
                       actionEvent ->
                           viewFactory
-                              .createCategoryChartDialog()
-                              .show(categoryRow.getCategoryName()));
+                              .createCategoryChartDialog(categoryRow.getCategoryName())
+                              .showChart());
                   setGraphic(button);
                 }
               }
@@ -95,7 +95,6 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
               setText(null);
             } else {
               setText(currencyFormat.format(value));
-              //              setStyle("-fx-background-color: yellow;");
             }
           }
         };

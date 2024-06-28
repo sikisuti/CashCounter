@@ -1,7 +1,7 @@
 package org.siki.cashcounter.view;
 
 import javafx.collections.ObservableList;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
@@ -18,14 +18,13 @@ import org.siki.cashcounter.view.dialog.CategoryChartDialog;
 import org.siki.cashcounter.view.dialog.CorrectionDialog;
 import org.siki.cashcounter.view.dialog.MonthlyPredictionsDialog;
 import org.siki.cashcounter.view.dialog.monthlyinfo.MonthInfoDialog;
-import org.springframework.beans.factory.annotation.Autowired;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ViewFactory {
-  @Autowired private final DataForViewService dataForViewService;
-  @Autowired private final CategoryService categoryService;
-  @Autowired private final CorrectionService correctionService;
-  @Autowired private final ConfigurationManager configurationManager;
+  private final DataForViewService dataForViewService;
+  private final CategoryService categoryService;
+  private final CorrectionService correctionService;
+  private final ConfigurationManager configurationManager;
 
   public TransactionListView createTransactionListView(
       ObservableList<AccountTransaction> transactions, DailyBalanceControl parent) {
@@ -52,7 +51,8 @@ public class ViewFactory {
   }
 
   public CategoryChartDialog createCategoryChartDialog(String category) {
-    return new CategoryChartDialog(categoryService, category, configurationManager);
+    return new CategoryChartDialog(
+        categoryService, category, configurationManager, correctionService);
   }
 
   public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {

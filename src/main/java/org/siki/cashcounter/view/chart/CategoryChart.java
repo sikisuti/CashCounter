@@ -1,5 +1,6 @@
 package org.siki.cashcounter.view.chart;
 
+import static javafx.geometry.Side.RIGHT;
 import static org.siki.cashcounter.service.CategoryService.RANGE;
 
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ public class CategoryChart extends LineChart<LocalDate, Number> {
   public CategoryChart(CategoryService categoryService) {
     super(new DateAxis(LocalDate.now().plusDays(RANGE), LocalDate.now()), new NumberAxis());
     this.categoryService = categoryService;
+
+    this.getYAxis().setSide(RIGHT);
 
     getYAxis().setAutoRanging(false);
     setCreateSymbols(false);

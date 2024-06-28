@@ -1,17 +1,21 @@
 package org.siki.cashcounter.service;
 
+import static java.util.function.Function.identity;
+
+import java.text.Collator;
+import java.time.LocalDate;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import lombok.RequiredArgsConstructor;
+import org.siki.cashcounter.model.AccountTransaction;
 import org.siki.cashcounter.model.Correction;
 import org.siki.cashcounter.repository.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.text.Collator;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class CorrectionService {
@@ -30,13 +34,17 @@ public class CorrectionService {
   }
 
   private SortedList<String> collectCorrectionTypes() {
-    return dataManager.getMonthlyBalances().stream()
-        .flatMap(
-            mb ->
-                mb.getDailyBalances().stream()
-                    .flatMap(db -> db.getCorrections().stream().map(Correction::getType)))
-        .distinct()
+    return Stream.of(
+            dataManager.getAllCorrections().stream()
+                .filter(
+                    c -> c.getParentDailyBalance().getDate().isAfter(LocalDate.now().minusYears(1)))
+                .map(Correction::getType),
+            dataManager.getAllTransactions().stream()
+                .filter(t -> t.getDate().isAfter(LocalDate.now().minusYears(1)))
+                .map(AccountTransaction::getCategory))
+        .flatMap(identity())
         .filter(c -> Optional.ofNullable(c).isPresent())
+        .distinct()
         .collect(Collectors.toCollection(FXCollections::observableArrayList))
         .sorted((o1, o2) -> Collator.getInstance(new Locale("hu", "HU")).compare(o1, o2));
   }

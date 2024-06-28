@@ -130,6 +130,13 @@ public class DataManager {
         .collect(Collectors.toList());
   }
 
+  public List<AccountTransaction> getAllTransactions() {
+    return dataSource.getMonthlyBalances().stream()
+        .flatMap(mb -> mb.getDailyBalances().stream())
+        .flatMap(db -> db.getTransactions().stream())
+        .toList();
+  }
+
   private void backupIfRequired(String dataPath) throws IOException {
     FileTime lastModifiedTime = Files.getLastModifiedTime(Paths.get(dataPath));
     var lastModifiedDate =

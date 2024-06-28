@@ -1,5 +1,11 @@
 package org.siki.cashcounter.view.statisticstable;
 
+import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.STAT_END_OFFSET_MONTH;
+import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.STAT_START_OFFSET_MONTH;
+
+import java.text.NumberFormat;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -11,13 +17,6 @@ import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
 import org.siki.cashcounter.view.Refreshable;
 import org.siki.cashcounter.view.ViewFactory;
-
-import java.text.NumberFormat;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-
-import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.STAT_END_OFFSET_MONTH;
-import static org.siki.cashcounter.view.statisticstable.StatisticsTableProvider.STAT_START_OFFSET_MONTH;
 
 @SuppressWarnings("java:S110")
 @Slf4j
@@ -45,6 +44,7 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
 
   private void configureCategoryNameColumn() {
     var categoryNameCol = new TableColumn<CategoryRow, CategoryRow>();
+    categoryNameCol.setPrefWidth(120);
     categoryNameCol.setCellFactory(
         categoryRowStringTableColumn ->
             new TableCell<>() {
@@ -53,6 +53,7 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
                 super.updateItem(categoryRow, empty);
                 if (!empty && categoryRow != null) {
                   var button = new Button(categoryRow.getCategoryName());
+                  button.setPrefWidth(200);
                   button.setOnAction(
                       actionEvent ->
                           viewFactory

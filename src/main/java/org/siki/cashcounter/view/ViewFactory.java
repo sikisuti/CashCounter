@@ -50,9 +50,8 @@ public class ViewFactory {
     return new CorrectionControl(correction, parent, categoryService, this);
   }
 
-  public CategoryChartDialog createCategoryChartDialog(String category) {
-    return new CategoryChartDialog(
-        categoryService, category, configurationManager, correctionService);
+  public CategoryChartDialog createCategoryChartDialog() {
+    return new CategoryChartDialog(categoryService, configurationManager, correctionService);
   }
 
   public MonthInfoDialog getMonthInfoDialog(MonthlyBalance monthlyBalance) {

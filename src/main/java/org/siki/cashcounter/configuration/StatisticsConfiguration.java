@@ -2,7 +2,10 @@ package org.siki.cashcounter.configuration;
 
 import org.siki.cashcounter.ConfigurationManager;
 import org.siki.cashcounter.repository.DataManager;
+import org.siki.cashcounter.service.CategoryService;
+import org.siki.cashcounter.service.CorrectionService;
 import org.siki.cashcounter.view.ViewFactory;
+import org.siki.cashcounter.view.chart.CategoryChartGrid;
 import org.siki.cashcounter.view.statistics.StatisticsProvider;
 import org.siki.cashcounter.view.statistics.StatisticsView;
 import org.siki.cashcounter.view.statisticstable.StatisticsTableProvider;
@@ -35,5 +38,13 @@ public class StatisticsConfiguration {
   public StatisticsTableProvider statisticsTableProvider(
       DataManager dataManager, ConfigurationManager configurationManager) {
     return new StatisticsTableProvider(dataManager, configurationManager);
+  }
+
+  @Bean
+  public CategoryChartGrid categoryChartGrid(
+      CategoryService categoryService,
+      ConfigurationManager configurationManager,
+      CorrectionService correctionService) {
+    return new CategoryChartGrid(categoryService, configurationManager, correctionService);
   }
 }

@@ -13,6 +13,7 @@ import org.siki.cashcounter.view.MainMenuBar;
 import org.siki.cashcounter.view.MainScene;
 import org.siki.cashcounter.view.MainTabPaneContent;
 import org.siki.cashcounter.view.cashflow.CashFlowView;
+import org.siki.cashcounter.view.chart.CategoryChartGrid;
 import org.siki.cashcounter.view.dailycorrections.DailyCorrectionsView;
 import org.siki.cashcounter.view.dialog.AlertFactory;
 import org.siki.cashcounter.view.dialog.CategoriesDialog;
@@ -60,11 +61,13 @@ public class MainViewConfiguration {
   public MainTabPaneContent mainContent(
       DailyCorrectionsView dailyCorrectionsView,
       CashFlowView cashFlowView,
+      CategoryChartGrid categoryChartGrid,
       StatisticsView statisticsView,
       StatisticsTableView statisticsTableView) {
     var tabs = new LinkedHashMap<String, Node>();
     tabs.put("Korrekciók", dailyCorrectionsView);
     tabs.put("Flow chart", cashFlowView);
+    tabs.put("Kategória történet", categoryChartGrid);
     tabs.put("Statisztikák", statisticsView);
     tabs.put("Statisztikák2", statisticsTableView);
     return new MainTabPaneContent(tabs);

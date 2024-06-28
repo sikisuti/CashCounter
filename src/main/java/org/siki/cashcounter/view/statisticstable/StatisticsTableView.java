@@ -57,8 +57,8 @@ public class StatisticsTableView extends TableView<CategoryRow> implements Refre
                   button.setOnAction(
                       actionEvent ->
                           viewFactory
-                              .createCategoryChartDialog(categoryRow.getCategoryName())
-                              .showChart());
+                              .createCategoryChartDialog()
+                              .showChart(categoryRow.getCategoryName()));
                   setGraphic(button);
                 }
               }

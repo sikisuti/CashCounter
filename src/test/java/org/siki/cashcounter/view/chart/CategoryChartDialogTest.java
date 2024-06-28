@@ -1,7 +1,7 @@
-package org.siki.cashcounter.view.dialog;
+package org.siki.cashcounter.view.chart;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.siki.cashcounter.view.dialog.CategoryChartDialog.Range.*;
+import static org.siki.cashcounter.view.chart.CategoryChartGrid.Range.*;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,8 +11,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 class CategoryChartDialogTest {
   @ParameterizedTest
   @MethodSource("weekStream")
-  void rangeFromWeed(int weeks, CategoryChartDialog.Range expectedRange) {
-    assertThat(CategoryChartDialog.Range.fromWeeks(weeks)).isEqualTo(expectedRange);
+  void rangeFromWeed(int weeks, CategoryChartGrid.Range expectedRange) {
+    assertThat(CategoryChartGrid.Range.fromWeeks(weeks)).isEqualTo(expectedRange);
   }
 
   public static Stream<Arguments> weekStream() {

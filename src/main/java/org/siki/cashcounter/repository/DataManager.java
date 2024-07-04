@@ -127,6 +127,11 @@ public class DataManager {
     return dataSource.getMonthlyBalances().stream()
         .flatMap(mb -> mb.getDailyBalances().stream())
         .flatMap(db -> db.getCorrections().stream())
+        .filter(
+            c ->
+                c.getParentDailyBalance()
+                    .getDate()
+                    .isBefore(LocalDate.now().withDayOfMonth(1).plusMonths(2)))
         .collect(Collectors.toList());
   }
 

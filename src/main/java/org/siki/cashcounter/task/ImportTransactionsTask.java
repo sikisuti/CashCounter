@@ -129,14 +129,14 @@ public class ImportTransactionsTask extends Task<List<AccountTransaction>> {
   }
 
   enum XlsxColumn {
-    TRANSACTION_DATE_TIME(0),
-    DATE(1),
-    TYPE(2),
-    OWNER(4),
-    PARTNER_ACCOUNT_NUMBER(5),
-    COMMENT(7),
-    ACCOUNT_NUMBER(9),
-    AMOUNT(10);
+    TRANSACTION_DATE_TIME(7),
+    DATE(8),
+    TYPE(3),
+    OWNER(2),
+    PARTNER_ACCOUNT_NUMBER(1),
+    COMMENT(4),
+    ACCOUNT_NUMBER(0),
+    AMOUNT(9);
 
     private final int number;
 
